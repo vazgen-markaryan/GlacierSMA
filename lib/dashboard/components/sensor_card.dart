@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../constants.dart';
-import '../../../sensors_donnees/sensors_data.dart';
+import '../../../sensors_data/sensors_data.dart';
 
 class SensorCard extends StatelessWidget {
         const SensorCard({
@@ -48,11 +48,10 @@ class SensorCard extends StatelessWidget {
                                 children: [
                                         // Contenant de l'icône
                                         Container(
-                                                padding: EdgeInsets.all(defaultPadding / 2),
-                                                height: 50,
-                                                width: 50,
+                                                padding: EdgeInsets.all(defaultPadding / 8),
+                                                height: 30,
+                                                width: 30,
                                                 decoration: BoxDecoration(
-                                                        color: iconColor.withOpacity(0.1),
                                                         borderRadius: const BorderRadius.all(Radius.circular(5))
                                                 ),
                                                 child: SvgPicture.asset(

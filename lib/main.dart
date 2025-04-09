@@ -1,136 +1,69 @@
-import 'constants.dart';
+//         void readMessage() {
+//                 messageChannel?.receiveBroadcastStream().listen((event) {
+//                                 if (event is Uint8List) {
+//                                         final chunk = String.fromCharCodes(event);
+//                                         buffer += chunk;
+//
+//                                         if (buffer.contains("<phone_start>")) {
+//                                                 isCapturing = true;
+//                                                 buffer = "";
+//                                         }
+//                                         if (isCapturing && buffer.contains("<phone_end>")) {
+//                                                 isCapturing = false;
+//                                                 final rawData = buffer.replaceAll("<phone_start>", "").replaceAll("<phone_end>", "").trim();
+//                                                 List<String> lines = rawData.split('\n').map((e) => e.trim()).toList();
+//                                                 if (lines.isNotEmpty) {
+//                                                         if (lines[0] == "<data>" && lines.length >= 3) {
+//                                                                 final headers = lines[1].split(',');
+//                                                                 final values = lines[2].split(',');
+//                                                                 final dataMap = Map.fromIterables(headers, values);
+//                                                                 setState(() => receivedMessage = "SENSORS DATA:\n$dataMap");
+//                                                         }
+//                                                         else if (lines[0] == "<status>" && lines.length >= 3) {
+//                                                                 final headers = lines[1].split(',');
+//                                                                 final values = lines[2].split(',');
+//                                                                 final statusMap = Map.fromIterables(headers, values);
+//                                                                 setState(() => receivedMessage = "SENSORS STATUS:\n$statusMap");
+//                                                         }
+//                                                 }
+//                                                 buffer = "";
+//                                         }
+//                                 }
+//                         }
+//                 );
+//         }
+
+//         Widget buildMessageSection() {
+//                 if (!isConnected) {
+//                         return const SizedBox();
+//                 }
+//                 return Card(
+//                         child: Padding(
+//                                 padding: const EdgeInsets.all(12.0),
+//                                 child: Column(
+//                                         crossAxisAlignment: CrossAxisAlignment.start,
+//                                         children: [
+//                                                 const Text("Reception du data:", style: TextStyle(fontWeight: FontWeight.bold)),
+//                                                 const SizedBox(height: 8),
+//                                                 Text(receivedMessage, style: const TextStyle(fontSize: 16))
+//                                         ]
+//                                 )
+//                         )
+//                 );
+//         }
+
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_serial_communication/models/device_info.dart';
-import 'package:flutter_serial_communication/flutter_serial_communication.dart';
+import 'package:rev_glacier_sma_mobile/dashboard/dashboard_screen.dart';
+import 'connection/connection_screen.dart';
+import 'constants.dart';
 
 void main() {
-        runApp(MyApp());
+        runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
         const MyApp({super.key});
-
-        @override
-        State<MyApp> createState() => MyAppState();
-}
-
-class MyAppState extends State<MyApp> {
-        final flutterSerialCommunicationPlugin = FlutterSerialCommunication();
-        bool isConnected = false;
-        List<DeviceInfo> connectedDevices = [];
-        EventChannel? messageChannel;
-
-        String sentMessageStatus = '';
-        String buffer = '';
-        String receivedMessage = '';
-        bool isCapturing = false;
-
-        @override
-        void initState() {
-                super.initState();
-                flutterSerialCommunicationPlugin
-                        .getDeviceConnectionListener()
-                        .receiveBroadcastStream()
-                        .listen((event) {
-                                        setState(() => isConnected = event);
-                                }
-                        );
-                messageChannel = flutterSerialCommunicationPlugin.getSerialMessageListener();
-        }
-
-        Future<void> getAllConnectedDevices() async {
-                List<DeviceInfo> newConnectedDevices = await flutterSerialCommunicationPlugin.getAvailableDevices();
-                setState(() {
-                                connectedDevices = newConnectedDevices;
-                                if (connectedDevices.isEmpty) {
-                                        sentMessageStatus = "Aucun appareil connecté trouvé.";
-                                        Future.delayed(const Duration(seconds: 2), () {
-                                                        setState(() => sentMessageStatus = '');
-                                                }
-                                        );
-                                }
-                        }
-                );
-        }
-
-        Future<void> connect(DeviceInfo deviceInfo) async {
-                bool success = await flutterSerialCommunicationPlugin.connect(deviceInfo, 115200);
-                debugPrint("Connection success: $success");
-                if (success) {
-                        sendMessage("<android>"); // Envoi d'un message de test après la connexion
-                        readMessage();
-                }
-        }
-
-        Future<void> disconnect() async {
-                await flutterSerialCommunicationPlugin.disconnect();
-                setState(() {
-                                isConnected = false;
-                                connectedDevices = [];
-                                receivedMessage = '';
-                                sentMessageStatus = '';
-                                buffer = "";
-                        }
-                );
-        }
-
-        Future<void> sendMessage(String message) async {
-                Uint8List data = convertStringToUint8List(message);
-                try {
-                        bool isMessageSent = await flutterSerialCommunicationPlugin.write(data);
-                        setState(() => sentMessageStatus = "Message : \"$message\" envoyé? : ${isMessageSent.toString().toUpperCase()}");
-
-                        // Effacer le statut après 3 secondes
-                        Future.delayed(const Duration(seconds: 3), () {
-                                        setState(() => sentMessageStatus = '');
-                                }
-                        );
-                }
-                catch (e) {
-                        setState(() => sentMessageStatus = "Erreur lors de l'envoi du message : $e");
-                }
-        }
-
-        Uint8List convertStringToUint8List(String input) {
-                return Uint8List.fromList(input.codeUnits);
-        }
-
-        void readMessage() {
-                messageChannel?.receiveBroadcastStream().listen((event) {
-                                if (event is Uint8List) {
-                                        final chunk = String.fromCharCodes(event);
-                                        buffer += chunk;
-
-                                        if (buffer.contains("<phone_start>")) {
-                                                isCapturing = true;
-                                                buffer = "";
-                                        }
-                                        if (isCapturing && buffer.contains("<phone_end>")) {
-                                                isCapturing = false;
-                                                final rawData = buffer.replaceAll("<phone_start>", "").replaceAll("<phone_end>", "").trim();
-                                                List<String> lines = rawData.split('\n').map((e) => e.trim()).toList();
-                                                if (lines.isNotEmpty) {
-                                                        if (lines[0] == "<data>" && lines.length >= 3) {
-                                                                final headers = lines[1].split(',');
-                                                                final values = lines[2].split(',');
-                                                                final dataMap = Map.fromIterables(headers, values);
-                                                                setState(() => receivedMessage = "SENSORS DATA:\n$dataMap");
-                                                        }
-                                                        else if (lines[0] == "<status>" && lines.length >= 3) {
-                                                                final headers = lines[1].split(',');
-                                                                final values = lines[2].split(',');
-                                                                final statusMap = Map.fromIterables(headers, values);
-                                                                setState(() => receivedMessage = "SENSORS STATUS:\n$statusMap");
-                                                        }
-                                                }
-                                                buffer = "";
-                                        }
-                                }
-                        }
-                );
-        }
 
         @override
         Widget build(BuildContext context) {
@@ -139,121 +72,11 @@ class MyAppState extends State<MyApp> {
                         title: 'Glacier SMA',
                         theme: ThemeData.dark().copyWith(
                                 scaffoldBackgroundColor: bgColor,
-                                textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme).apply(bodyColor: Colors.white),
+                                textTheme: ThemeData.dark().textTheme.apply(bodyColor: Colors.white),
                                 canvasColor: secondaryColor
                         ),
-                        // home: isConnected ? DashboardScreen() : buildConnectionScreen()
-                        home: isConnected ? buildConnectionScreen() : buildConnectionScreen()
-                );
-        }
-
-        Widget buildConnectionScreen() {
-                return Scaffold(
-                        appBar: AppBar(title: const Text('Connexion')),
-                        body: SingleChildScrollView(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                                buildConnectionStatus(),
-                                                buildDeviceList(),
-                                                buildActionButtons(),
-                                                buildSentMessageStatus(),
-                                                buildMessageSection()
-                                        ]
-                                )
-                        )
-                );
-        }
-
-        Widget buildConnectionStatus() {
-                return Card(
-                        child: ListTile(
-                                leading: Icon(isConnected ? Icons.usb : Icons.usb_off, color: isConnected ? Colors.green : Colors.red),
-                                title: Text(isConnected ? "${connectedDevices.isNotEmpty ? connectedDevices.first.productName : 'Unknown Device'}" : "Not Connected")
-                        )
-                );
-        }
-
-        Widget buildDeviceList() {
-                if (isConnected || connectedDevices.isEmpty) {
-                        return const SizedBox();
-                }
-                return Column(
-                        children: connectedDevices.map(
-                                (device) {
-                                        return Card(
-                                                margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-                                                child: ListTile(
-                                                        contentPadding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-                                                        title: Text(
-                                                                device.productName,
-                                                                overflow: TextOverflow.ellipsis,
-                                                                maxLines: 1,
-                                                                style: const TextStyle(fontSize: 12)
-                                                        ),
-                                                        trailing: ElevatedButton(
-                                                                onPressed: () => connect(device),
-                                                                child: const Text("Connecter", style: TextStyle(fontSize: 12))
-                                                        )
-                                                )
-                                        );
-
-                                }
-                        ).toList()
-                );
-        }
-
-        Widget buildActionButtons() {
-                return Column(
-                        children: [
-                                if (!isConnected)
-                                ElevatedButton(
-                                        onPressed: getAllConnectedDevices,
-                                        child: const Text("Trouver les Appareils connectés")
-                                ),
-                                if (isConnected) ...[
-                                        const SizedBox(height: 8),
-                                        ElevatedButton(
-                                                onPressed: disconnect,
-                                                child: const Text("Déconnecter")
-                                        ),
-                                        const SizedBox(height: 8),
-                                        ElevatedButton(
-                                                onPressed: () => sendMessage("TEST"),
-                                                child: const Text("Envoyer un message de test")
-                                        )
-                                ]
-                        ]
-                );
-        }
-
-        Widget buildMessageSection() {
-                if (!isConnected) {
-                        return const SizedBox();
-                }
-                return Card(
-                        child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                                const Text("Reception du data:", style: TextStyle(fontWeight: FontWeight.bold)),
-                                                const SizedBox(height: 8),
-                                                Text(receivedMessage, style: const TextStyle(fontSize: 16))
-                                        ]
-                                )
-                        )
-                );
-        }
-
-        Widget buildSentMessageStatus() {
-                return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                                const SizedBox(height: 16.0),
-                                Text(sentMessageStatus, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))
-                        ]
+                        home: const ConnectionScreen()
+                        // home: const DashboardScreen(flutterSerialCommunicationPlugin: null, isConnected: false, connectedDevices: [])
                 );
         }
 }

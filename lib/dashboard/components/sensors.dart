@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../constants.dart';
-import '../../../sensors_donnees/sensors_data.dart';
+import '../../../sensors_data/sensors_data.dart';
 import 'sensor_card.dart';
 
 class MySensors extends StatelessWidget {
@@ -10,7 +10,7 @@ class MySensors extends StatelessWidget {
         const MySensors({
                 super.key,
                 required this.title,
-                required this.sensors,
+                required this.sensors
         });
 
         @override
@@ -20,19 +20,16 @@ class MySensors extends StatelessWidget {
                                 Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
-                                                Text(
-                                                        title,
-                                                        style: Theme.of(context).textTheme.titleMedium,
-                                                ),
-                                        ],
+                                                Text(title, style: Theme.of(context).textTheme.titleMedium)
+                                        ]
                                 ),
                                 SizedBox(height: defaultPadding),
                                 FileInfoCardGridView(
                                         sensors: sensors,
                                         crossAxisCount: 2,
-                                        childAspectRatio: 1.5,
-                                ),
-                        ],
+                                        childAspectRatio: 2
+                                )
+                        ]
                 );
         }
 }
@@ -42,7 +39,7 @@ class FileInfoCardGridView extends StatelessWidget {
                 super.key,
                 required this.sensors,
                 this.crossAxisCount = 2,
-                this.childAspectRatio = 1,
+                this.childAspectRatio = 1
         });
 
         final List<CloudStorageInfo> sensors;
@@ -59,9 +56,9 @@ class FileInfoCardGridView extends StatelessWidget {
                                 crossAxisCount: crossAxisCount,
                                 crossAxisSpacing: defaultPadding,
                                 mainAxisSpacing: defaultPadding,
-                                childAspectRatio: childAspectRatio,
+                                childAspectRatio: childAspectRatio
                         ),
-                        itemBuilder: (context, index) => SensorCard(info: sensors[index]),
+                        itemBuilder: (context, index) => SensorCard(info: sensors[index])
                 );
         }
 }
