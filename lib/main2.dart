@@ -1,12 +1,10 @@
-import 'constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_serial_communication/models/device_info.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
+import 'package:flutter_serial_communication/models/device_info.dart';
 
 void main() {
-        runApp(MyApp());
+        runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -41,46 +39,32 @@ class MyAppState extends State<MyApp> {
         }
 
         Future<void> getAllConnectedDevices() async {
-                List<DeviceInfo> newConnectedDevices = await flutterSerialCommunicationPlugin.getAvailableDevices();
-                setState(() {
-                                connectedDevices = newConnectedDevices;
-                                if (connectedDevices.isEmpty) {
-                                        sentMessageStatus = "Aucun appareil connecté trouvé.";
-                                        Future.delayed(const Duration(seconds: 2), () {
-                                                        setState(() => sentMessageStatus = '');
-                                                }
-                                        );
-                                }
-                        }
-                );
+                List<DeviceInfo> newConnectedDevices =
+                        await flutterSerialCommunicationPlugin.getAvailableDevices();
+                setState(() => connectedDevices = newConnectedDevices);
         }
 
         Future<void> connect(DeviceInfo deviceInfo) async {
-                bool success = await flutterSerialCommunicationPlugin.connect(deviceInfo, 115200);
+                bool success =
+                        await flutterSerialCommunicationPlugin.connect(deviceInfo, 115200);
                 debugPrint("Connection success: $success");
-                if (success) {
-                        sendMessage("<android>"); // Envoi d'un message de test après la connexion
-                        readMessage();
-                }
+                sendMessage("<android>"); // Envoi d'un message de test après la connexion
         }
 
         Future<void> disconnect() async {
                 await flutterSerialCommunicationPlugin.disconnect();
-                setState(() {
-                                isConnected = false;
-                                connectedDevices = [];
-                                receivedMessage = '';
-                                sentMessageStatus = '';
-                                buffer = "";
-                        }
-                );
         }
 
         Future<void> sendMessage(String message) async {
+                if (!isConnected) {
+                        setState(() => sentMessageStatus = "Erreur : Pas de connexion active.");
+                        return;
+                }
+
                 Uint8List data = convertStringToUint8List(message);
                 try {
                         bool isMessageSent = await flutterSerialCommunicationPlugin.write(data);
-                        setState(() => sentMessageStatus = "Message : \"$message\" envoyé? : ${isMessageSent.toString().toUpperCase()}");
+                        setState(() => sentMessageStatus = "Message : \"$message\" statut d'envoi : ${isMessageSent.toString().toUpperCase()}");
 
                         // Effacer le statut après 3 secondes
                         Future.delayed(const Duration(seconds: 3), () {
@@ -135,32 +119,20 @@ class MyAppState extends State<MyApp> {
         @override
         Widget build(BuildContext context) {
                 return MaterialApp(
-                        debugShowCheckedModeBanner: false,
-                        title: 'Glacier SMA',
-                        theme: ThemeData.dark().copyWith(
-                                scaffoldBackgroundColor: bgColor,
-                                textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme).apply(bodyColor: Colors.white),
-                                canvasColor: secondaryColor
-                        ),
-                        // home: isConnected ? DashboardScreen() : buildConnectionScreen()
-                        home: isConnected ? buildConnectionScreen() : buildConnectionScreen()
-                );
-        }
-
-        Widget buildConnectionScreen() {
-                return Scaffold(
-                        appBar: AppBar(title: const Text('Connexion')),
-                        body: SingleChildScrollView(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                                buildConnectionStatus(),
-                                                buildDeviceList(),
-                                                buildActionButtons(),
-                                                buildSentMessageStatus(),
-                                                buildMessageSection()
-                                        ]
+                        home: Scaffold(
+                                appBar: AppBar(title: const Text('Glacier SMA')),
+                                body: SingleChildScrollView(
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                        buildConnectionStatus(),
+                                                        buildDeviceList(),
+                                                        buildActionButtons(),
+                                                        buildMessageSection(),
+                                                        buildSentMessageStatus()
+                                                ]
+                                        )
                                 )
                         )
                 );
@@ -170,35 +142,23 @@ class MyAppState extends State<MyApp> {
                 return Card(
                         child: ListTile(
                                 leading: Icon(isConnected ? Icons.usb : Icons.usb_off, color: isConnected ? Colors.green : Colors.red),
-                                title: Text(isConnected ? "${connectedDevices.isNotEmpty ? connectedDevices.first.productName : 'Unknown Device'}" : "Not Connected")
+                                title: Text(isConnected ? "Connected" : "Not Connected")
                         )
                 );
         }
 
         Widget buildDeviceList() {
-                if (isConnected || connectedDevices.isEmpty) {
-                        return const SizedBox();
-                }
                 return Column(
-                        children: connectedDevices.map(
-                                (device) {
+                        children: connectedDevices.map((device) {
                                         return Card(
-                                                margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
                                                 child: ListTile(
-                                                        contentPadding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-                                                        title: Text(
-                                                                device.productName,
-                                                                overflow: TextOverflow.ellipsis,
-                                                                maxLines: 1,
-                                                                style: const TextStyle(fontSize: 12)
-                                                        ),
+                                                        title: Text(device.productName),
                                                         trailing: ElevatedButton(
                                                                 onPressed: () => connect(device),
-                                                                child: const Text("Connecter", style: TextStyle(fontSize: 12))
+                                                                child: const Text("Connect")
                                                         )
                                                 )
                                         );
-
                                 }
                         ).toList()
                 );
@@ -207,38 +167,37 @@ class MyAppState extends State<MyApp> {
         Widget buildActionButtons() {
                 return Column(
                         children: [
-                                if (!isConnected)
                                 ElevatedButton(
                                         onPressed: getAllConnectedDevices,
-                                        child: const Text("Trouver les Appareils connectés")
+                                        child: const Text("Get All Connected Devices")
                                 ),
-                                if (isConnected) ...[
-                                        const SizedBox(height: 8),
-                                        ElevatedButton(
-                                                onPressed: disconnect,
-                                                child: const Text("Déconnecter")
-                                        ),
-                                        const SizedBox(height: 8),
-                                        ElevatedButton(
-                                                onPressed: () => sendMessage("TEST"),
-                                                child: const Text("Envoyer un message de test")
-                                        )
-                                ]
+                                const SizedBox(height: 8),
+                                ElevatedButton(
+                                        onPressed: isConnected ? disconnect : null,
+                                        child: const Text("Disconnect")
+                                ),
+                                const SizedBox(height: 8),
+                                ElevatedButton(
+                                        onPressed: isConnected ? () => sendMessage("Test Button") : null,
+                                        child: const Text("Send Message")
+                                ),
+                                const SizedBox(height: 8),
+                                ElevatedButton(
+                                        onPressed: isConnected ? readMessage : null,
+                                        child: const Text("Read Message")
+                                )
                         ]
                 );
         }
 
         Widget buildMessageSection() {
-                if (!isConnected) {
-                        return const SizedBox();
-                }
                 return Card(
                         child: Padding(
                                 padding: const EdgeInsets.all(12.0),
                                 child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                                const Text("Reception du data:", style: TextStyle(fontWeight: FontWeight.bold)),
+                                                const Text("Received Message:", style: TextStyle(fontWeight: FontWeight.bold)),
                                                 const SizedBox(height: 8),
                                                 Text(receivedMessage, style: const TextStyle(fontSize: 16))
                                         ]
@@ -253,7 +212,6 @@ class MyAppState extends State<MyApp> {
                         children: [
                                 const SizedBox(height: 16.0),
                                 Text(sentMessageStatus, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))
-                        ]
-                );
+                        ]);
         }
 }
