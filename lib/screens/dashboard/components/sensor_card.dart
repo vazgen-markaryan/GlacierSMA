@@ -1,7 +1,6 @@
+import '../../../constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
-import '../../../constants.dart';
 import '../../../sensors_data/sensors_data.dart';
 
 class SensorCard extends StatelessWidget {
@@ -40,13 +39,12 @@ class SensorCard extends StatelessWidget {
                         decoration: BoxDecoration(
                                 color: secondaryColor,
                                 borderRadius: const BorderRadius.all(Radius.circular(10)),
-                                border: Border.all(color: borderColor, width: 3) // Couleur de la bordure
+                                border: Border.all(color: borderColor, width: 3)
                         ),
                         child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center, // Centre verticalement
-                                mainAxisAlignment: MainAxisAlignment.start, // Aligne horizontalement
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                        // Contenant de l'icône
                                         Container(
                                                 padding: EdgeInsets.all(defaultPadding / 8),
                                                 height: 30,
@@ -59,7 +57,7 @@ class SensorCard extends StatelessWidget {
                                                         colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn)
                                                 )
                                         ),
-                                        SizedBox(width: defaultPadding), // Espacement entre l'icône et le texte
+                                        SizedBox(width: defaultPadding),
                                         // Texte
                                         Expanded(
                                                 child: Text(

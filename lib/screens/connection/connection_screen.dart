@@ -1,24 +1,22 @@
-import 'dart:typed_data';
-
+import '../../constants.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_serial_communication/flutter_serial_communication.dart';
-import 'package:flutter_serial_communication/models/device_info.dart';
-
-import '../constants.dart';
 import '../dashboard/dashboard_screen.dart';
+import 'package:flutter_serial_communication/models/device_info.dart';
+import 'package:flutter_serial_communication/flutter_serial_communication.dart';
 
 class ConnectionScreen extends StatefulWidget {
         const ConnectionScreen({super.key});
 
         @override
-        State<ConnectionScreen> createState() => _ConnectionScreenState();
+        State<ConnectionScreen> createState() => ConnectionScreenState();
 }
 
-class _ConnectionScreenState extends State<ConnectionScreen> {
+class ConnectionScreenState extends State<ConnectionScreen> {
         final flutterSerialCommunicationPlugin = FlutterSerialCommunication();
         List<DeviceInfo> connectedDevices = [];
 
-        Future<void> getAllConnectedDevices() async {
+        // Methode qui verifie s'il y a un qqch connecté via SERIAL port à telephone
+        Future<void> getAllCableConnectedDevices() async {
                 List<DeviceInfo> devices = await flutterSerialCommunicationPlugin.getAvailableDevices();
                 setState(() {
                                 connectedDevices = devices;
@@ -26,7 +24,8 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                 );
         }
 
-        Future<void> _showDeviceSelectionDialog() async {
+        Future<void> showDeviceSelectionDialog() async {
+                // Si rien n'est connecté affiche notification (SnackBar)
                 if (connectedDevices.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
@@ -46,6 +45,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                         return;
                 }
 
+                // Si des appareils sont disponibles, affiche la boîte de dialogue avec la liste
                 showDialog(
                         context: context,
                         builder: (BuildContext context) {
@@ -64,7 +64,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                                                         itemBuilder: (context, index) {
                                                                 final device = connectedDevices[index];
                                                                 return Card(
-                                                                        color: bgColor,
+                                                                        color: backgroundColor,
                                                                         margin: const EdgeInsets.symmetric(vertical: 8.0),
                                                                         child: ListTile(
                                                                                 title: Text(
@@ -75,8 +75,10 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                                                                                         "ID: ${device.deviceId}",
                                                                                         style: const TextStyle(color: Colors.white70, fontSize: 14)
                                                                                 ),
+                                                                                //  Si l'utilisateur clique sur un appareil, essaie de se connecter
                                                                                 onTap: () async {
                                                                                         bool success = await flutterSerialCommunicationPlugin.connect(device, 115200);
+                                                                                        // Si la connexion est réussie, navigue vers le DashboardScreen
                                                                                         if (success) {
                                                                                                 Navigator.pushReplacement(
                                                                                                         context,
@@ -89,6 +91,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                                                                                                         )
                                                                                                 );
                                                                                         }
+                                                                                        // Si la connexion est échouée/refusée, affiche un message d'erreur
                                                                                         else {
                                                                                                 Navigator.pop(context); // Ferme la boîte de dialogue
                                                                                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -119,22 +122,22 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                                         bool isHorizontal = constraints.maxWidth > 600;
                                         return Container(
                                                 padding: const EdgeInsets.all(16.0),
-                                                decoration: const BoxDecoration(color: bgColor),
+                                                decoration: const BoxDecoration(color: backgroundColor),
                                                 child: isHorizontal
                                                         ? Row(
                                                                 children: [
-                                                                        Expanded(child: _buildBluetoothSection()),
+                                                                        Expanded(child: buildBluetoothSection()),
                                                                         const SizedBox(width: 16),
-                                                                        Expanded(child: _buildCableSection())
+                                                                        Expanded(child: buildCableSection())
                                                                 ]
                                                         )
                                                         : Column(
                                                                 children: [
-                                                                        Expanded(child: _buildBluetoothSection()),
+                                                                        Expanded(child: buildBluetoothSection()),
                                                                         const SizedBox(height: 12),
-                                                                        _buildArrowInstruction(),
+                                                                        buildArrowInstruction(),
                                                                         const SizedBox(height: 12),
-                                                                        Expanded(child: _buildCableSection())
+                                                                        Expanded(child: buildCableSection())
                                                                 ]
                                                         )
                                         );
@@ -143,7 +146,8 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                 );
         }
 
-        Widget _buildBluetoothSection() {
+        // TODO: Ajouter la fonctionnalité de connexion Bluetooth quand elle sera disponible via Hardware
+        Widget buildBluetoothSection() {
                 return GestureDetector(
                         onTap: () {
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -179,11 +183,11 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                 );
         }
 
-        Widget _buildCableSection() {
+        Widget buildCableSection() {
                 return GestureDetector(
                         onTap: () async {
-                                await getAllConnectedDevices();
-                                await _showDeviceSelectionDialog();
+                                await getAllCableConnectedDevices();
+                                await showDeviceSelectionDialog();
                         },
                         child: Card(
                                 color: secondaryColor,
@@ -202,7 +206,8 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                 );
         }
 
-        Widget _buildArrowInstruction() {
+        // Widget qui crée une flèche avec un texte au milieu seulement pour le Mode Verticale
+        Widget buildArrowInstruction() {
                 return Row(
                         children: const[
                                 Expanded(child: Divider(color: Colors.white24)),

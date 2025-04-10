@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
-import '../../../constants.dart';
-import '../../../sensors_data/sensors_data.dart';
 import 'sensor_card.dart';
+import '../../../constants.dart';
+import 'package:flutter/material.dart';
+import '../../../sensors_data/sensors_data.dart';
 
 class MySensors extends StatelessWidget {
         final String title;
