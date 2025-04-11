@@ -1,4 +1,4 @@
-import 'constants.dart';
+import 'constantes.dart';
 import 'package:flutter/material.dart';
 import 'package:rev_glacier_sma_mobile/screens/connection/connection_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/dashboard/dashboard_screen.dart';

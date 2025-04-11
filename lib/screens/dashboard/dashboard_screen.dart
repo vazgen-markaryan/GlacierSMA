@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/rendering.dart';
 
-import '../../constants.dart';
+import '../../constantes.dart';
 import 'components/sensors.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
@@ -376,21 +376,21 @@ class DashboardScreenState extends State<DashboardScreen> {
 
                                 // Mettre à jour les capteurs internes
                                 for (var sensor in internalSensors) {
-                                        if (sensor.title?.toLowerCase() == sensorName.toLowerCase()) {
+                                        if (sensor.header?.toLowerCase() == sensorName.toLowerCase()) {
                                                 sensor.powerStatus = status;
                                         }
                                 }
 
                                 // Mettre à jour les capteurs du vent
                                 for (var sensor in windSensors) {
-                                        if (sensor.title?.toLowerCase() == sensorName.toLowerCase()) {
+                                        if (sensor.header?.toLowerCase() == sensorName.toLowerCase()) {
                                                 sensor.powerStatus = status;
                                         }
                                 }
 
                                 // Mettre à jour les capteurs Stevenson
                                 for (var sensor in stevensonSensors) {
-                                        if (sensor.title?.toLowerCase() == sensorName.toLowerCase()) {
+                                        if (sensor.header?.toLowerCase() == sensorName.toLowerCase()) {
                                                 sensor.powerStatus = status;
                                         }
                                 }

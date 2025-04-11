@@ -1,4 +1,4 @@
-import '../../../constants.dart';
+import '../../../constantes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../sensors_data/sensors_data.dart';

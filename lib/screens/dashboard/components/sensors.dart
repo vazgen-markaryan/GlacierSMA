@@ -1,5 +1,5 @@
 import 'sensor_card.dart';
-import '../../../constants.dart';
+import '../../../constantes.dart';
 import 'package:flutter/material.dart';
 import '../../../sensors_data/sensors_data.dart';
 
