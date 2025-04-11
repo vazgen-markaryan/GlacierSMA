@@ -31,7 +31,7 @@ class ConnectionScreenState extends State<ConnectionScreen> {
                                 SnackBar(
                                         content: Center(
                                                 child: Text(
-                                                        "Aucun appareil trouvé",
+                                                        "Aucun appareil trouvé. Vérifiez le câble ou la Switch Hardware.",
                                                         style: const TextStyle(color: Colors.black, fontSize: 18),
                                                         textAlign: TextAlign.center
                                                 )

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class CloudStorageInfo {
-        final String? svgSrc, title;
-        final int? powerStatus;
-        final Color? color;
+        String? svgSrc, title;
+        int? powerStatus;
+        Color? color;
 
         CloudStorageInfo({
                 this.svgSrc,
@@ -16,48 +16,40 @@ class CloudStorageInfo {
 List<CloudStorageInfo> internalSensors = [
         CloudStorageInfo(
                 title: "BME280",
-                svgSrc: "assets/icons/microchip.svg",
-                powerStatus: 1
+                svgSrc: "assets/icons/microchip.svg"
         ),
         CloudStorageInfo(
                 title: "LSM303",
-                svgSrc: "assets/icons/microchip.svg",
-                powerStatus: 1
+                svgSrc: "assets/icons/microchip.svg"
         ),
         CloudStorageInfo(
                 title: "VELM7700",
-                svgSrc: "assets/icons/microchip.svg",
-                powerStatus: 2
+                svgSrc: "assets/icons/microchip.svg"
         ),
         CloudStorageInfo(
-            title: "GPS",
-            svgSrc: "assets/icons/microchip.svg",
-            powerStatus: 3
+                title: "GPS",
+                svgSrc: "assets/icons/microchip.svg"
         )
 ];
 
-List<CloudStorageInfo>  windSensors = [
+List<CloudStorageInfo> windSensors = [
         CloudStorageInfo(
-            title: "Wind Speed",
-            svgSrc: "assets/icons/ventilation.svg",
-            powerStatus: 1
+                title: "Wind_Speed",
+                svgSrc: "assets/icons/ventilation.svg"
         ),
         CloudStorageInfo(
-            title: "Wind Direction",
-            svgSrc: "assets/icons/ventilation.svg",
-            powerStatus: 0
+                title: "Wind_Direction",
+                svgSrc: "assets/icons/ventilation.svg"
         )
 ];
 
-List<CloudStorageInfo>  stevensonSensors = [
+List<CloudStorageInfo> stevensonSensors = [
         CloudStorageInfo(
-            title: "BME280",
-            svgSrc: "assets/icons/microchip.svg",
-            powerStatus: 1
+                title: "BME280",
+                svgSrc: "assets/icons/microchip.svg"
         ),
         CloudStorageInfo(
-            title: "VELM7700",
-            svgSrc: "assets/icons/microchip.svg",
-            powerStatus: 2
+                title: "VELM7700",
+                svgSrc: "assets/icons/microchip.svg"
         )
 ];

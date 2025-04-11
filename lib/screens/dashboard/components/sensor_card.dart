@@ -17,21 +17,26 @@ class SensorCard extends StatelessWidget {
                 Color iconColor;
                 Color borderColor;
                 switch (info.powerStatus) {
+                        case 0:
+                                //TODO ajouter loading truc
+                                iconColor = Colors.grey; // Status 0 : Gris - Pas vérifié/Inconnu
+                                borderColor = Colors.grey;
+                                break;
                         case 1:
-                                iconColor = Colors.green; // Statut 1 : Vert - Marche bien
+                                iconColor = Colors.green; // Status 1 : Vert - Marche bien
                                 borderColor = Colors.green;
                                 break;
                         case 2:
-                                iconColor = Colors.yellow; // Statut 2 : Jaune - Pas connecté
+                                iconColor = Colors.yellow; // Status 2 : Jaune - Pas connecté
                                 borderColor = Colors.yellow;
                                 break;
                         case 3:
-                                iconColor = Colors.red; // Statut 3 : Rouge - Erreur
+                                iconColor = Colors.red; // Status 3 : Rouge - Erreur
                                 borderColor = Colors.red;
                                 break;
                         default:
-                        iconColor = Colors.grey; // Status pas encore vérifié
-                        borderColor = Colors.grey;
+                        iconColor = Colors.black; // Status Default : Noir - Autre que 0, 1, 2 ou 3
+                        borderColor = Colors.black;
                 }
 
                 return Container(
@@ -61,8 +66,7 @@ class SensorCard extends StatelessWidget {
                                         // Texte
                                         Expanded(
                                                 child: Text(
-                                                        info.title!,
-                                                        maxLines: 1,
+                                                        info.powerStatus.toString() + info.title!,
                                                         overflow: TextOverflow.ellipsis,
                                                         style: Theme.of(context).textTheme.bodyMedium
                                                 )

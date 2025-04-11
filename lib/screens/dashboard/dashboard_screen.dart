@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:flutter/rendering.dart';
+
 import '../../constants.dart';
 import 'components/sensors.dart';
 import 'package:flutter/services.dart';
@@ -32,6 +34,15 @@ class DashboardScreenState extends State<DashboardScreen> {
         String receivedMessage = '';
         bool isCapturing = false;
 
+        // DEBUG MOD
+        DateTime? lastLogTime; // Variable pour limiter la fréquence des logs
+        bool isDebugVisible = false; // État pour afficher ou masquer les logs
+        List<String> debugLogs = []; // Liste pour stocker les logs de débogage
+        List<String> tempLogBuffer = []; // Buffer temporaire pour collecter les logs
+        bool isUserScrolling = false; // Indique si l'utilisateur fait défiler manuellement
+        Timer? scrollInactivityTimer; // Timer pour surveiller l'inactivité de défilement
+        final ScrollController _scrollController = ScrollController();
+
         @override
         void initState() {
                 super.initState();
@@ -39,6 +50,9 @@ class DashboardScreenState extends State<DashboardScreen> {
 
                 // Initialisation de messageChannel pour écouter les messages Serial
                 messageChannel = widget.flutterSerialCommunicationPlugin?.getSerialMessageListener();
+
+                // Indiquer à Arduino qu'il est connecté
+                widget.flutterSerialCommunicationPlugin?.setDTR(true);
 
                 // Appeler readMessage pour écouter les messages
                 readMessage();
@@ -54,6 +68,56 @@ class DashboardScreenState extends State<DashboardScreen> {
                                 }
                         }
                 );
+
+                // Timer pour écrire les chunks toutes les 3 secondes
+                Timer.periodic(const Duration(seconds: 3), (timer) {
+                                if (tempLogBuffer.isNotEmpty) {
+                                        setState(() {
+                                                        debugLogs.add("-----START LOG CHUNK-----\n");
+                                                        debugLogs.addAll(tempLogBuffer);
+                                                        debugLogs.add("\n-----END LOG CHUNK-----");
+                                                        tempLogBuffer.clear(); // Vider le buffer temporaire
+                                                }
+                                        );
+
+                                        // Auto-scroll si l'utilisateur ne fait pas défiler
+                                        if (!isUserScrolling && _scrollController.hasClients) {
+                                                _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+                                        }
+                                }
+                        }
+                );
+
+                // Écoute des interactions de défilement
+                _scrollController.addListener(() {
+                                if (_scrollController.position.userScrollDirection != ScrollDirection.idle) {
+                                        isUserScrolling = true;
+
+                                        // Réinitialiser le timer d'inactivité
+                                        scrollInactivityTimer?.cancel();
+                                        scrollInactivityTimer = Timer(const Duration(seconds: 5), () {
+                                                        setState(() {
+                                                                        isUserScrolling = false;
+                                                                }
+                                                        );
+
+                                                        // Auto-scroll si l'utilisateur est inactif
+                                                        if (_scrollController.hasClients) {
+                                                                _scrollController.animateTo(
+                                                                        _scrollController.position.maxScrollExtent,
+                                                                        duration: const Duration(milliseconds: 300),
+                                                                        curve: Curves.easeOut
+                                                                );
+                                                        }
+                                                }
+                                        );
+                                }
+                        }
+                );
+        }
+
+        void addDebugLog(String log) {
+                tempLogBuffer.add(log); // Ajouter le log au buffer temporaire
         }
 
         @override
@@ -74,7 +138,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                         style: TextStyle(color: primaryColor, fontSize: 20, fontWeight: FontWeight.bold)
                                 ),
                                 content: const Text(
-                                        "Connexion perdue. Vérifiez le câble.",
+                                        "Connexion perdue. Vérifiez le câble ou la switch hardware du Debug Mod",
                                         style: TextStyle(color: Colors.white70, fontSize: 16)
                                 ),
                                 actions: [
@@ -107,14 +171,19 @@ class DashboardScreenState extends State<DashboardScreen> {
                 Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const ConnectionScreen()));
         }
 
-        // Methode pour envoyer un message à Arduino
+        // Méthode pour envoyer un message avec journalisation
         Future<bool> sendMessage(String message) async {
                 Uint8List data = convertStringToUint8List(message);
                 try {
                         bool isMessageSent = await widget.flutterSerialCommunicationPlugin?.write(data) ?? false;
+
+                        // Ajouter un log pour l'envoi
+                        addDebugLog("\nMessage envoyé : $message");
+
                         return isMessageSent;
                 }
                 catch (e) {
+                        addDebugLog("Erreur lors de l'envoi : $e");
                         return false;
                 }
         }
@@ -197,23 +266,12 @@ class DashboardScreenState extends State<DashboardScreen> {
                                 automaticallyImplyLeading: false,
                                 backgroundColor: secondaryColor,
                                 title: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
-                                                Icon(isConnected ? Icons.usb : Icons.usb_off, color: isConnected ? Colors.green : Colors.red),
-                                                const SizedBox(width: 8),
-                                                Text(
-                                                        isConnected
-                                                                ? (widget.connectedDevices.isNotEmpty ? widget.connectedDevices.first.productName : "Appareil inconnu")
-                                                                : "Non connecté",
-                                                        style: const TextStyle(fontSize: 16)
-                                                )
+                                                buildConnectionStatus(),
+                                                buildDebugToggleButton() // Bouton toggle
                                         ]
-                                ),
-                                actions: [
-                                        IconButton(
-                                                icon: const Icon(Icons.logout, color: Colors.white),
-                                                onPressed: () => showDisconnectConfirmationDialog(context)
-                                        )
-                                ]
+                                )
                         ),
                         body: SafeArea(
                                 child: SingleChildScrollView(
@@ -221,6 +279,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                         child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
+                                                        if (isDebugVisible) buildDebugMenu(), // Affichage conditionnel des logs
                                                         SizedBox(height: defaultPadding),
                                                         MySensors(
                                                                 title: "Les Capteurs Internes",
@@ -235,20 +294,6 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                         MySensors(
                                                                 title: "Les Capteurs Stevenson",
                                                                 sensors: stevensonSensors
-                                                        ),
-                                                        SizedBox(height: defaultPadding),
-                                                        Card(
-                                                                child: Padding(
-                                                                        padding: const EdgeInsets.all(12.0),
-                                                                        child: Column(
-                                                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                children: [
-                                                                                        const Text("Reception du data:", style: TextStyle(fontWeight: FontWeight.bold)),
-                                                                                        const SizedBox(height: 8),
-                                                                                        Text(receivedMessage, style: const TextStyle(fontSize: 16))
-                                                                                ]
-                                                                        )
-                                                                )
                                                         )
                                                 ]
                                         )
@@ -257,37 +302,32 @@ class DashboardScreenState extends State<DashboardScreen> {
                 );
         }
 
+        // Méthode pour lire les messages avec journalisation
         void readMessage() {
-                //Envoi du message <android> pour initier la communication avec Arduino
                 sendMessage(communicationMessageAndroid);
-
                 messageChannel?.receiveBroadcastStream().listen(
                         (event) {
                                 if (event is Uint8List) {
                                         final chunk = String.fromCharCodes(event);
                                         buffer += chunk;
+
                                         if (buffer.contains(communicationMessagePhoneStart)) {
+                                                addDebugLog("\nBuffer contient Header");
                                                 isCapturing = true;
                                                 buffer = "";
                                         }
+
                                         if (isCapturing && buffer.contains(communicationMessagePhoneEnd)) {
                                                 isCapturing = false;
-                                                final rawData = buffer.replaceAll(communicationMessagePhoneStart, "").replaceAll(communicationMessagePhoneEnd, "").trim();
-                                                List<String> lines = rawData.split('\n').map((e) => e.trim()).toList();
-                                                if (lines.isNotEmpty) {
-                                                        if (lines[0] == communicationMessageData && lines.length >= 3) {
-                                                                final headers = lines[1].split(',');
-                                                                final values = lines[2].split(',');
-                                                                final dataMap = Map.fromIterables(headers, values);
-                                                                setState(() => receivedMessage = "SENSORS DATA:\n$dataMap");
-                                                        }
-                                                        else if (lines[0] == communicationMessageStatus && lines.length >= 3) {
-                                                                final headers = lines[1].split(',');
-                                                                final values = lines[2].split(',');
-                                                                final statusMap = Map.fromIterables(headers, values);
-                                                                setState(() => receivedMessage = "SENSORS STATUS:\n$statusMap");
-                                                        }
-                                                }
+                                                final rawData = buffer
+                                                        .replaceAll(communicationMessagePhoneStart, "")
+                                                        .replaceAll(communicationMessagePhoneEnd, "")
+                                                        .trim();
+
+                                                // Ajouter un log pour la réception
+                                                addDebugLog("\nMessage reçu : $rawData");
+
+                                                updateSensorsData(rawData);
                                                 buffer = "";
                                         }
                                 }
@@ -295,16 +335,121 @@ class DashboardScreenState extends State<DashboardScreen> {
                 );
         }
 
-        Widget buildMessageSection() {
+        Widget buildDebugMenu() {
                 return Card(
                         child: Padding(
                                 padding: const EdgeInsets.all(12.0),
                                 child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                                const Text("Reception du data:", style: TextStyle(fontWeight: FontWeight.bold)),
+                                                const Text("Logs de débogage :", style: TextStyle(fontWeight: FontWeight.bold)),
                                                 const SizedBox(height: 8),
-                                                Text(receivedMessage, style: const TextStyle(fontSize: 16))
+                                                SizedBox(
+                                                        height: 200,
+                                                        child: ListView.builder(
+                                                                controller: _scrollController,
+                                                                itemCount: debugLogs.length,
+                                                                itemBuilder: (context, index) {
+                                                                        return Text(debugLogs[index], style: const TextStyle(fontSize: 14));
+                                                                }
+                                                        )
+                                                )
+                                        ]
+                                )
+                        )
+                );
+        }
+
+        void updateSensorsData(String rawData) {
+                String statusMessage = '';
+                String dataMessage = '';
+
+                if (rawData.contains(communicationMessageStatus)) {
+                        // Extraire les données de statut
+                        final headers = rawData.split('\n')[1].split(',');
+                        final values = rawData.split('\n')[2].split(',');
+
+                        // Mettre à jour les statuts des capteurs
+                        for (int i = 0; i < headers.length; i++) {
+                                final sensorName = headers[i].trim();
+                                final status = int.tryParse(values[i].trim()) ?? 0;
+
+                                // Mettre à jour les capteurs internes
+                                for (var sensor in internalSensors) {
+                                        if (sensor.title?.toLowerCase() == sensorName.toLowerCase()) {
+                                                sensor.powerStatus = status;
+                                        }
+                                }
+
+                                // Mettre à jour les capteurs du vent
+                                for (var sensor in windSensors) {
+                                        if (sensor.title?.toLowerCase() == sensorName.toLowerCase()) {
+                                                sensor.powerStatus = status;
+                                        }
+                                }
+
+                                // Mettre à jour les capteurs Stevenson
+                                for (var sensor in stevensonSensors) {
+                                        if (sensor.title?.toLowerCase() == sensorName.toLowerCase()) {
+                                                sensor.powerStatus = status;
+                                        }
+                                }
+                        }
+
+                        // Construire le message de statut
+                        statusMessage = "SENSORS STATUS:\n${Map.fromIterables(headers, values)}";
+                }
+
+                if (rawData.contains(communicationMessageData)) {
+                        // Extraire les données des capteurs
+                        final headers = rawData.split('\n')[1].split(',');
+                        final values = rawData.split('\n')[2].split(',');
+
+                        // Construire le message de données
+                        dataMessage = "SENSORS DATA:\n${Map.fromIterables(headers, values)}";
+                }
+
+                // Mettre à jour le message reçu avec les deux types d'informations
+                setState(() {
+                                receivedMessage = "$statusMessage\n\n$dataMessage";
+                        }
+                );
+        }
+
+        Widget buildDebugToggleButton() {
+                return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: GestureDetector(
+                                onTap: () {
+                                        setState(() {
+                                                        isDebugVisible = !isDebugVisible;
+                                                }
+                                        );
+                                },
+                                child: Row(
+                                        children: [
+                                                const Text("Debug", style: TextStyle(fontSize: 16, color: Colors.white)),
+                                                const SizedBox(width: 8),
+                                                Container(
+                                                        width: 60,
+                                                        height: 30,
+                                                        decoration: BoxDecoration(
+                                                                color: isDebugVisible ? Colors.green : Colors.grey,
+                                                                borderRadius: BorderRadius.circular(15)
+                                                        ),
+                                                        child: AnimatedAlign(
+                                                                duration: const Duration(milliseconds: 200),
+                                                                alignment: isDebugVisible ? Alignment.centerRight : Alignment.centerLeft,
+                                                                child: Container(
+                                                                        width: 25,
+                                                                        height: 25,
+                                                                        decoration: const BoxDecoration(
+                                                                                color: Colors.white,
+                                                                                shape: BoxShape.circle
+                                                                        )
+                                                                )
+                                                        )
+                                                )
                                         ]
                                 )
                         )

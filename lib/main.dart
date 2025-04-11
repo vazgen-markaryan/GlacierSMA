@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
                 /// DEFAULT: FALSE
                 /// Si true, bypass le ConnectionScreen et affiche le DashboardScreen (pour le développement seulement)
                 /// Si false, affiche le ConnectionScreen (ce qui est le comportement par défaut)
-                bool areWeInDevelopingMode = true;
+                bool areWeInDevelopingMode = false;
 
                 return MaterialApp(
                         debugShowCheckedModeBanner: false,
@@ -29,8 +29,8 @@ class MyApp extends StatelessWidget {
 
                         /// Basculer entre ConnectionScreen et DashboardScreen
                         home: areWeInDevelopingMode
-                            ? const DashboardScreen(flutterSerialCommunicationPlugin: null, isConnected: false, connectedDevices: [])
-                            : const ConnectionScreen()
+                                ? const DashboardScreen(flutterSerialCommunicationPlugin: null, isConnected: false, connectedDevices: [])
+                                : const ConnectionScreen()
                 );
         }
 }
