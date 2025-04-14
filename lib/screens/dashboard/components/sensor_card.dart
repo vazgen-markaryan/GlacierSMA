@@ -6,10 +6,12 @@ import '../../../sensors_data/sensors_data.dart';
 class SensorCard extends StatelessWidget {
         const SensorCard({
                 super.key,
-                required this.info
+                required this.info,
+                required this.isDebugMode
         });
 
         final CloudStorageInfo info;
+        final bool isDebugMode;
 
         @override
         Widget build(BuildContext context) {
@@ -66,7 +68,7 @@ class SensorCard extends StatelessWidget {
                                         // Texte
                                         Expanded(
                                                 child: Text(
-                                                        info.powerStatus.toString() + info.title!,
+                                                        isDebugMode ? "Status: " + info.powerStatus.toString() + "\n" + info.title! : info.title!,
                                                         overflow: TextOverflow.ellipsis,
                                                         style: Theme.of(context).textTheme.bodyMedium
                                                 )

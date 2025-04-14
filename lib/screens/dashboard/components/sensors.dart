@@ -6,11 +6,13 @@ import '../../../sensors_data/sensors_data.dart';
 class MySensors extends StatelessWidget {
         final String title;
         final List<CloudStorageInfo> sensors;
+        final bool isDebugMode;
 
         const MySensors({
                 super.key,
                 required this.title,
-                required this.sensors
+                required this.sensors,
+                required this.isDebugMode
         });
 
         @override
@@ -24,25 +26,28 @@ class MySensors extends StatelessWidget {
                                         ]
                                 ),
                                 SizedBox(height: defaultPadding),
-                                FileInfoCardGridView(
+                                SensorsGrid(
                                         sensors: sensors,
                                         crossAxisCount: 2,
-                                        childAspectRatio: 2
+                                        childAspectRatio: 2,
+                                        isDebugMode: isDebugMode
                                 )
                         ]
                 );
         }
 }
 
-class FileInfoCardGridView extends StatelessWidget {
-        const FileInfoCardGridView({
+class SensorsGrid extends StatelessWidget {
+        const SensorsGrid({
                 super.key,
                 required this.sensors,
+                required this.isDebugMode,
                 this.crossAxisCount = 2,
                 this.childAspectRatio = 1
         });
 
         final List<CloudStorageInfo> sensors;
+        final bool isDebugMode;
         final int crossAxisCount;
         final double childAspectRatio;
 
@@ -58,7 +63,7 @@ class FileInfoCardGridView extends StatelessWidget {
                                 mainAxisSpacing: defaultPadding,
                                 childAspectRatio: childAspectRatio
                         ),
-                        itemBuilder: (context, index) => SensorCard(info: sensors[index])
+                        itemBuilder: (context, index) => SensorCard(info: sensors[index], isDebugMode: isDebugMode)
                 );
         }
 }
