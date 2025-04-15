@@ -4,7 +4,6 @@ import '../../constantes.dart';
 import 'components/sensors.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import '../../sensors_data/sensors_data.dart';
 import '../connection/connection_screen.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
@@ -31,7 +30,6 @@ class DashboardScreenState extends State<DashboardScreen> {
         Timer? connectionCheckTimer;
         EventChannel? messageChannel;
         String buffer = '';
-        String receivedMessage = '';
         bool isCapturing = false;
 
         // DEBUG MOD
@@ -288,11 +286,11 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                                 final values = lines[2].split(',').map((v) => v.trim()).toList();
 
                                                                 tempLogBuffer[1] = "Status:\n" + headers.asMap().entries.map((entry) {
-                                                                                final index = entry.key;
-                                                                                final header = entry.value.toUpperCase();
-                                                                                return "$header:    ${values[index]}";
-                                                                        }
-                                                                ).join("\n");
+                                                                                        final index = entry.key;
+                                                                                        final header = entry.value.toUpperCase();
+                                                                                        return "$header:    ${values[index]}";
+                                                                                }
+                                                                        ).join("\n");
                                                         }
                                                 }
 
@@ -304,22 +302,139 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                                 final values = lines[2].split(',').map((v) => v.trim()).toList();
 
                                                                 tempLogBuffer[2] = "\nValeurs:\n" + headers.asMap().entries.map((entry) {
-                                                                                final index = entry.key;
-                                                                                final header = entry.value.toUpperCase();
-                                                                                return "$header:    ${values[index]}";
-                                                                        }
-                                                                ).join("\n");
+                                                                                        final index = entry.key;
+                                                                                        final header = entry.value.toUpperCase();
+                                                                                        return "$header:    ${values[index]}";
+                                                                                }
+                                                                        ).join("\n");
                                                         }
                                                 }
 
                                                 updateLogs();
 
+                                                // Remplacer les valeurs de sensors par les valeurs reçues
+                                                if (rawData.contains("<data>")) {
+                                                        populateSensorData(rawData); // Appel correct
+                                                }
+
+                                                // Mettre à jour les capteurs avec les données brutes (tout le temps)
                                                 updateSensorsData(rawData);
                                                 buffer = "";
                                         }
                                 }
                         }
                 );
+        }
+
+        void populateSensorData(String rawData) {
+                // Séparer les lignes
+                final lines = rawData.split('\n');
+                if (lines.length < 3) return;
+
+                // Extraire les en-têtes et les valeurs
+                final headers = lines[1].split(',').map((h) => h.trim().toLowerCase()).toList();
+                final values = lines[2].split(',').map((v) => v.trim()).toList();
+
+                // Fonction générique pour mettre à jour les capteurs
+                void updateSensorData(List<Sensors> sensors) {
+                        for (var sensor in sensors) {
+                                sensor.data.forEach((key, _) {
+                                                final headerIndex = headers.indexOf(key.header.toLowerCase());
+                                                if (headerIndex != -1) {
+                                                        // Récupérer la valeur et la formater
+                                                        if (key.header == "wind_direction_facing") {
+                                                                final directionValue = int.tryParse(values[headerIndex]) ?? -1;
+                                                                sensor.data[key] = getWindDirectionFacing(directionValue);
+                                                        }
+                                                        else {
+                                                                final rawValue = double.tryParse(values[headerIndex]) ?? 0.0;
+                                                                final formattedValue = rawValue.toStringAsFixed(2) + getUnitForHeader(key.header);
+                                                                sensor.data[key] = formattedValue;
+                                                        }
+                                                }
+                                        }
+                                );
+                        }
+                }
+
+                // Mettre à jour les différentes catégories de capteurs
+                updateSensorData(internalSensors);
+                updateSensorData(modBusSensors);
+                updateSensorData(stevensonSensors);
+        }
+
+        // Méthode pour récupérer l'unité personnalisée en fonction du header
+        String getUnitForHeader(String header) {
+                switch (header.toLowerCase()) {
+                        case "bme280_temperature":
+                        case "bme280modbus_temperature":
+                                return " °C";
+                        case "bme280_pression":
+                        case "bme280modbus_pression":
+                                return " kPa";
+                        case "bme280_altitude":
+                                return " m";
+                        case "bme280_humidity":
+                        case "bme280modbus_humidity":
+                                return " %";
+                        case "lsm303_accel_x":
+                        case "lsm303_accel_y":
+                        case "lsm303_accel_z":
+                                return " m/s²";
+                        case "lsm303_roll":
+                        case "lsm303_pitch":
+                                return " °";
+                        case "lsm303_accel_range":
+                                return " g";
+                        case "wind_speed":
+                                return " m/s";
+                        case "wind_direction_angle":
+                                return " °";
+                        case "asl20lux_lux":
+                                return " lux";
+                        default:
+                        return ""; // Pas d'unité par défaut
+                }
+        }
+
+        String getWindDirectionFacing(int value) {
+                switch (value) {
+                        case 0:
+                        case 16:
+                                return "Nord";
+                        case 1:
+                                return "Nord-nord-est";
+                        case 2:
+                                return "Nord-est";
+                        case 3:
+                                return "Est-nord-est";
+                        case 4:
+                                return "Est";
+                        case 5:
+                                return "Est-sud-est";
+                        case 6:
+                                return "Sud-est";
+                        case 7:
+                                return "Sud-sud-est";
+                        case 8:
+                                return "Sud";
+                        case 9:
+                                return "Sud-sud-ouest";
+                        case 10:
+                                return "Sud-ouest";
+                        case 11:
+                                return "Ouest-sud-ouest";
+                        case 12:
+                                return "Ouest";
+                        case 13:
+                                return "Ouest-nord-ouest";
+                        case 14:
+                                return "Nord-ouest";
+                        case 15:
+                                return "Nord-nord-ouest";
+                        default:
+                        return "Inconnu";
+                }
         }
 
         Widget buildDebugMenu() {
@@ -354,7 +469,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                 final values = rawData.split('\n')[2].split(',').map((v) => int.tryParse(v.trim()) ?? 0).toList();
 
                 // Fonction générique pour mettre à jour les capteurs
-                void updateSensorStatus(List<CloudStorageInfo> sensors) {
+                void updateSensorStatus(List<Sensors> sensors) {
                         for (var sensor in sensors) {
                                 if (sensor.header != null && headers.contains(sensor.header!.toLowerCase())) {
                                         sensor.powerStatus = values[headers.indexOf(sensor.header!.toLowerCase())];

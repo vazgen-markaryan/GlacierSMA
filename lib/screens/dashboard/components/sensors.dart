@@ -5,7 +5,7 @@ import '../../../sensors_data/sensors_data.dart';
 
 class MySensors extends StatelessWidget {
         final String title;
-        final List<CloudStorageInfo> sensors;
+        final List<Sensors> sensors;
         final bool isDebugMode;
 
         const MySensors({
@@ -28,8 +28,8 @@ class MySensors extends StatelessWidget {
                                 SizedBox(height: defaultPadding),
                                 SensorsGrid(
                                         sensors: sensors,
-                                        crossAxisCount: 2,
-                                        childAspectRatio: 2,
+                                        crossAxisCount: 1,
+                                        childAspectRatio: 4,
                                         isDebugMode: isDebugMode
                                 )
                         ]
@@ -46,7 +46,7 @@ class SensorsGrid extends StatelessWidget {
                 this.childAspectRatio = 1
         });
 
-        final List<CloudStorageInfo> sensors;
+        final List<Sensors> sensors;
         final bool isDebugMode;
         final int crossAxisCount;
         final double childAspectRatio;

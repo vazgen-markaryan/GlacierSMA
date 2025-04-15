@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
                 /// DEFAULT: FALSE
                 /// Si true, bypass le ConnectionScreen et affiche le DashboardScreen (pour le développement seulement)
                 /// Si false, affiche le ConnectionScreen (ce qui est le comportement par défaut)
-                bool areWeInDevelopingMode = false;
+                bool areWeInDevelopingMode = true;
 
                 return MaterialApp(
                         debugShowCheckedModeBanner: false,
