@@ -41,44 +41,40 @@ class SensorCard extends StatelessWidget {
                 }
 
                 return GestureDetector(
-                        onTap: info.data.isNotEmpty ? () => showSensorDetails(context, info) : null, // Désactiver le clic si data est vide (SD Card)
-                        child: Container(
-                                padding: EdgeInsets.all(defaultPadding),
-                                decoration: BoxDecoration(
-                                        color: secondaryColor,
-                                        borderRadius: const BorderRadius.all(Radius.circular(10)),
-                                        border: Border.all(color: borderColor, width: 3)
-                                ),
-                                child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        children: [
-                                                Container(
-                                                        padding: EdgeInsets.all(defaultPadding / 8),
-                                                        height: 30,
-                                                        width: 30,
-                                                        decoration: BoxDecoration(
-                                                                borderRadius: const BorderRadius.all(Radius.circular(5))
+                        onTap: info.data.isNotEmpty ? () => showSensorDetails(context, info) : null,
+                        child: Material(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Container(
+                                        padding: EdgeInsets.all(defaultPadding),
+                                        decoration: BoxDecoration(
+                                                color: secondaryColor,
+                                                borderRadius: const BorderRadius.all(Radius.circular(10)),
+                                                border: Border.all(color: borderColor, width: 3)
+                                        ),
+                                        child: Row(
+                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                children: [
+                                                        Container(
+                                                                padding: EdgeInsets.all(defaultPadding / 8),
+                                                                height: 30,
+                                                                width: 30,
+                                                                decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(5))
+                                                                ),
+                                                                child: SvgPicture.asset(
+                                                                        info.svgSrc!,
+                                                                        colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn)
+                                                                )
                                                         ),
-                                                        child: SvgPicture.asset(
-                                                                info.svgSrc!,
-                                                                colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn)
+                                                        SizedBox(width: defaultPadding),
+                                                        Expanded(
+                                                                child: Text(
+                                                                        isDebugMode ? "${info.title!}\n(Status: ${info.powerStatus})" : info.title!,
+                                                                        style: Theme.of(context).textTheme.bodyMedium
+                                                                )
                                                         )
-                                                ),
-                                                SizedBox(width: defaultPadding),
-                                                // Texte
-                                                Expanded(
-                                                        child: Text(
-                                                                isDebugMode
-                                                                        ? "Status: ${info.powerStatus}\n${info.title!}"
-                                                                        : info.title!,
-                                                                overflow: TextOverflow.visible,
-                                                                softWrap: true,
-                                                                maxLines: 2, // Limite à 2 lignes
-                                                                style: Theme.of(context).textTheme.bodyMedium
-                                                        )
-                                                )
-                                        ]
+                                                ]
+                                        )
                                 )
                         )
                 );
@@ -88,62 +84,80 @@ class SensorCard extends StatelessWidget {
                 showDialog(
                         context: context,
                         builder: (context) {
-                                return AlertDialog(
-                                        backgroundColor: secondaryColor,
-                                        shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(16)
-                                        ),
-                                        title: Text(
-                                                sensor.title ?? "Détails du capteur",
-                                                style: const TextStyle(
-                                                        color: primaryColor,
-                                                        fontSize: 20,
-                                                        fontWeight: FontWeight.bold
-                                                )
-                                        ),
-                                        content: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: sensor.data.entries.map((entry) {
-                                                                final dataName = entry.key;
-                                                                final value = entry.value;
-                                                                return Row(
-                                                                        children: [
-                                                                                SvgPicture.asset(
-                                                                                        dataName.svgSrc,
-                                                                                        height: 24,
-                                                                                        width: 24,
-                                                                                        colorFilter: const ColorFilter.mode(
-                                                                                                Colors.white70,
-                                                                                                BlendMode.srcIn
-                                                                                        )
-                                                                                ),
-                                                                                const SizedBox(width: 8),
-                                                                                Text(
-                                                                                        "${dataName.name}: $value",
-                                                                                        style: const TextStyle(
-                                                                                                color: Colors.white70,
-                                                                                                fontSize: 16
-                                                                                        )
-                                                                                )
-                                                                        ]
-                                                                );
-                                                        }
-                                                ).toList()
-                                        ),
-                                        actions: [
-                                                TextButton(
-                                                        onPressed: () => Navigator.of(context).pop(),
-                                                        child: const Text(
-                                                                "Fermer",
-                                                                style: TextStyle(
+                                return StatefulBuilder(
+                                        builder: (context, setState) {
+                                                return AlertDialog(
+                                                        backgroundColor: secondaryColor,
+                                                        shape: RoundedRectangleBorder(
+                                                                borderRadius: BorderRadius.circular(16)
+                                                        ),
+                                                        title: Text(
+                                                                sensor.title ?? "Détails du capteur",
+                                                                style: const TextStyle(
                                                                         color: primaryColor,
-                                                                        fontSize: 16,
+                                                                        fontSize: 20,
                                                                         fontWeight: FontWeight.bold
                                                                 )
-                                                        )
-                                                )
-                                        ]
+                                                        ),
+                                                        content: Column(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                children: sensor.data.entries.expand((entry) {
+                                                                                final dataName = entry.key;
+                                                                                final value = entry.value;
+                                                                                return [
+                                                                                        Row(
+                                                                                                children: [
+                                                                                                        SvgPicture.asset(
+                                                                                                                dataName.svgSrc,
+                                                                                                                height: 30,
+                                                                                                                width: 30,
+                                                                                                                colorFilter: const ColorFilter.mode(
+                                                                                                                        Colors.white70,
+                                                                                                                        BlendMode.srcIn
+                                                                                                                )
+                                                                                                        ),
+                                                                                                        const SizedBox(width: 12),
+                                                                                                        Expanded(
+                                                                                                                child: Text(
+                                                                                                                        dataName.name + " :",
+                                                                                                                        style: const TextStyle(
+                                                                                                                                color: Colors.white70,
+                                                                                                                                fontSize: 16
+                                                                                                                        )
+                                                                                                                )
+                                                                                                        ),
+                                                                                                        const SizedBox(width: 12),
+                                                                                                        Text(
+                                                                                                                value.toString(),
+                                                                                                                style: const TextStyle(
+                                                                                                                        color: Colors.white70,
+                                                                                                                        fontSize: 16
+                                                                                                                ),
+                                                                                                                textAlign: TextAlign.right
+                                                                                                        )
+                                                                                                ]
+                                                                                        ),
+                                                                                        const SizedBox(height: 12)
+                                                                                ];
+                                                                        }
+                                                                ).toList()
+                                                        ),
+                                                        actions: [
+                                                                TextButton(
+                                                                        onPressed: () => Navigator.of(context).pop(),
+                                                                        child: const Text(
+                                                                                "Fermer",
+                                                                                style: TextStyle(
+                                                                                        color: primaryColor,
+                                                                                        fontSize: 16,
+                                                                                        fontWeight: FontWeight.bold
+                                                                                )
+                                                                        )
+                                                                )
+                                                        ]
+                                                );
+                                        }
                                 );
                         }
                 );

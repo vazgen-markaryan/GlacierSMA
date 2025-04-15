@@ -26,10 +26,8 @@ class MySensors extends StatelessWidget {
                                         ]
                                 ),
                                 SizedBox(height: defaultPadding),
-                                SensorsGrid(
+                                SensorsRow(
                                         sensors: sensors,
-                                        crossAxisCount: 1,
-                                        childAspectRatio: 4,
                                         isDebugMode: isDebugMode
                                 )
                         ]
@@ -37,33 +35,31 @@ class MySensors extends StatelessWidget {
         }
 }
 
-class SensorsGrid extends StatelessWidget {
-        const SensorsGrid({
+class SensorsRow extends StatelessWidget {
+        const SensorsRow({
                 super.key,
                 required this.sensors,
-                required this.isDebugMode,
-                this.crossAxisCount = 2,
-                this.childAspectRatio = 1
+                required this.isDebugMode
         });
 
         final List<Sensors> sensors;
         final bool isDebugMode;
-        final int crossAxisCount;
-        final double childAspectRatio;
 
         @override
         Widget build(BuildContext context) {
-                return GridView.builder(
-                        physics: NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: sensors.length,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: crossAxisCount,
-                                crossAxisSpacing: defaultPadding,
-                                mainAxisSpacing: defaultPadding,
-                                childAspectRatio: childAspectRatio
-                        ),
-                        itemBuilder: (context, index) => SensorCard(info: sensors[index], isDebugMode: isDebugMode)
+                return Wrap(
+                        spacing: defaultPadding,
+                        runSpacing: defaultPadding,
+                        children: sensors
+                                .where((sensor) => sensor.powerStatus != null) // Filtrer les capteurs avec powerStatus != null
+                                .map((sensor) {
+                                                return SizedBox(
+                                                        width: double.infinity,
+                                                        height: 100,
+                                                        child: SensorCard(info: sensor, isDebugMode: isDebugMode)
+                                                );
+                                        }
+                                ).toList()
                 );
         }
 }

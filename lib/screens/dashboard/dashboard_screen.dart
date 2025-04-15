@@ -221,7 +221,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
                                                 buildConnectionStatus(),
-                                                buildDebugToggleButton() // Bouton toggle
+                                                buildDebugToggleButton()
                                         ]
                                 )
                         ),
@@ -471,8 +471,15 @@ class DashboardScreenState extends State<DashboardScreen> {
                 // Fonction générique pour mettre à jour les capteurs
                 void updateSensorStatus(List<Sensors> sensors) {
                         for (var sensor in sensors) {
-                                if (sensor.header != null && headers.contains(sensor.header!.toLowerCase())) {
+                                if (sensor.header == null) {
+                                        continue; // Ignore les capteurs sans header
+                                }
+
+                                if (headers.contains(sensor.header!.toLowerCase())) {
                                         sensor.powerStatus = values[headers.indexOf(sensor.header!.toLowerCase())];
+                                }
+                                else {
+                                        sensor.powerStatus = null; // Si le capteur n'est pas trouvé, on le met hors ligne
                                 }
                         }
                 }
