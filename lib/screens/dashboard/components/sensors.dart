@@ -3,12 +3,12 @@ import '../../../constantes.dart';
 import 'package:flutter/material.dart';
 import '../../../sensors_data/sensors_data.dart';
 
-class MySensors extends StatelessWidget {
+class Sensors extends StatelessWidget {
         final String title;
-        final List<Sensors> sensors;
+        final List<SensorsData> sensors;
         final bool isDebugMode;
 
-        const MySensors({
+        const Sensors({
                 super.key,
                 required this.title,
                 required this.sensors,
@@ -42,7 +42,7 @@ class SensorsRow extends StatelessWidget {
                 required this.isDebugMode
         });
 
-        final List<Sensors> sensors;
+        final List<SensorsData> sensors;
         final bool isDebugMode;
 
         @override
@@ -51,15 +51,18 @@ class SensorsRow extends StatelessWidget {
                         spacing: defaultPadding,
                         runSpacing: defaultPadding,
                         children: sensors
-                                .where((sensor) => sensor.powerStatus != null) // Filtrer les capteurs avec powerStatus != null
-                                .map((sensor) {
-                                                return SizedBox(
-                                                        width: double.infinity,
-                                                        height: 100,
-                                                        child: SensorCard(info: sensor, isDebugMode: isDebugMode)
-                                                );
-                                        }
-                                ).toList()
+                                .where((sensor) => isDebugMode || sensor.powerStatus != null) // Affiche les capteurs null uniquement en mode debug
+                                .map(
+                                        (sensor) => SizedBox(
+                                                width: double.infinity,
+                                                height: 100,
+                                                child: SensorCard(
+                                                        info: sensor,
+                                                        isDebugMode: isDebugMode
+                                                )
+                                        )
+                                )
+                                .toList()
                 );
         }
 }

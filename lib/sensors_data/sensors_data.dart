@@ -20,13 +20,17 @@ const String windDirectionIcon = "assets/icons/wind_direction.svg";
 const String windSpeedIcon = "assets/icons/wind_speed.svg";
 const String windAngleIcon = "assets/icons/wind_angle.svg";
 
-class Sensors {
+class SensorsData {
         String? svgSrc, title, header, temp, pres, hum, antenna;
         int? powerStatus;
         Color? color;
-        Map<DataMap, dynamic> data = {};
 
-        Sensors({
+        Map<DataMap, dynamic> get data => dataNotifier.value;
+
+        final ValueNotifier<Map<DataMap, dynamic>> dataNotifier;
+        final ValueNotifier<DateTime> lastUpdated;
+
+        SensorsData({
                 this.svgSrc,
                 this.title,
                 this.powerStatus,
@@ -36,11 +40,17 @@ class Sensors {
                 this.pres,
                 this.hum,
                 this.antenna,
-                required this.data
-        });
+                required Map<DataMap, dynamic> data
+        }) : dataNotifier = ValueNotifier(data), lastUpdated = ValueNotifier(DateTime.now());
+
+        void updateData(DataMap key, dynamic newValue) {
+                final updated = Map<DataMap, dynamic>.from(dataNotifier.value);
+                updated[key] = newValue;
+                dataNotifier.value = updated;
+        }
 }
 
-List<Sensors> getSensors(String type) {
+List<SensorsData> getSensors(String type) {
         switch (type) {
                 case "internal":
                         return internalSensors;
@@ -55,8 +65,8 @@ List<Sensors> getSensors(String type) {
         }
 }
 
-List<Sensors> internalSensors = [
-        Sensors(
+List<SensorsData> internalSensors = [
+        SensorsData(
                 title: "Thermo-Hygro-Baromètre",
                 header: "bme280_status",
                 data: {
@@ -67,7 +77,7 @@ List<Sensors> internalSensors = [
                 },
                 svgSrc: microchipIcon
         ),
-        Sensors(
+        SensorsData(
                 title: "Accéléromètre",
                 header: "lsm303_status",
                 data: {
@@ -80,7 +90,7 @@ List<Sensors> internalSensors = [
                 },
                 svgSrc: microchipIcon
         ),
-        Sensors(
+        SensorsData(
                 title: "GPS",
                 header: "gps_status",
                 antenna: "gps_antenna_status",
@@ -88,11 +98,12 @@ List<Sensors> internalSensors = [
                         DataMap(name: "Latitude", header: "gps_latitude", svgSrc: gpsIcon) : "default_value",
                         DataMap(name: "Longitude", header: "gps_longitude", svgSrc: gpsIcon) : "default_value",
                         DataMap(name: "Satelites", header: "gps_satelites", svgSrc: gpsIcon) : "default_value",
-                        DataMap(name: "HDOP", header: "gps_hdop", svgSrc: gpsIcon) : "default_value"
+                        DataMap(name: "HDOP", header: "gps_hdop", svgSrc: gpsIcon) : "default_value",
+                        DataMap(name: "Antenne", header: "gps_antenna_status", svgSrc: gpsIcon) : "default_value"
                 },
-                svgSrc: microchipIcon
+                svgSrc: gpsIcon
         ),
-        Sensors(
+        SensorsData(
                 title: "SD Card",
                 header: "sdcard",
                 data: {}, // Doit être vide
@@ -100,8 +111,8 @@ List<Sensors> internalSensors = [
         )
 ];
 
-List<Sensors> modBusSensors = [
-        Sensors(
+List<SensorsData> modBusSensors = [
+        SensorsData(
                 title: "Anémomètre",
                 header: "wind_speed_status",
                 data: {
@@ -109,7 +120,7 @@ List<Sensors> modBusSensors = [
                 },
                 svgSrc: ventilationIcon
         ),
-        Sensors(
+        SensorsData(
                 title: "Girouette",
                 header: "wind_direction_status",
                 data: {
@@ -118,7 +129,7 @@ List<Sensors> modBusSensors = [
                 },
                 svgSrc: ventilationIcon
         ),
-        Sensors(
+        SensorsData(
                 title: "Luxmètre",
                 header: "asl20lux_status",
                 data: {
@@ -126,7 +137,7 @@ List<Sensors> modBusSensors = [
                 },
                 svgSrc: luxmetreIcon
         ),
-        Sensors(
+        SensorsData(
                 title: "Thermo-Hygro-Baromètre",
                 header: "bme280modbus_status",
                 data: {
@@ -138,8 +149,8 @@ List<Sensors> modBusSensors = [
         )
 ];
 
-List<Sensors> stevensonSensors = [
-        Sensors(
+List<SensorsData> stevensonSensors = [
+        SensorsData(
                 title: "Thermo-Hygro-Baromètre",
                 temp: "stevenson_bme280_temp_status",
                 pres: "stevenson_bme280_pres_status",
@@ -150,17 +161,17 @@ List<Sensors> stevensonSensors = [
                         DataMap(name: "Humidité", header: "bme280_humidity", svgSrc: humidityIcon) : "default_value"
                 },
                 svgSrc: microchipIcon),
-        Sensors(
-                title: "VELM7700",
+        SensorsData(
+                title: "Luxmètre",
                 header: "stevenson_velm7700_lum_status",
                 data: {
                         DataMap(name: "Luminosité", header: "asl20lux_lux", svgSrc: luxmetreIcon) : "default_value"
                 },
-                svgSrc: microchipIcon)
+                svgSrc: luxmetreIcon)
 ];
 
-List<Sensors> stevensonStatus = [
-        Sensors(
+List<SensorsData> stevensonStatus = [
+        SensorsData(
                 title: "Stevenson",
                 header: "stevenson_status",
                 data: {}, // Doit être vide

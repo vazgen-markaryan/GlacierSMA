@@ -233,19 +233,19 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                 children: [
                                                         if (isDebugVisible) buildDebugMenu(), // Affichage conditionnel des logs
                                                         SizedBox(height: defaultPadding),
-                                                        MySensors(
+                                                        Sensors(
                                                                 title: "Les Capteurs Internes",
                                                                 sensors: getSensors("internal"),
                                                                 isDebugMode: isDebugVisible
                                                         ),
                                                         SizedBox(height: defaultPadding),
-                                                        MySensors(
+                                                        Sensors(
                                                                 title: "Les Capteurs ModBus",
                                                                 sensors: getSensors("modbus"),
                                                                 isDebugMode: isDebugVisible
                                                         ),
                                                         SizedBox(height: defaultPadding),
-                                                        MySensors(
+                                                        Sensors(
                                                                 title: "Les Capteurs Stevenson",
                                                                 sensors: getSensors("stevensonStatus").first.powerStatus == 2 ? getSensors("stevensonStatus") : getSensors("stevenson"),
                                                                 isDebugMode: isDebugVisible
@@ -336,24 +336,42 @@ class DashboardScreenState extends State<DashboardScreen> {
                 final values = lines[2].split(',').map((v) => v.trim()).toList();
 
                 // Fonction générique pour mettre à jour les capteurs
-                void updateSensorData(List<Sensors> sensors) {
+                void updateSensorData(List<SensorsData> sensors) {
                         for (var sensor in sensors) {
+                                bool hasChanged = false;
+                                final updatedData = Map<DataMap, dynamic>.from(sensor.data);
+
                                 sensor.data.forEach((key, _) {
                                                 final headerIndex = headers.indexOf(key.header.toLowerCase());
                                                 if (headerIndex != -1) {
-                                                        // Récupérer la valeur et la formater
+                                                        String newValue;
+
                                                         if (key.header == "wind_direction_facing") {
                                                                 final directionValue = int.tryParse(values[headerIndex]) ?? -1;
-                                                                sensor.data[key] = getWindDirectionFacing(directionValue);
+                                                                newValue = getWindDirectionFacing(directionValue);
+                                                        }
+                                                        else if (key.header == "gps_antenna_status") {
+                                                                final antennaValue = int.tryParse(values[headerIndex]) ?? -1;
+                                                                newValue = getGPSAntennaRealValue(antennaValue);
                                                         }
                                                         else {
                                                                 final rawValue = double.tryParse(values[headerIndex]) ?? 0.0;
-                                                                final formattedValue = rawValue.toStringAsFixed(2) + getUnitForHeader(key.header);
-                                                                sensor.data[key] = formattedValue;
+                                                                newValue = rawValue.toStringAsFixed(2) + getUnitForHeader(key.header);
+                                                        }
+
+                                                        if (updatedData[key] != newValue) {
+                                                                updatedData[key] = newValue;
+                                                                hasChanged = true;
                                                         }
                                                 }
                                         }
                                 );
+
+                                if (hasChanged) {
+                                        sensor.dataNotifier.value = updatedData;
+                                }
+
+                                sensor.lastUpdated.value = DateTime.now(); // Force le rebuild même si data ne change pas
                         }
                 }
 
@@ -437,6 +455,21 @@ class DashboardScreenState extends State<DashboardScreen> {
                 }
         }
 
+        String getGPSAntennaRealValue(int value) {
+                switch (value) {
+                        case 0:
+                                return "Inconnu";
+                        case 1:
+                                return "Externe";
+                        case 2:
+                                return "Interne";
+                        case 3:
+                                return "Court-circuit d'antenne externe";
+                        default:
+                        return "Inconnu";
+                }
+        }
+
         Widget buildDebugMenu() {
                 return Card(
                         child: Padding(
@@ -469,7 +502,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                 final values = rawData.split('\n')[2].split(',').map((v) => int.tryParse(v.trim()) ?? 0).toList();
 
                 // Fonction générique pour mettre à jour les capteurs
-                void updateSensorStatus(List<Sensors> sensors) {
+                void updateSensorStatus(List<SensorsData> sensors) {
                         for (var sensor in sensors) {
                                 if (sensor.header == null) {
                                         continue; // Ignore les capteurs sans header
