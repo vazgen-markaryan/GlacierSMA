@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../dashboard/dashboard_screen.dart';
-import 'package:rev_glacier_sma_mobile/constantes.dart';
+import 'package:rev_glacier_sma_mobile/constants.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
 
-// Methode qui verifie s'il y a un qqch connecté via SERIAL port à telephone
+// Methode qui verifie s'il y a qqch qui est connecté via SERIAL port à telephone
 Future<void> getAllCableConnectedDevices(
         FlutterSerialCommunication flutterSerialCommunicationPlugin,
         Function(List<DeviceInfo>) updateDevices) async {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rev_glacier_sma_mobile/constantes.dart';
+import 'package:rev_glacier_sma_mobile/constants.dart';
 
 // TODO: Ajouter la fonctionnalité de connexion Bluetooth quand elle sera disponible via Hardware
 // Widget qui affiche la section de connexion Bluetooth

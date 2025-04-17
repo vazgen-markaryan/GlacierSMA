@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'functions/connection_screen_functions.dart';
-import 'package:rev_glacier_sma_mobile/constantes.dart';
+import 'functions/connection_functions.dart';
+import 'package:rev_glacier_sma_mobile/constants.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
-import 'package:rev_glacier_sma_mobile/screens/connection/widgets/connection_screen_widgets.dart';
+import 'package:rev_glacier_sma_mobile/screens/connection/widgets/connection_widgets.dart';
 
 class ConnectionScreen extends StatefulWidget {
         const ConnectionScreen({super.key});

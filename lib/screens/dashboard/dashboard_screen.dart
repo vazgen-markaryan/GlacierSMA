@@ -1,13 +1,16 @@
 import 'dart:async';
-import 'dart:math';
-import '../../constantes.dart';
-import 'components/sensors.dart';
+import '../../constants.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import '../../sensors_data/sensors_data.dart';
+import 'components/sensors_data.dart';
+import 'components/sensors_layout.dart';
+import 'functions/data_reader.dart';
+import 'functions/debug_log_manager.dart';
 import '../connection/connection_screen.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
+import 'package:rev_glacier_sma_mobile/screens/dashboard/widgets/debug_data.dart';
+import 'package:rev_glacier_sma_mobile/screens/dashboard/widgets/debug_toggle.dart';
 
 class DashboardScreen extends StatefulWidget {
         final FlutterSerialCommunication? flutterSerialCommunicationPlugin;
@@ -29,15 +32,12 @@ class DashboardScreenState extends State<DashboardScreen> {
         late bool isConnected;
         Timer? connectionCheckTimer;
         EventChannel? messageChannel;
-        String buffer = '';
-        bool isCapturing = false;
 
         // DEBUG MOD
         bool isDebugVisible = false; // État pour afficher ou masquer les logs
-        List<String> debugLogs = []; // Liste pour stocker les logs de débogage
-        List<String> tempLogBuffer = ["", "", ""]; // Buffer temporaire pour collecter les logs
+        final DebugLogManager debugLogManager = DebugLogManager();
 
-        // Variables globales pour BME de Stevenson
+        // Suivi d'état pour le capteur Stevenson
         late int stevensonTemp;
         late int stevensonHum;
         late int stevensonPress;
@@ -54,7 +54,15 @@ class DashboardScreenState extends State<DashboardScreen> {
                 widget.flutterSerialCommunicationPlugin?.setDTR(true);
 
                 // Appeler readMessage pour écouter les messages
-                readMessage();
+                readMessage(
+                        messageChannel: messageChannel,
+                        sendMessage: sendMessage,
+                        debugLogManager: debugLogManager,
+                        getSensors: getSensors,
+                        setTemp: (v) => stevensonTemp = v,
+                        setHum: (v) => stevensonHum = v,
+                        setPres: (v) => stevensonPress = v
+                );
 
                 // Vérification périodique de l'état de connexion
                 connectionCheckTimer = Timer.periodic(const Duration(seconds: 2),
@@ -127,14 +135,14 @@ class DashboardScreenState extends State<DashboardScreen> {
                         bool isMessageSent = await widget.flutterSerialCommunicationPlugin?.write(data) ?? false;
 
                         // Ajouter un log pour l'envoi
-                        tempLogBuffer[0] = "\nMessage envoyé : $message\n";
-                        updateLogs();
+                        debugLogManager.setLogChunk(0, "Message envoyé : $message");
+                        debugLogManager.updateLogs();
 
                         return isMessageSent;
                 }
                 catch (error) {
-                        tempLogBuffer[0] = "Erreur lors de l'envoi : $error";
-                        updateLogs();
+                        debugLogManager.setLogChunk(0, "\nErreur lors de l'envoi : $error\n");
+                        debugLogManager.updateLogs();
 
                         return false;
                 }
@@ -195,7 +203,55 @@ class DashboardScreenState extends State<DashboardScreen> {
                 }
         }
 
-        // Widget qui affiche l'état de la connexion en haut de l'écran
+        @override
+        Widget build(BuildContext context) {
+                return Scaffold(
+                        appBar: AppBar(
+                                automaticallyImplyLeading: false,
+                                backgroundColor: secondaryColor,
+                                title: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                                buildConnectionStatus(),
+                                                DebugToggleButton(
+                                                        isDebugVisible: isDebugVisible,
+                                                        onToggle: toggleDebugMode
+                                                )
+                                        ]
+                                )
+                        ),
+                        body: SafeArea(
+                                child: SingleChildScrollView(
+                                        padding: const EdgeInsets.all(defaultPadding),
+                                        child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                        if (isDebugVisible) DebugData(debugLogManager: debugLogManager),
+                                                        SizedBox(height: defaultPadding),
+                                                        SensorsDiv(
+                                                                title: "Les Capteurs Internes",
+                                                                sensors: getSensors(SensorType.internal),
+                                                                isDebugMode: isDebugVisible
+                                                        ),
+                                                        SizedBox(height: defaultPadding),
+                                                        SensorsDiv(
+                                                                title: "Les Capteurs ModBus",
+                                                                sensors: getSensors(SensorType.modbus),
+                                                                isDebugMode: isDebugVisible
+                                                        ),
+                                                        SizedBox(height: defaultPadding),
+                                                        SensorsDiv(
+                                                                title: "Les Capteurs Stevenson",
+                                                                sensors: getSensors(SensorType.stevensonStatus).first.powerStatus == 2 ? getSensors(SensorType.stevensonStatus) : getSensors(SensorType.stevenson),
+                                                                isDebugMode: isDebugVisible
+                                                        )
+                                                ]
+                                        )
+                                )
+                        )
+                );
+        }
+
         Widget buildConnectionStatus() {
                 return Row(
                         children: [
@@ -211,379 +267,9 @@ class DashboardScreenState extends State<DashboardScreen> {
                 );
         }
 
-        @override
-        Widget build(BuildContext context) {
-                return Scaffold(
-                        appBar: AppBar(
-                                automaticallyImplyLeading: false,
-                                backgroundColor: secondaryColor,
-                                title: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                                buildConnectionStatus(),
-                                                buildDebugToggleButton()
-                                        ]
-                                )
-                        ),
-                        body: SafeArea(
-                                child: SingleChildScrollView(
-                                        padding: const EdgeInsets.all(defaultPadding),
-                                        child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                        if (isDebugVisible) buildDebugMenu(), // Affichage conditionnel des logs
-                                                        SizedBox(height: defaultPadding),
-                                                        Sensors(
-                                                                title: "Les Capteurs Internes",
-                                                                sensors: getSensors("internal"),
-                                                                isDebugMode: isDebugVisible
-                                                        ),
-                                                        SizedBox(height: defaultPadding),
-                                                        Sensors(
-                                                                title: "Les Capteurs ModBus",
-                                                                sensors: getSensors("modbus"),
-                                                                isDebugMode: isDebugVisible
-                                                        ),
-                                                        SizedBox(height: defaultPadding),
-                                                        Sensors(
-                                                                title: "Les Capteurs Stevenson",
-                                                                sensors: getSensors("stevensonStatus").first.powerStatus == 2 ? getSensors("stevensonStatus") : getSensors("stevenson"),
-                                                                isDebugMode: isDebugVisible
-                                                        )
-                                                ]
-                                        )
-                                )
-                        )
-                );
-        }
-
-        // Méthode pour lire les messages avec journalisation
-        void readMessage() {
-                sendMessage(communicationMessageAndroid);
-                messageChannel?.receiveBroadcastStream().listen(
-                        (event) {
-                                if (event is Uint8List) {
-                                        final chunk = String.fromCharCodes(event);
-                                        buffer += chunk;
-
-                                        if (buffer.contains(communicationMessagePhoneStart)) {
-                                                isCapturing = true;
-                                                buffer = "";
-                                        }
-
-                                        if (isCapturing && buffer.contains(communicationMessagePhoneEnd)) {
-                                                isCapturing = false;
-                                                final rawData = buffer
-                                                        .replaceAll(communicationMessagePhoneStart, "")
-                                                        .replaceAll(communicationMessagePhoneEnd, "")
-                                                        .trim();
-
-                                                // Si rawData contient <status>
-                                                if (rawData.contains("<status>")) {
-                                                        final lines = rawData.split('\n');
-                                                        if (lines.length >= 3) {
-                                                                final headers = lines[1].split(',').map((h) => h.trim()).toList();
-                                                                final values = lines[2].split(',').map((v) => v.trim()).toList();
-
-                                                                tempLogBuffer[1] = "Status:\n" + headers.asMap().entries.map((entry) {
-                                                                                        final index = entry.key;
-                                                                                        final header = entry.value.toUpperCase();
-                                                                                        return "$header:    ${values[index]}";
-                                                                                }
-                                                                        ).join("\n");
-                                                        }
-                                                }
-
-                                                // Si rawData contient <data>
-                                                if (rawData.contains("<data>")) {
-                                                        final lines = rawData.split('\n');
-                                                        if (lines.length >= 3) {
-                                                                final headers = lines[1].split(',').map((h) => h.trim()).toList();
-                                                                final values = lines[2].split(',').map((v) => v.trim()).toList();
-
-                                                                tempLogBuffer[2] = "\nValeurs:\n" + headers.asMap().entries.map((entry) {
-                                                                                        final index = entry.key;
-                                                                                        final header = entry.value.toUpperCase();
-                                                                                        return "$header:    ${values[index]}";
-                                                                                }
-                                                                        ).join("\n");
-                                                        }
-                                                }
-
-                                                updateLogs();
-
-                                                // Remplacer les valeurs de sensors par les valeurs reçues
-                                                if (rawData.contains("<data>")) {
-                                                        populateSensorData(rawData); // Appel correct
-                                                }
-
-                                                // Mettre à jour les capteurs avec les données brutes (tout le temps)
-                                                updateSensorsData(rawData);
-                                                buffer = "";
-                                        }
-                                }
-                        }
-                );
-        }
-
-        void populateSensorData(String rawData) {
-                // Séparer les lignes
-                final lines = rawData.split('\n');
-                if (lines.length < 3) return;
-
-                // Extraire les en-têtes et les valeurs
-                final headers = lines[1].split(',').map((h) => h.trim().toLowerCase()).toList();
-                final values = lines[2].split(',').map((v) => v.trim()).toList();
-
-                // Fonction générique pour mettre à jour les capteurs
-                void updateSensorData(List<SensorsData> sensors) {
-                        for (var sensor in sensors) {
-                                bool hasChanged = false;
-                                final updatedData = Map<DataMap, dynamic>.from(sensor.data);
-
-                                sensor.data.forEach((key, _) {
-                                                final headerIndex = headers.indexOf(key.header.toLowerCase());
-                                                if (headerIndex != -1) {
-                                                        String newValue;
-
-                                                        if (key.header == "wind_direction_facing") {
-                                                                final directionValue = int.tryParse(values[headerIndex]) ?? -1;
-                                                                newValue = getWindDirectionFacing(directionValue);
-                                                        }
-                                                        else if (key.header == "gps_antenna_status") {
-                                                                final antennaValue = int.tryParse(values[headerIndex]) ?? -1;
-                                                                newValue = getGPSAntennaRealValue(antennaValue);
-                                                        }
-                                                        else {
-                                                                final rawValue = double.tryParse(values[headerIndex]) ?? 0.0;
-                                                                newValue = rawValue.toStringAsFixed(2) + getUnitForHeader(key.header);
-                                                        }
-
-                                                        if (updatedData[key] != newValue) {
-                                                                updatedData[key] = newValue;
-                                                                hasChanged = true;
-                                                        }
-                                                }
-                                        }
-                                );
-
-                                if (hasChanged) {
-                                        sensor.dataNotifier.value = updatedData;
-                                }
-
-                                sensor.lastUpdated.value = DateTime.now(); // Force le rebuild même si data ne change pas
-                        }
-                }
-
-                // Mettre à jour les différentes catégories de capteurs
-                updateSensorData(internalSensors);
-                updateSensorData(modBusSensors);
-                updateSensorData(stevensonSensors);
-        }
-
-        // Méthode pour récupérer l'unité personnalisée en fonction du header
-        String getUnitForHeader(String header) {
-                switch (header.toLowerCase()) {
-                        case "bme280_temperature":
-                        case "bme280modbus_temperature":
-                                return " °C";
-                        case "bme280_pression":
-                        case "bme280modbus_pression":
-                                return " kPa";
-                        case "bme280_altitude":
-                                return " m";
-                        case "bme280_humidity":
-                        case "bme280modbus_humidity":
-                                return " %";
-                        case "lsm303_accel_x":
-                        case "lsm303_accel_y":
-                        case "lsm303_accel_z":
-                                return " m/s²";
-                        case "lsm303_roll":
-                        case "lsm303_pitch":
-                                return " °";
-                        case "lsm303_accel_range":
-                                return " g";
-                        case "wind_speed":
-                                return " m/s";
-                        case "wind_direction_angle":
-                                return " °";
-                        case "asl20lux_lux":
-                                return " lux";
-                        default:
-                        return ""; // Pas d'unité par défaut
-                }
-        }
-
-        String getWindDirectionFacing(int value) {
-                switch (value) {
-                        case 0:
-                        case 16:
-                                return "Nord";
-                        case 1:
-                                return "Nord-nord-est";
-                        case 2:
-                                return "Nord-est";
-                        case 3:
-                                return "Est-nord-est";
-                        case 4:
-                                return "Est";
-                        case 5:
-                                return "Est-sud-est";
-                        case 6:
-                                return "Sud-est";
-                        case 7:
-                                return "Sud-sud-est";
-                        case 8:
-                                return "Sud";
-                        case 9:
-                                return "Sud-sud-ouest";
-                        case 10:
-                                return "Sud-ouest";
-                        case 11:
-                                return "Ouest-sud-ouest";
-                        case 12:
-                                return "Ouest";
-                        case 13:
-                                return "Ouest-nord-ouest";
-                        case 14:
-                                return "Nord-ouest";
-                        case 15:
-                                return "Nord-nord-ouest";
-                        default:
-                        return "Inconnu";
-                }
-        }
-
-        String getGPSAntennaRealValue(int value) {
-                switch (value) {
-                        case 0:
-                                return "Inconnu";
-                        case 1:
-                                return "Externe";
-                        case 2:
-                                return "Interne";
-                        case 3:
-                                return "Court-circuit d'antenne externe";
-                        default:
-                        return "Inconnu";
-                }
-        }
-
-        Widget buildDebugMenu() {
-                return Card(
-                        child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                                const Text("Logs de Debug (se rafraîchit tout seul):", style: TextStyle(fontWeight: FontWeight.bold)),
-                                                const SizedBox(height: 8),
-                                                SizedBox(
-                                                        height: 200,
-                                                        child: ListView.builder(
-                                                                itemCount: debugLogs.length,
-                                                                itemBuilder: (context, index) {
-                                                                        return Text(debugLogs[index], style: const TextStyle(fontSize: 14));
-                                                                }
-                                                        )
-                                                )
-                                        ]
-                                )
-                        )
-                );
-        }
-
-        void updateSensorsData(String rawData) {
-                if (!rawData.contains(communicationMessageStatus)) return;
-
-                // Extraire les données de statut
-                final headers = rawData.split('\n')[1].split(',').map((h) => h.trim().toLowerCase()).toList();
-                final values = rawData.split('\n')[2].split(',').map((v) => int.tryParse(v.trim()) ?? 0).toList();
-
-                // Fonction générique pour mettre à jour les capteurs
-                void updateSensorStatus(List<SensorsData> sensors) {
-                        for (var sensor in sensors) {
-                                if (sensor.header == null) {
-                                        continue; // Ignore les capteurs sans header
-                                }
-
-                                if (headers.contains(sensor.header!.toLowerCase())) {
-                                        sensor.powerStatus = values[headers.indexOf(sensor.header!.toLowerCase())];
-                                }
-                                else {
-                                        sensor.powerStatus = null; // Si le capteur n'est pas trouvé, on le met hors ligne
-                                }
-                        }
-                }
-
-                // Mettre à jour les capteurs internes, du vent et Stevenson
-                updateSensorStatus(getSensors("internal"));
-                updateSensorStatus(getSensors("modbus"));
-                updateSensorStatus(getSensors("stevenson"));
-                updateSensorStatus(getSensors("stevensonStatus"));
-
-                // Mettre à jour les propriétés spécifiques de Stevenson
-                final stevensonMapping = {
-                        getSensors("stevenson").first.temp?.toLowerCase():(int status) => stevensonTemp = status,
-                        getSensors("stevenson").first.hum?.toLowerCase():(int status) => stevensonHum = status,
-                        getSensors("stevenson").first.pres?.toLowerCase():(int status) => stevensonPress = status
-                };
-
-                for (int i = 0; i < headers.length; i++) {
-                        stevensonMapping[headers[i]]?.call(values[i]);
-                }
-
-                // Calculer le powerStatus global pour le capteur Stevenson principal
-                getSensors("stevenson").first.powerStatus = max(stevensonTemp, max(stevensonHum, stevensonPress));
-        }
-
-        Widget buildDebugToggleButton() {
-                return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: GestureDetector(
-                                onTap: () {
-                                        setState(() {
-                                                        isDebugVisible = !isDebugVisible;
-                                                }
-                                        );
-                                },
-                                child: Row(
-                                        children: [
-                                                const Text("Debug", style: TextStyle(fontSize: 16, color: Colors.white)),
-                                                const SizedBox(width: 8),
-                                                Container(
-                                                        width: 60,
-                                                        height: 30,
-                                                        decoration: BoxDecoration(
-                                                                color: isDebugVisible ? Colors.green : Colors.grey,
-                                                                borderRadius: BorderRadius.circular(15)
-                                                        ),
-                                                        child: AnimatedAlign(
-                                                                duration: const Duration(milliseconds: 200),
-                                                                alignment: isDebugVisible ? Alignment.centerRight : Alignment.centerLeft,
-                                                                child: Container(
-                                                                        width: 25,
-                                                                        height: 25,
-                                                                        decoration: const BoxDecoration(
-                                                                                color: Colors.white,
-                                                                                shape: BoxShape.circle
-                                                                        )
-                                                                )
-                                                        )
-                                                )
-                                        ]
-                                )
-                        )
-                );
-        }
-
-        void updateLogs() async {
+        void toggleDebugMode() {
                 setState(() {
-                                debugLogs.clear();
-                                debugLogs.add("-----START LOG CHUNK-----");
-                                debugLogs.addAll(tempLogBuffer);
-                                debugLogs.add("\n-----END LOG CHUNK-----");
+                                isDebugVisible = !isDebugVisible;
                         }
                 );
         }
