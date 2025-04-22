@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'sensors_data.dart';
 import 'package:intl/intl.dart';
 import '../../../constants.dart';
@@ -29,10 +31,17 @@ class SensorDetailsPopup extends StatelessWidget {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                                 // Affichage du timestamp formaté
-                                                ValueListenableBuilder<DateTime>(
-                                                        valueListenable: sensor.lastUpdated,
-                                                        builder: (context, timestamp, _) {
-                                                                final formatted = DateFormat("dd-MM-yyyy 'à' HH:mm:ss").format(timestamp);
+                                                StatefulBuilder(
+                                                        builder: (context, setState) {
+                                                                final now = DateTime.now();
+                                                                final formatted = DateFormat("dd-MM-yyyy 'à' HH:mm:ss").format(now);
+
+                                                                // Redémarre l’horloge toutes les secondes
+                                                                Timer(const Duration(seconds: 1), () => setState(() {
+                                                                                }
+                                                                        )
+                                                                );
+
                                                                 return Text(
                                                                         "Mise à jour $formatted",
                                                                         style: const TextStyle(
@@ -43,6 +52,7 @@ class SensorDetailsPopup extends StatelessWidget {
                                                                 );
                                                         }
                                                 ),
+
                                                 const SizedBox(height: 8),
 
                                                 // Affichage des données (nom + valeur + icône)

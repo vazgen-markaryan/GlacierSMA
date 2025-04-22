@@ -29,7 +29,6 @@ class SensorsData {
         Color? color;
 
         final ValueNotifier<Map<DataMap, dynamic>> dataNotifier;
-        final ValueNotifier<DateTime> lastUpdated;
 
         Map<DataMap, dynamic> get data => dataNotifier.value;
 
@@ -37,7 +36,7 @@ class SensorsData {
                 this.svgIcon, this.title, this.powerStatus, this.color,
                 this.header, this.temp, this.pres, this.hum, this.antenna,
                 required Map<DataMap, dynamic> data
-        }) : dataNotifier = ValueNotifier(data), lastUpdated = ValueNotifier(DateTime.now());
+        }) : dataNotifier = ValueNotifier(data);
 
         void updateData(DataMap key, dynamic newValue) {
                 final updated = Map<DataMap, dynamic>.from(dataNotifier.value);

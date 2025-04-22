@@ -42,7 +42,6 @@ void populateSensorData(String rawData, List<List<SensorsData>> sensorGroups) {
 
                         if (hasChanged) {
                                 sensor.dataNotifier.value = updatedData;
-                                sensor.lastUpdated.value = DateTime.now();
                         }
                 }
         }
