@@ -30,14 +30,14 @@ class DashboardScreen extends StatefulWidget {
 
 class DashboardScreenState extends State<DashboardScreen> {
         late bool isConnected;
+        late final ValueNotifier<bool> isInitialLoading;
         Timer? connectionCheckTimer;
         EventChannel? messageChannel;
 
-        // DEBUG MOD
-        bool isDebugVisible = false; // État pour afficher ou masquer les logs
+        bool isDebugVisible = false;
         final DebugLogManager debugLogManager = DebugLogManager();
 
-        // Suivi d'état pour le capteur Stevenson
+        // Variables spécifiques au Stevenson
         late int stevensonTemp;
         late int stevensonHum;
         late int stevensonPress;
@@ -46,14 +46,12 @@ class DashboardScreenState extends State<DashboardScreen> {
         void initState() {
                 super.initState();
                 isConnected = widget.isConnected;
+                isInitialLoading = ValueNotifier(true);
 
-                // Initialisation de messageChannel pour écouter les messages Serial
                 messageChannel = widget.flutterSerialCommunicationPlugin?.getSerialMessageListener();
-
-                // Indiquer à Arduino qu'il est connecté
                 widget.flutterSerialCommunicationPlugin?.setDTR(true);
 
-                // Appeler readMessage pour écouter les messages
+                // Appelle readMessage AVEC callback pour isInitialLoading
                 readMessage(
                         messageChannel: messageChannel,
                         sendMessage: sendMessage,
@@ -61,13 +59,20 @@ class DashboardScreenState extends State<DashboardScreen> {
                         getSensors: getSensors,
                         setTemp: (v) => stevensonTemp = v,
                         setHum: (v) => stevensonHum = v,
-                        setPres: (v) => stevensonPress = v
+                        setPres: (v) => stevensonPress = v,
+                        onDataReceived: () {
+                                // Callback déclenché dès qu'un capteur valide est détecté
+                                final hasData = [
+                                        ...getSensors(SensorType.internal),
+                                        ...getSensors(SensorType.modbus),
+                                        ...getSensors(SensorType.stevenson),
+                                        ...getSensors(SensorType.stevensonStatus)
+                                ].any((sensor) => sensor.powerStatus != null);
+                                if (hasData) isInitialLoading.value = false;
+                        }
                 );
 
-                // Vérification périodique de l'état de connexion
-                connectionCheckTimer = Timer.periodic(const Duration(seconds: 2),
-                        (timer) async {
-                                //Envoi du message <android> pour PING Arduino et s'assurer que la connexion est toujours active
+                connectionCheckTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
                                 bool isMessageSent = await sendMessage(communicationMessageAndroid);
                                 if (!isMessageSent && isConnected) {
                                         setState(() => isConnected = false);
@@ -80,6 +85,7 @@ class DashboardScreenState extends State<DashboardScreen> {
         @override
         void dispose() {
                 connectionCheckTimer?.cancel();
+                isInitialLoading.dispose();
                 super.dispose();
         }
 
@@ -221,32 +227,43 @@ class DashboardScreenState extends State<DashboardScreen> {
                                 )
                         ),
                         body: SafeArea(
-                                child: SingleChildScrollView(
-                                        padding: const EdgeInsets.all(defaultPadding),
-                                        child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                        if (isDebugVisible) DebugData(debugLogManager: debugLogManager),
-                                                        SizedBox(height: defaultPadding),
-                                                        SensorsDiv(
-                                                                title: "Les Capteurs Internes",
-                                                                sensors: getSensors(SensorType.internal),
-                                                                isDebugMode: isDebugVisible
-                                                        ),
-                                                        SizedBox(height: defaultPadding),
-                                                        SensorsDiv(
-                                                                title: "Les Capteurs ModBus",
-                                                                sensors: getSensors(SensorType.modbus),
-                                                                isDebugMode: isDebugVisible
-                                                        ),
-                                                        SizedBox(height: defaultPadding),
-                                                        SensorsDiv(
-                                                                title: "Les Capteurs Stevenson",
-                                                                sensors: getSensors(SensorType.stevensonStatus).first.powerStatus == 2 ? getSensors(SensorType.stevensonStatus) : getSensors(SensorType.stevenson),
-                                                                isDebugMode: isDebugVisible
+                                child: ValueListenableBuilder<bool>(
+                                        valueListenable: isInitialLoading,
+                                        builder: (context, loading, _) {
+                                                if (loading) {
+                                                        return const Center(child: CircularProgressIndicator());
+                                                }
+
+                                                return SingleChildScrollView(
+                                                        padding: const EdgeInsets.all(defaultPadding),
+                                                        child: Column(
+                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                children: [
+                                                                        if (isDebugVisible) DebugData(debugLogManager: debugLogManager),
+                                                                        SizedBox(height: defaultPadding),
+                                                                        SensorsDiv(
+                                                                                title: "Les Capteurs Internes",
+                                                                                sensors: getSensors(SensorType.internal),
+                                                                                isDebugMode: isDebugVisible
+                                                                        ),
+                                                                        SizedBox(height: defaultPadding),
+                                                                        SensorsDiv(
+                                                                                title: "Les Capteurs ModBus",
+                                                                                sensors: getSensors(SensorType.modbus),
+                                                                                isDebugMode: isDebugVisible
+                                                                        ),
+                                                                        SizedBox(height: defaultPadding),
+                                                                        SensorsDiv(
+                                                                                title: "Les Capteurs Stevenson",
+                                                                                sensors: getSensors(SensorType.stevensonStatus).first.powerStatus == 2
+                                                                                        ? getSensors(SensorType.stevensonStatus)
+                                                                                        : getSensors(SensorType.stevenson),
+                                                                                isDebugMode: isDebugVisible
+                                                                        )
+                                                                ]
                                                         )
-                                                ]
-                                        )
+                                                );
+                                        }
                                 )
                         )
                 );

@@ -23,6 +23,7 @@ class ConnectionScreenState extends State<ConnectionScreen> {
                         body: LayoutBuilder(
                                 builder: (context, constraints) {
                                         bool isHorizontal = constraints.maxWidth > 600;
+                                        // Si l'écran est horizontal, on affiche la section Bluetooth à gauche et la section câble à droite
                                         return Container(
                                                 padding: const EdgeInsets.all(16.0),
                                                 decoration: const BoxDecoration(color: backgroundColor),
@@ -47,6 +48,7 @@ class ConnectionScreenState extends State<ConnectionScreen> {
                                                                         )
                                                                 ]
                                                         )
+                                                        // Si l'écran est vertical, on affiche la section Bluetooth en haut et la section câble en bas
                                                         : Column(
                                                                 children: [
                                                                         Expanded(child: buildBluetoothSection(context)),

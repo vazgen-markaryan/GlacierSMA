@@ -14,7 +14,8 @@ void readMessage({
         required List<SensorsData> Function(SensorType) getSensors,
         required void Function(int) setTemp,
         required void Function(int) setHum,
-        required void Function(int) setPres
+        required void Function(int) setPres,
+        required void Function() onDataReceived
 }) {
         sendMessage(communicationMessageAndroid);
         String buffer = '';
@@ -45,7 +46,8 @@ void readMessage({
                                                 final maxHeaderLength = headers.fold<int>(0, (prev, h) => max(prev, h.length));
 
                                                 if (rawData.contains("<status>")) {
-                                                        final statusLog = "Status:\n" + headers.asMap().entries.map((entry) {
+                                                        final statusLog = "Status:\n" +
+                                                                headers.asMap().entries.map((entry) {
                                                                                 final index = entry.key;
                                                                                 final header = entry.value.toUpperCase();
                                                                                 final paddedHeader = header.padRight(maxHeaderLength);
@@ -57,13 +59,15 @@ void readMessage({
                                                 }
 
                                                 if (rawData.contains("<data>")) {
-                                                        final dataLog = "\nValeurs:\n" + headers.asMap().entries.map(
-                                                                        (entry) {
+                                                        final dataLog = "\nValeurs:\n" +
+                                                                headers.asMap().entries.map((entry) {
                                                                                 final index = entry.key;
                                                                                 final header = entry.value.toUpperCase();
                                                                                 final paddedHeader = header.padRight(maxHeaderLength);
                                                                                 final raw = values[index];
-                                                                                final formatted = double.tryParse(raw) != null ? "${double.parse(raw).toStringAsFixed(2)}${getUnitForHeader(header.toLowerCase())}" : raw;
+                                                                                final formatted = double.tryParse(raw) != null
+                                                                                        ? "${double.parse(raw).toStringAsFixed(2)}${getUnitForHeader(header.toLowerCase())}"
+                                                                                        : raw;
                                                                                 return "$paddedHeader : $formatted";
                                                                         }
                                                                 ).join("\n");
@@ -78,12 +82,23 @@ void readMessage({
                                                                 getSensors(SensorType.internal),
                                                                 getSensors(SensorType.modbus),
                                                                 getSensors(SensorType.stevenson)
-                                                        ]
-                                                );
+                                                        ]);
                                         }
 
                                         if (rawData.contains("<status>")) {
                                                 updateSensorsData(rawData, getSensors, communicationMessageStatus, setTemp, setHum, setPres);
+                                        }
+
+                                        // Vérifie s’il y a au moins un capteur actif
+                                        final hasData = [
+                                                ...getSensors(SensorType.internal),
+                                                ...getSensors(SensorType.modbus),
+                                                ...getSensors(SensorType.stevenson),
+                                                ...getSensors(SensorType.stevensonStatus)
+                                        ].any((sensor) => sensor.powerStatus != null);
+
+                                        if (hasData) {
+                                                onDataReceived(); // Appel du callback pour stopper le loader
                                         }
 
                                         buffer = "";

@@ -45,3 +45,13 @@ class MyApp extends StatelessWidget {
                 );
         }
 }
+
+//TODO afficher batterie status dynamiquement selon le voltage
+//TODO bottom navigation bar ou possiblement slide menu
+//TODO settings min max sensors value menu + messages de notification si dehors des limites
+//TODO settings pour power les sensors
+//TODO deplacer DEBUG switch dans settings menu
+//TODO Internationalisation EN + FR
+//TODO vérifier horizontal mode partout
+//TODO rediger README au fur et à mesure
+//TODO faire plus de TODOs :)
