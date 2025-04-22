@@ -22,11 +22,10 @@ class MyApp extends StatelessWidget {
                 return FutureBuilder<bool>(
                         future: isRunningOnEmulator(),
                         builder: (context, snapshot) {
-
-                                /// Boolean pour basculer entre ConnectionScreen et DashboardScreen
-                                ///  Depend de l'environnement de développement
-                                ///  Si emulateur, on affiche le DashboardScreen
-                                ///  Si pas emulateur, on affiche le ConnectionScreen
+                                // Boolean pour basculer entre ConnectionScreen et DashboardScreen
+                                //  Depend de l'environnement de développement
+                                //  Si emulateur, on affiche le DashboardScreen
+                                //  Si pas emulateur, on affiche le ConnectionScreen
                                 final areWeInDevelopingMode = snapshot.data ?? false;
 
                                 return MaterialApp(
@@ -54,4 +53,5 @@ class MyApp extends StatelessWidget {
 //TODO Internationalisation EN + FR
 //TODO vérifier horizontal mode partout
 //TODO rediger README au fur et à mesure
+
 //TODO faire plus de TODOs :)

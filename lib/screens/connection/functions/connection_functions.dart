@@ -13,10 +13,7 @@ Future<void> getAllCableConnectedDevices(
 }
 
 // Methode qui affiche une boite de dialogue pour selectionner un appareil
-Future<void> showDeviceSelectionDialog(
-        BuildContext context,
-        List<DeviceInfo> connectedDevices,
-        FlutterSerialCommunication flutterSerialCommunicationPlugin) async {
+Future<void> showDeviceSelectionDialog(BuildContext context, List<DeviceInfo> connectedDevices, FlutterSerialCommunication flutterSerialCommunicationPlugin) async {
         // Si rien n'est connecté affiche notification (SnackBar)
         if (connectedDevices.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -46,7 +43,7 @@ Future<void> showDeviceSelectionDialog(
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                                 title: const Text(
                                         "Appareils disponibles",
-                                        style: TextStyle(color: primaryColor, fontSize: 20, fontWeight: FontWeight.bold)
+                                        style: TextStyle(color: primaryColor, fontSize: 18, fontWeight: FontWeight.bold)
                                 ),
                                 content: SizedBox(
                                         width: double.maxFinite,
@@ -60,7 +57,7 @@ Future<void> showDeviceSelectionDialog(
                                                                 margin: const EdgeInsets.symmetric(vertical: 8.0),
                                                                 child: ListTile(
                                                                         title: Text(
-                                                                                device.productName,
+                                                                                device.productName.isNotEmpty ? device.productName : "Module inconnu",
                                                                                 style: const TextStyle(color: Colors.white, fontSize: 16)
                                                                         ),
                                                                         subtitle: Text(

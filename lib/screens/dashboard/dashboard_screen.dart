@@ -1,16 +1,17 @@
 import 'dart:async';
 import '../../constants.dart';
+import 'widgets/debug_data.dart';
+import 'sensors/sensors_data.dart';
+import 'widgets/debug_toggle.dart';
+import 'functions/data_reader.dart';
+import 'sensors/sensors_group.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'components/sensors_data.dart';
-import 'components/sensors_layout.dart';
-import 'functions/data_reader.dart';
+import 'utils/connection_manager.dart';
 import 'functions/debug_log_manager.dart';
-import '../connection/connection_screen.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
-import 'package:rev_glacier_sma_mobile/screens/dashboard/widgets/debug_data.dart';
-import 'package:rev_glacier_sma_mobile/screens/dashboard/widgets/debug_toggle.dart';
 
 class DashboardScreen extends StatefulWidget {
         final FlutterSerialCommunication? flutterSerialCommunicationPlugin;
@@ -35,9 +36,9 @@ class DashboardScreenState extends State<DashboardScreen> {
         EventChannel? messageChannel;
 
         bool isDebugVisible = false;
+        late bool isEmulator;
         final DebugLogManager debugLogManager = DebugLogManager();
 
-        // Variables spécifiques au Stevenson
         late int stevensonTemp;
         late int stevensonHum;
         late int stevensonPress;
@@ -47,36 +48,53 @@ class DashboardScreenState extends State<DashboardScreen> {
                 super.initState();
                 isConnected = widget.isConnected;
                 isInitialLoading = ValueNotifier(true);
+                isEmulator = false;
 
-                messageChannel = widget.flutterSerialCommunicationPlugin?.getSerialMessageListener();
-                widget.flutterSerialCommunicationPlugin?.setDTR(true);
+                // Vérifie si on est sur un émulateur
+                DeviceInfoPlugin().androidInfo.then(
+                        (info) {
+                                isEmulator = !info.isPhysicalDevice;
 
-                // Appelle readMessage AVEC callback pour isInitialLoading
-                readMessage(
-                        messageChannel: messageChannel,
-                        sendMessage: sendMessage,
-                        debugLogManager: debugLogManager,
-                        getSensors: getSensors,
-                        setTemp: (v) => stevensonTemp = v,
-                        setHum: (v) => stevensonHum = v,
-                        setPres: (v) => stevensonPress = v,
-                        onDataReceived: () {
-                                // Callback déclenché dès qu'un capteur valide est détecté
-                                final hasData = [
-                                        ...getSensors(SensorType.internal),
-                                        ...getSensors(SensorType.modbus),
-                                        ...getSensors(SensorType.stevenson),
-                                        ...getSensors(SensorType.stevensonStatus)
-                                ].any((sensor) => sensor.powerStatus != null);
-                                if (hasData) isInitialLoading.value = false;
-                        }
-                );
+                                if (!isEmulator) {
+                                        // Initialiser les éléments réels seulement sur un vrai appareil
+                                        messageChannel = widget.flutterSerialCommunicationPlugin?.getSerialMessageListener();
+                                        widget.flutterSerialCommunicationPlugin?.setDTR(true);
 
-                connectionCheckTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
-                                bool isMessageSent = await sendMessage(communicationMessageAndroid);
-                                if (!isMessageSent && isConnected) {
-                                        setState(() => isConnected = false);
-                                        showDisconnectionDialog();
+                                        readMessage(
+                                                messageChannel: messageChannel,
+                                                sendMessage: sendMessage,
+                                                debugLogManager: debugLogManager,
+                                                getSensors: getSensors,
+                                                setTemp: (v) => stevensonTemp = v,
+                                                setHum: (v) => stevensonHum = v,
+                                                setPres: (v) => stevensonPress = v,
+                                                onDataReceived: () {
+                                                        final hasData = [
+                                                                ...getSensors(SensorType.internal),
+                                                                ...getSensors(SensorType.modbus),
+                                                                ...getSensors(SensorType.stevenson),
+                                                                ...getSensors(SensorType.stevensonStatus)
+                                                        ].any((sensor) => sensor.powerStatus != null);
+                                                        if (hasData) isInitialLoading.value = false;
+                                                }
+                                        );
+
+                                        // Timer de ping toutes les 2s
+                                        connectionCheckTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+                                                        bool isMessageSent = await sendMessage(communicationMessageAndroid);
+                                                        if (!isMessageSent && isConnected) {
+                                                                setState(() => isConnected = false);
+                                                                showDisconnectionDialog(context, () => handleDisconnection(context, widget.flutterSerialCommunicationPlugin));
+                                                        }
+                                                }
+                                        );
+                                }
+                                else {
+                                        // Simule un délai de chargement pour l'UI
+                                        Future.delayed(const Duration(seconds: 1), () {
+                                                        isInitialLoading.value = false;
+                                                }
+                                        );
                                 }
                         }
                 );
@@ -89,126 +107,6 @@ class DashboardScreenState extends State<DashboardScreen> {
                 super.dispose();
         }
 
-        // Methode pour afficher la boîte de dialogue de déconnexion si la connexion est perdue
-        Future<void> showDisconnectionDialog() async {
-                await showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                                backgroundColor: secondaryColor,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                title: const Text(
-                                        "Déconnexion",
-                                        style: TextStyle(color: primaryColor, fontSize: 20, fontWeight: FontWeight.bold)
-                                ),
-                                content: const Text(
-                                        "Connexion perdue. Vérifiez le câble ou la switch hardware du Debug Mod",
-                                        style: TextStyle(color: Colors.white70, fontSize: 16)
-                                ),
-                                actions: [
-                                        TextButton(
-                                                onPressed: () {
-                                                        Navigator.of(context).pop();
-                                                },
-                                                child: const Text(
-                                                        "OK",
-                                                        style: TextStyle(color: primaryColor, fontSize: 16, fontWeight: FontWeight.bold)
-                                                )
-                                        )
-                                ]
-                        )
-                );
-
-                // Déconnecter après la boîte de dialogue
-                await disconnect();
-        }
-
-        // Methode qui force la déconnexion
-        Future<void> disconnect() async {
-                await widget.flutterSerialCommunicationPlugin?.disconnect();
-                setState(() {
-                                isConnected = false;
-                        }
-                );
-
-                // Redirection vers l'écran de connexion
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const ConnectionScreen()));
-        }
-
-        // Méthode pour envoyer un message avec journalisation
-        Future<bool> sendMessage(String message) async {
-                Uint8List data = convertStringToUint8List(message);
-                try {
-                        bool isMessageSent = await widget.flutterSerialCommunicationPlugin?.write(data) ?? false;
-
-                        // Ajouter un log pour l'envoi
-                        debugLogManager.setLogChunk(0, "Message envoyé : $message");
-                        debugLogManager.updateLogs();
-
-                        return isMessageSent;
-                }
-                catch (error) {
-                        debugLogManager.setLogChunk(0, "\nErreur lors de l'envoi : $error\n");
-                        debugLogManager.updateLogs();
-
-                        return false;
-                }
-        }
-
-        // Methode pour convertir une chaîne de caractères en Uint8List pour Arduino
-        Uint8List convertStringToUint8List(String input) {
-                return Uint8List.fromList(input.codeUnits);
-        }
-
-        // Methode pour afficher la boîte de dialogue de déconnexion si l'utilisateur veut quitter
-        Future<void> showDisconnectConfirmationDialog(BuildContext context) async {
-                final shouldDisconnect = await showDialog<bool>(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                                backgroundColor: secondaryColor,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                title: const Text(
-                                        "Déconnexion",
-                                        style: TextStyle(color: primaryColor, fontSize: 20, fontWeight: FontWeight.bold)
-                                ),
-                                content: const Text(
-                                        "Voulez-vous vraiment vous déconnecter ?",
-                                        style: TextStyle(color: Colors.white70, fontSize: 16)
-                                ),
-                                actions: [
-                                        TextButton(
-                                                onPressed: () => Navigator.of(context).pop(false),
-                                                child: const Text(
-                                                        "Non",
-                                                        style: TextStyle(color: Colors.white, fontSize: 16)
-                                                )
-                                        ),
-                                        TextButton(
-                                                onPressed: () async {
-                                                        await widget.flutterSerialCommunicationPlugin?.disconnect();
-                                                        Navigator.of(context).pop(true);
-                                                },
-                                                child: const Text(
-                                                        "Oui",
-                                                        style: TextStyle(color: primaryColor, fontSize: 16, fontWeight: FontWeight.bold)
-                                                )
-                                        )
-                                ]
-                        )
-                ) ?? false;
-
-                // Si l'utilisateur a confirmé la déconnexion affiche un message de succès
-                if (shouldDisconnect) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                        content: Text("Déconnecté avec succès.")
-                                )
-                        );
-
-                        // Redirection vers l'écran de connexion
-                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const ConnectionScreen()));
-                }
-        }
-
         @override
         Widget build(BuildContext context) {
                 return Scaffold(
@@ -219,10 +117,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
                                                 buildConnectionStatus(),
-                                                DebugToggleButton(
-                                                        isDebugVisible: isDebugVisible,
-                                                        onToggle: toggleDebugMode
-                                                )
+                                                DebugToggleButton(isDebugVisible: isDebugVisible, onToggle: toggleDebugMode)
                                         ]
                                 )
                         ),
@@ -230,9 +125,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                                 child: ValueListenableBuilder<bool>(
                                         valueListenable: isInitialLoading,
                                         builder: (context, loading, _) {
-                                                if (loading) {
-                                                        return const Center(child: CircularProgressIndicator());
-                                                }
+                                                if (loading) return const Center(child: CircularProgressIndicator());
 
                                                 return SingleChildScrollView(
                                                         padding: const EdgeInsets.all(defaultPadding),
@@ -240,25 +133,53 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                                 children: [
                                                                         if (isDebugVisible) DebugData(debugLogManager: debugLogManager),
-                                                                        SizedBox(height: defaultPadding),
-                                                                        SensorsDiv(
+                                                                        const SizedBox(height: defaultPadding),
+                                                                        SensorsGroup(
                                                                                 title: "Les Capteurs Internes",
                                                                                 sensors: getSensors(SensorType.internal),
                                                                                 isDebugMode: isDebugVisible
                                                                         ),
-                                                                        SizedBox(height: defaultPadding),
-                                                                        SensorsDiv(
+                                                                        const SizedBox(height: defaultPadding),
+                                                                        SensorsGroup(
                                                                                 title: "Les Capteurs ModBus",
                                                                                 sensors: getSensors(SensorType.modbus),
                                                                                 isDebugMode: isDebugVisible
                                                                         ),
-                                                                        SizedBox(height: defaultPadding),
-                                                                        SensorsDiv(
+                                                                        const SizedBox(height: defaultPadding),
+                                                                        SensorsGroup(
                                                                                 title: "Les Capteurs Stevenson",
                                                                                 sensors: getSensors(SensorType.stevensonStatus).first.powerStatus == 2
                                                                                         ? getSensors(SensorType.stevensonStatus)
                                                                                         : getSensors(SensorType.stevenson),
                                                                                 isDebugMode: isDebugVisible
+                                                                        ),
+                                                                        const SizedBox(height: defaultPadding),
+                                                                        Center(
+                                                                                child: ElevatedButton(
+                                                                                        onPressed: () async {
+                                                                                                final success = await sendCustomMessage("<active>", Uint8List.fromList([0xff, 0xff]));
+                                                                                                // final success = await sendMessage("<active>");
+
+                                                                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                                                                        SnackBar(
+                                                                                                                content: Text(
+                                                                                                                        success
+                                                                                                                                ? "Message envoyé"
+                                                                                                                                : "Échec de l'envoi du message."
+                                                                                                                ),
+                                                                                                                backgroundColor: success ? Colors.green : Colors.red
+                                                                                                        )
+                                                                                                );
+                                                                                        },
+                                                                                        style: ElevatedButton.styleFrom(
+                                                                                                backgroundColor: Colors.blue,
+                                                                                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10)
+                                                                                        ),
+                                                                                        child: const Text(
+                                                                                                "Envoyer Message",
+                                                                                                style: TextStyle(fontSize: 16)
+                                                                                        )
+                                                                                )
                                                                         )
                                                                 ]
                                                         )
@@ -289,5 +210,46 @@ class DashboardScreenState extends State<DashboardScreen> {
                                 isDebugVisible = !isDebugVisible;
                         }
                 );
+        }
+
+        Future<bool> sendMessage(String message) async {
+                if (isEmulator) return false; // Pas d’envoi en mode UI-only
+
+                final Uint8List data = Uint8List.fromList(message.codeUnits);
+
+                try {
+                        final result = await widget.flutterSerialCommunicationPlugin!.write(data);
+                        debugLogManager.setLogChunk(0, "Message envoyé : $message");
+                        debugLogManager.updateLogs();
+                        return result;
+                }
+                catch (error) {
+                        debugLogManager.setLogChunk(0, "Erreur lors de l'envoi : $error");
+                        debugLogManager.updateLogs();
+                        return false;
+                }
+        }
+
+        Future<bool> sendCustomMessage(String prefix, Uint8List message) async {
+
+                // Ajout du préfixe et du suffixe au message
+                final Uint8List data = Uint8List.fromList([
+                                ...prefix.codeUnits,
+                                ...message
+                        ]);
+
+                try {
+                        final result = await widget.flutterSerialCommunicationPlugin!.write(data);
+
+                        debugLogManager.setLogChunk(0, "Message envoyé : ${data.map((byte) => byte.toRadixString(16).padLeft(2, '0')).join()}");
+
+                        debugLogManager.updateLogs();
+                        return result;
+                }
+                catch (error) {
+                        debugLogManager.setLogChunk(0, "Erreur lors de l'envoi : $error");
+                        debugLogManager.updateLogs();
+                        return false;
+                }
         }
 }

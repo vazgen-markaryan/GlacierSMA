@@ -1,14 +1,15 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:intl/intl.dart';
-
-import '../../../constants.dart';
 import 'sensors_data.dart';
+import 'package:intl/intl.dart';
+import '../../../constants.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:flutter/material.dart';
 
-class SensorDetailsDialog extends StatelessWidget {
+// Popup qui affiche les détails d’un capteur spécifique.
+// Affiche la dernière mise à jour et les données disponibles (nom + valeur + icône).
+class SensorDetailsPopup extends StatelessWidget {
+
         final SensorsData sensor;
-
-        const SensorDetailsDialog({super.key, required this.sensor});
+        const SensorDetailsPopup({super.key, required this.sensor});
 
         @override
         Widget build(BuildContext context) {
@@ -25,9 +26,9 @@ class SensorDetailsDialog extends StatelessWidget {
                         ),
                         content: SingleChildScrollView(
                                 child: Column(
-                                        mainAxisSize: MainAxisSize.min,
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
+                                                // Affichage du timestamp formaté
                                                 ValueListenableBuilder<DateTime>(
                                                         valueListenable: sensor.lastUpdated,
                                                         builder: (context, timestamp, _) {
@@ -43,41 +44,50 @@ class SensorDetailsDialog extends StatelessWidget {
                                                         }
                                                 ),
                                                 const SizedBox(height: 8),
+
+                                                // Affichage des données (nom + valeur + icône)
                                                 ValueListenableBuilder<Map<DataMap, dynamic>>(
                                                         valueListenable: sensor.dataNotifier,
                                                         builder: (context, data, _) {
                                                                 return Column(
-                                                                        children: data.entries.map((entry) {
+                                                                        children: data.entries.map(
+                                                                                (entry) {
                                                                                         final key = entry.key;
                                                                                         final value = entry.value;
+
                                                                                         return Padding(
                                                                                                 padding: const EdgeInsets.only(bottom: 12),
                                                                                                 child: Row(
+                                                                                                        crossAxisAlignment: CrossAxisAlignment.center,
                                                                                                         children: [
-                                                                                                                SvgPicture.asset(
-                                                                                                                        key.svgLogo,
-                                                                                                                        height: 30,
-                                                                                                                        width: 30,
-                                                                                                                        colorFilter: const ColorFilter.mode(Colors.white70, BlendMode.srcIn)
-                                                                                                                ),
-                                                                                                                const SizedBox(width: 12),
+                                                                                                                // Icone + nom du capteur
                                                                                                                 Expanded(
-                                                                                                                        child: Text(
-                                                                                                                                "${key.name} :",
-                                                                                                                                style: const TextStyle(
-                                                                                                                                        color: Colors.white70,
-                                                                                                                                        fontSize: 16
-                                                                                                                                )
+                                                                                                                        child: Row(
+                                                                                                                                children: [
+                                                                                                                                        SvgPicture.asset(
+                                                                                                                                                key.svgLogo,
+                                                                                                                                                height: 25,
+                                                                                                                                                width: 25,
+                                                                                                                                                colorFilter: const ColorFilter.mode(Colors.white70, BlendMode.srcIn)
+                                                                                                                                        ),
+                                                                                                                                        const SizedBox(width: 10),
+                                                                                                                                        Flexible(
+                                                                                                                                                child: Text(
+                                                                                                                                                        "${key.name}: ",
+                                                                                                                                                        style: const TextStyle(color: Colors.white70, fontSize: 15),
+                                                                                                                                                        overflow: TextOverflow.ellipsis
+                                                                                                                                                )
+                                                                                                                                        )
+                                                                                                                                ]
                                                                                                                         )
                                                                                                                 ),
-                                                                                                                const SizedBox(width: 12),
+
+                                                                                                                // Valeur alignée à droite
                                                                                                                 Text(
                                                                                                                         value.toString(),
-                                                                                                                        style: const TextStyle(
-                                                                                                                                color: Colors.white70,
-                                                                                                                                fontSize: 16
-                                                                                                                        ),
-                                                                                                                        textAlign: TextAlign.right
+                                                                                                                        style: const TextStyle(color: Colors.white70, fontSize: 15),
+                                                                                                                        textAlign: TextAlign.right,
+                                                                                                                        overflow: TextOverflow.ellipsis
                                                                                                                 )
                                                                                                         ]
                                                                                                 )

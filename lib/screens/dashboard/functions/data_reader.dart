@@ -1,11 +1,11 @@
 import 'dart:math';
 import 'data_parser.dart';
-import '../utils/dashboard_utils.dart';
 import '../../../constants.dart';
+import '../utils/dashboard_utils.dart';
 import 'package:flutter/services.dart';
-import '../components/sensors_data.dart';
+import '../sensors/sensors_data.dart';
+import '../sensors/sensor_status_updater.dart';
 import '../functions/debug_log_manager.dart';
-import 'package:rev_glacier_sma_mobile/screens/dashboard/functions/sensor_status_updater.dart';
 
 void readMessage({
         required EventChannel? messageChannel,
@@ -21,7 +21,8 @@ void readMessage({
         String buffer = '';
         bool isCapturing = false;
 
-        messageChannel?.receiveBroadcastStream().listen((event) {
+        messageChannel?.receiveBroadcastStream().listen(
+                (event) {
                         if (event is Uint8List) {
                                 final chunk = String.fromCharCodes(event);
                                 buffer += chunk;
@@ -82,14 +83,15 @@ void readMessage({
                                                                 getSensors(SensorType.internal),
                                                                 getSensors(SensorType.modbus),
                                                                 getSensors(SensorType.stevenson)
-                                                        ]);
+                                                        ]
+                                                );
                                         }
 
                                         if (rawData.contains("<status>")) {
                                                 updateSensorsData(rawData, getSensors, communicationMessageStatus, setTemp, setHum, setPres);
                                         }
 
-                                        // Vérifie s’il y a au moins un capteur actif
+                                        // Déclenche le callback d'arrêt de chargement s'il y a au moins un capteur actif
                                         final hasData = [
                                                 ...getSensors(SensorType.internal),
                                                 ...getSensors(SensorType.modbus),

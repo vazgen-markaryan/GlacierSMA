@@ -1,6 +1,6 @@
 import 'dart:math';
 import '../../../constants.dart';
-import '../components/sensors_data.dart';
+import 'sensors_data.dart';
 
 void updateSensorsData(
         String rawData,
@@ -21,10 +21,12 @@ void updateSensorsData(
 
                         if (headers.contains(sensor.header!.toLowerCase())) {
                                 sensor.powerStatus = values[headers.indexOf(sensor.header!.toLowerCase())];
-                        }
-                        else {
+                        } else {
                                 sensor.powerStatus = null;
                         }
+
+                        // Force un notifyListeners pour que l'UI réagisse au changement
+                        sensor.dataNotifier.value = sensor.dataNotifier.value;
                 }
         }
 
