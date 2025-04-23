@@ -1,11 +1,11 @@
 import 'dart:math';
 import 'data_parser.dart';
 import '../../../constants.dart';
-import '../utils/dashboard_utils.dart';
-import 'package:flutter/services.dart';
 import '../sensors/sensors_data.dart';
+import 'package:flutter/services.dart';
+import '../utils/dashboard_swtiches.dart';
 import '../sensors/sensor_status_updater.dart';
-import '../functions/debug_log_manager.dart';
+import '../debug_menu/debug_log_manager.dart';
 
 void readMessage({
         required EventChannel? messageChannel,

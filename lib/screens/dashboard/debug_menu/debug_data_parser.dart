@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../functions/debug_log_manager.dart';
+import 'debug_log_manager.dart';
 
 class DebugData extends StatelessWidget {
         final DebugLogManager debugLogManager;

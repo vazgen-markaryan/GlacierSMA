@@ -1,5 +1,5 @@
-import '../utils/dashboard_utils.dart';
 import '../sensors/sensors_data.dart';
+import '../utils/dashboard_swtiches.dart';
 
 void populateSensorData(String rawData, List<List<SensorsData>> sensorGroups) {
         final lines = rawData.split('\n');
