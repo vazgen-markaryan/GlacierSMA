@@ -32,14 +32,51 @@ class MyApp extends StatelessWidget {
                                         debugShowCheckedModeBanner: false,
                                         title: 'Glacier SMA',
                                         theme: ThemeData.dark().copyWith(
+                                                primaryColor: primaryColor,
                                                 scaffoldBackgroundColor: backgroundColor,
-                                                textTheme: ThemeData.dark().textTheme.apply(bodyColor: Colors.white),
-                                                canvasColor: secondaryColor
+                                                canvasColor: secondaryColor,
+                                                colorScheme: const ColorScheme.dark().copyWith(
+                                                        primary: primaryColor,
+                                                        secondary: secondaryColor,
+                                                        surface: backgroundColor,
+                                                        onPrimary: Colors.white,
+                                                        onSecondary: Colors.white,
+                                                        onSurface: Colors.white,
+                                                        onError: Colors.white
+                                                ),
+                                                textTheme: ThemeData.dark().textTheme.apply(
+                                                        bodyColor: Colors.white,
+                                                        displayColor: Colors.white
+                                                ),
+                                                appBarTheme: const AppBarTheme(
+                                                        backgroundColor: secondaryColor,
+                                                        iconTheme: IconThemeData(color: Colors.white),
+                                                        titleTextStyle: TextStyle(
+                                                                color: Colors.white,
+                                                                fontSize: 20,
+                                                                fontWeight: FontWeight.bold
+                                                        )
+                                                ),
+                                                elevatedButtonTheme: ElevatedButtonThemeData(
+                                                        style: ElevatedButton.styleFrom(
+                                                                backgroundColor: primaryColor,
+                                                                foregroundColor: Colors.white,
+                                                                textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+                                                        )
+                                                ),
+                                                snackBarTheme: SnackBarThemeData(
+                                                        backgroundColor: secondaryColor,
+                                                        contentTextStyle: const TextStyle(color: Colors.white),
+                                                        actionTextColor: primaryColor
+                                                )
                                         ),
+
                                         home: areWeInDevelopingMode
                                                 ? const DashboardScreen(flutterSerialCommunicationPlugin: null, isConnected: false, connectedDevices: [])
                                                 : const ConnectionScreen()
                                 );
+
                         }
                 );
         }
