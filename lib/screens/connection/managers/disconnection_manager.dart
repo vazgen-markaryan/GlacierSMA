@@ -1,6 +1,6 @@
 import '../../../constants.dart';
 import 'package:flutter/material.dart';
-import '../../connection/connection_screen.dart';
+import '../connection_screen.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
 
 Future<bool> showDisconnectPopup({
@@ -50,10 +50,46 @@ Future<bool> showDisconnectPopup({
         return true;
 }
 
+// Future<void> showLostConnectionPopup({
+//         required BuildContext context,
+//         required FlutterSerialCommunication? plugin,
+// }) async {
+//         await showDialog(
+//                 context: context,
+//                 builder: (context) => AlertDialog(
+//                         backgroundColor: secondaryColor,
+//                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+//                         title: const Text(
+//                                 "Déconnexion",
+//                                 style: TextStyle(color: primaryColor, fontSize: 20, fontWeight: FontWeight.bold),
+//                         ),
+//                         content: const Text(
+//                                 "Connexion perdue. Vérifiez le câble ou la switch hardware du Debug Mod.",
+//                                 style: TextStyle(color: Colors.white70, fontSize: 16),
+//                         ),
+//                         actions: [
+//                                 TextButton(
+//                                         onPressed: () => Navigator.of(context).pop(),
+//                                         child: const Text("OK", style: TextStyle(color: primaryColor)),
+//                                 )
+//                         ],
+//                 ),
+//         );
+//
+//         await plugin?.disconnect();
+//         Navigator.pushReplacement(
+//                 context,
+//                 MaterialPageRoute(builder: (context) => const ConnectionScreen()),
+//         );
+// }
+
 Future<void> showLostConnectionPopup({
         required BuildContext context,
         required FlutterSerialCommunication? plugin,
+        required Duration elapsedTime
 }) async {
+        final formatted = elapsedTime.toString().split('.').first; // hh:mm:ss
+
         await showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
@@ -61,24 +97,24 @@ Future<void> showLostConnectionPopup({
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         title: const Text(
                                 "Déconnexion",
-                                style: TextStyle(color: primaryColor, fontSize: 20, fontWeight: FontWeight.bold),
+                                style: TextStyle(color: primaryColor, fontSize: 20, fontWeight: FontWeight.bold)
                         ),
-                        content: const Text(
-                                "Connexion perdue. Vérifiez le câble ou la switch hardware du Debug Mod.",
-                                style: TextStyle(color: Colors.white70, fontSize: 16),
+                        content: Text(
+                                "Connexion perdue après $formatted.\nVérifiez le câble ou la switch hardware du Debug Mod.",
+                                style: const TextStyle(color: Colors.white70, fontSize: 16)
                         ),
                         actions: [
                                 TextButton(
                                         onPressed: () => Navigator.of(context).pop(),
-                                        child: const Text("OK", style: TextStyle(color: primaryColor)),
+                                        child: const Text("OK", style: TextStyle(color: primaryColor))
                                 )
-                        ],
-                ),
+                        ]
+                )
         );
 
         await plugin?.disconnect();
         Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const ConnectionScreen()),
+                MaterialPageRoute(builder: (_) => const ConnectionScreen())
         );
 }

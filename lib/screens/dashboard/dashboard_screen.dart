@@ -6,12 +6,13 @@ import 'sensors/sensors_group.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'debug_menu/debug_toggle.dart';
-import 'utils/disconnection_manager.dart';
 import 'debug_menu/debug_data_parser.dart';
 import 'debug_menu/debug_log_manager.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import '../connection/managers/disconnection_manager.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
+import 'package:rev_glacier_sma_mobile/screens/dashboard/battery/battery_indicator.dart';
 
 class DashboardScreen extends StatefulWidget {
         final FlutterSerialCommunication? flutterSerialCommunicationPlugin;
@@ -30,18 +31,24 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class DashboardScreenState extends State<DashboardScreen> {
+        // Connexion à l'appareil
         late bool isConnected;
         late final ValueNotifier<bool> isInitialLoading;
         Timer? connectionCheckTimer;
         EventChannel? messageChannel;
 
+        // Debug
         bool isDebugVisible = false;
         late bool isEmulator;
         final DebugLogManager debugLogManager = DebugLogManager();
 
+        // Capteurs stevenson
         late int stevensonTemp;
         late int stevensonHum;
         late int stevensonPress;
+
+        // Batterie
+        final ValueNotifier<double?> batteryVoltage = ValueNotifier(null);
 
         @override
         void initState() {
@@ -50,12 +57,18 @@ class DashboardScreenState extends State<DashboardScreen> {
                 isInitialLoading = ValueNotifier(true);
                 isEmulator = false;
 
+                //TODO TEMPORAIRE
+                final Stopwatch connectionTimer = Stopwatch();
+
                 // Vérifie si on est sur un émulateur
                 DeviceInfoPlugin().androidInfo.then(
                         (info) {
                                 isEmulator = !info.isPhysicalDevice;
 
                                 if (!isEmulator) {
+                                        //TODO TEMPORAIRE
+                                        connectionTimer.start();
+
                                         // Initialiser les éléments réels seulement sur un vrai appareil
                                         messageChannel = widget.flutterSerialCommunicationPlugin?.getSerialMessageListener();
                                         widget.flutterSerialCommunicationPlugin?.setDTR(true);
@@ -76,7 +89,8 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                                 ...getSensors(SensorType.stevensonStatus)
                                                         ].any((sensor) => sensor.powerStatus != null);
                                                         if (hasData) isInitialLoading.value = false;
-                                                }
+                                                },
+                                                batteryVoltage: batteryVoltage
                                         );
 
                                         // Timer de ping toutes les 2s
@@ -84,9 +98,16 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                         final isMessageSent = await sendMessage(communicationMessageAndroid);
                                                         if (!isMessageSent && isConnected) {
                                                                 setState(() => isConnected = false);
+                                                                // await showLostConnectionPopup(
+                                                                //         context: context,
+                                                                //         plugin: widget.flutterSerialCommunicationPlugin
+                                                                // );
+
+                                                                //TODO TEMPORAIRE
                                                                 await showLostConnectionPopup(
                                                                         context: context,
-                                                                        plugin: widget.flutterSerialCommunicationPlugin
+                                                                        plugin: widget.flutterSerialCommunicationPlugin,
+                                                                        elapsedTime: connectionTimer.elapsed
                                                                 );
                                                         }
                                                 }
@@ -137,15 +158,17 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                         buildConnectionStatus(),
                                                         Row(
                                                                 children: [
-                                                                        IconButton(
-                                                                                tooltip: "Déconnexion",
-                                                                                icon: const Icon(Icons.logout, color: Colors.white),
-                                                                                onPressed: () => showDisconnectPopup(
-                                                                                        context: context,
-                                                                                        plugin: widget.flutterSerialCommunicationPlugin,
-                                                                                        requireConfirmation: true
-                                                                                )
-                                                                        ),
+                                                                        BatteryIndicator(voltageNotifier: batteryVoltage),
+                                                                        const SizedBox(width: 12),
+                                                                        // IconButton(
+                                                                        //         tooltip: "Déconnexion",
+                                                                        //         icon: const Icon(Icons.logout, color: Colors.white),
+                                                                        //         onPressed: () => showDisconnectPopup(
+                                                                        //                 context: context,
+                                                                        //                 plugin: widget.flutterSerialCommunicationPlugin,
+                                                                        //                 requireConfirmation: true
+                                                                        //         )
+                                                                        // ),
                                                                         DebugToggleButton(
                                                                                 isDebugVisible: isDebugVisible,
                                                                                 onToggle: toggleDebugMode
@@ -167,19 +190,25 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                                         children: [
                                                                                 if (isDebugVisible) DebugData(debugLogManager: debugLogManager),
+
                                                                                 const SizedBox(height: defaultPadding),
+
                                                                                 SensorsGroup(
                                                                                         title: "Les Capteurs Internes",
                                                                                         sensors: getSensors(SensorType.internal),
                                                                                         isDebugMode: isDebugVisible
                                                                                 ),
+
                                                                                 const SizedBox(height: defaultPadding),
+
                                                                                 SensorsGroup(
                                                                                         title: "Les Capteurs ModBus",
                                                                                         sensors: getSensors(SensorType.modbus),
                                                                                         isDebugMode: isDebugVisible
                                                                                 ),
+
                                                                                 const SizedBox(height: defaultPadding),
+
                                                                                 SensorsGroup(
                                                                                         title: "Les Capteurs Stevenson",
                                                                                         sensors: getSensors(SensorType.stevensonStatus).first.powerStatus == 2
@@ -187,34 +216,10 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                                                                 : getSensors(SensorType.stevenson),
                                                                                         isDebugMode: isDebugVisible
                                                                                 ),
-                                                                                const SizedBox(height: defaultPadding),
-                                                                                Center(
-                                                                                        child: ElevatedButton(
-                                                                                                onPressed: () async {
-                                                                                                        final success = await sendCustomMessage("<active>", Uint8List.fromList([0xff, 0xff]));
-                                                                                                        // final success = await sendMessage("<active>");
 
-                                                                                                        ScaffoldMessenger.of(context).showSnackBar(
-                                                                                                                SnackBar(
-                                                                                                                        content: Text(
-                                                                                                                                success
-                                                                                                                                        ? "Message envoyé"
-                                                                                                                                        : "Échec de l'envoi du message."
-                                                                                                                        ),
-                                                                                                                        backgroundColor: success ? Colors.green : Colors.red
-                                                                                                                )
-                                                                                                        );
-                                                                                                },
-                                                                                                style: ElevatedButton.styleFrom(
-                                                                                                        backgroundColor: Colors.blue,
-                                                                                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10)
-                                                                                                ),
-                                                                                                child: const Text(
-                                                                                                        "Envoyer Message",
-                                                                                                        style: TextStyle(fontSize: 16)
-                                                                                                )
-                                                                                        )
-                                                                                )
+                                                                                const SizedBox(height: defaultPadding),
+
+                                                                                SendMessageButton(sendCustomMessage: sendCustomMessage)
                                                                         ]
                                                                 )
                                                         );
@@ -286,5 +291,47 @@ class DashboardScreenState extends State<DashboardScreen> {
                         debugLogManager.updateLogs();
                         return false;
                 }
+        }
+
+
+}
+
+//TEMPORARY
+class SendMessageButton extends StatelessWidget {
+        final Future<bool> Function(String, Uint8List) sendCustomMessage;
+
+        const SendMessageButton({super.key, required this.sendCustomMessage});
+
+        @override
+        Widget build(BuildContext context) {
+                return Column(
+                        children: [
+                                const SizedBox(height: defaultPadding),
+                                Center(
+                                        child: ElevatedButton(
+                                                onPressed: () async {
+                                                        final success = await sendCustomMessage("<active>", Uint8List.fromList([0xff, 0xff]));
+
+                                                        ScaffoldMessenger.of(context).showSnackBar(
+                                                                SnackBar(
+                                                                        content: Text(
+                                                                                success ? "Message envoyé" : "Échec de l'envoi du message."
+                                                                        ),
+                                                                        backgroundColor: success ? Colors.green : Colors.red
+                                                                )
+                                                        );
+                                                },
+                                                style: ElevatedButton.styleFrom(
+                                                        backgroundColor: Colors.blue,
+                                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10)
+                                                ),
+                                                child: const Text(
+                                                        "Envoyer Message",
+                                                        style: TextStyle(fontSize: 16)
+                                                )
+                                        )
+                                )
+                        ]
+                );
         }
 }

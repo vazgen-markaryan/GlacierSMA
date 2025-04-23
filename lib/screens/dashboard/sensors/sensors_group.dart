@@ -10,10 +10,11 @@ class SensorsGroupNotifier extends ValueNotifier<int> {
         SensorsGroupNotifier(List<SensorsData> sensors) : super(0) {
                 for (var sensor in sensors) {
                         sensor.dataNotifier.addListener(onChange);
+                        sensor.powerStatusNotifier.addListener(onChange);
                 }
         }
 
-        void onChange() => value++; // Déclenche un rebuild
+        void onChange() => value++;
 }
 
 // Widget principal qui affiche un groupe de capteurs avec un titre et une grille des capteurs visibles.

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'functions/connection_functions.dart';
+import 'managers/connection_manager.dart';
 import 'package:rev_glacier_sma_mobile/constants.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
@@ -22,7 +22,7 @@ class ConnectionScreenState extends State<ConnectionScreen> {
                         appBar: AppBar(title: const Center(child: Text('Glacier SMA Connexion'))),
                         body: LayoutBuilder(
                                 builder: (context, constraints) {
-                                        bool isHorizontal = constraints.maxWidth > 600;
+                                        bool isHorizontal = constraints.maxWidth > 700;
                                         // Si l'écran est horizontal, on affiche la section Bluetooth à gauche et la section câble à droite
                                         return Container(
                                                 padding: const EdgeInsets.all(16.0),

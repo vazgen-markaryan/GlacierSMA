@@ -25,18 +25,24 @@ class DataMap {
 
 class SensorsData {
         String? svgIcon, title, header, temp, pres, hum, antenna;
-        int? powerStatus;
         Color? color;
 
         final ValueNotifier<Map<DataMap, dynamic>> dataNotifier;
+        final ValueNotifier<int?> powerStatusNotifier;
 
-        Map<DataMap, dynamic> get data => dataNotifier.value;
+        int? get powerStatus => powerStatusNotifier.value;
+        set powerStatus(int? value) => powerStatusNotifier.value = value;
 
         SensorsData({
-                this.svgIcon, this.title, this.powerStatus, this.color,
-                this.header, this.temp, this.pres, this.hum, this.antenna,
-                required Map<DataMap, dynamic> data
-        }) : dataNotifier = ValueNotifier(data);
+                this.svgIcon, this.title, this.color,
+                this.header, this.temp, this.pres,
+                this.hum, this.antenna,
+                required Map<DataMap, dynamic> data,
+                int? powerStatus
+        }) : dataNotifier = ValueNotifier(data),
+                powerStatusNotifier = ValueNotifier(powerStatus);
+
+        Map<DataMap, dynamic> get data => dataNotifier.value;
 
         void updateData(DataMap key, dynamic newValue) {
                 final updated = Map<DataMap, dynamic>.from(dataNotifier.value);

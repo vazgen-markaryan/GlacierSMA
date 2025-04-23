@@ -3,6 +3,7 @@ import 'data_parser.dart';
 import '../../../constants.dart';
 import '../sensors/sensors_data.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
 import '../utils/dashboard_swtiches.dart';
 import '../sensors/sensor_status_updater.dart';
 import '../debug_menu/debug_log_manager.dart';
@@ -15,7 +16,8 @@ void readMessage({
         required void Function(int) setTemp,
         required void Function(int) setHum,
         required void Function(int) setPres,
-        required void Function() onDataReceived
+        required void Function() onDataReceived,
+        required ValueNotifier<double?> batteryVoltage
 }) {
         sendMessage(communicationMessageAndroid);
         String buffer = '';
@@ -60,6 +62,14 @@ void readMessage({
                                                 }
 
                                                 if (rawData.contains("<data>")) {
+                                                        final batteryIndex = headers.indexWhere((h) => h.toLowerCase() == "battery_voltage".toLowerCase());
+                                                        if (batteryIndex != -1) {
+                                                                final voltage = double.tryParse(values[batteryIndex]);
+                                                                if (voltage != null) {
+                                                                        batteryVoltage.value = voltage;
+                                                                }
+                                                        }
+
                                                         final dataLog = "\nValeurs:\n" +
                                                                 headers.asMap().entries.map((entry) {
                                                                                 final index = entry.key;
