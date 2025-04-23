@@ -3,39 +3,49 @@ import 'package:flutter/material.dart';
 import '../../connection/connection_screen.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
 
-Future<void> showDisconnectionDialog(
-        BuildContext context,
-        Future<void> Function() onDisconnect
-) async {
-        await showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                        backgroundColor: secondaryColor,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        title: const Text(
-                                "Déconnexion",
-                                style: TextStyle(color: primaryColor, fontSize: 20, fontWeight: FontWeight.bold)
-                        ),
-                        content: const Text(
-                                "Connexion perdue. Vérifiez le câble ou la switch hardware du Debug Mod",
-                                style: TextStyle(color: Colors.white70, fontSize: 16)
-                        ),
-                        actions: [
-                                TextButton(
-                                        onPressed: () => Navigator.of(context).pop(),
-                                        child: const Text("OK", style: TextStyle(color: primaryColor))
-                                )
-                        ]
-                )
-        );
+Future<bool> showDisconnectPopup({
+        required BuildContext context,
+        required FlutterSerialCommunication? plugin,
+        bool requireConfirmation = false
+}) async {
+        if (requireConfirmation) {
+                final result = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                                backgroundColor: secondaryColor,
+                                title: const Text("Déconnexion", style: TextStyle(color: primaryColor)),
+                                content: const Text("Voulez-vous vraiment vous déconnecter ?"),
+                                actions: [
+                                        TextButton(
+                                                onPressed: () => Navigator.of(context).pop(false),
+                                                child: const Text("Non", style: TextStyle(color: Colors.white))
+                                        ),
+                                        TextButton(
+                                                onPressed: () => Navigator.of(context).pop(true),
+                                                child: const Text("Oui", style: TextStyle(color: primaryColor))
+                                        )
+                                ]
+                        )
+                );
 
-        await onDisconnect();
-}
+                if (result == true) {
+                        await plugin?.disconnect();
+                        Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => const ConnectionScreen())
+                        );
+                        return true;
+                }
+                else {
+                        return false;
+                }
+        }
 
-Future<void> handleDisconnection(
-        BuildContext context,
-        FlutterSerialCommunication? plugin
-) async {
+        // Appel automatique en cas de déconnexion (sans confirmation)
         await plugin?.disconnect();
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const ConnectionScreen()));
+        Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const ConnectionScreen())
+        );
+        return true;
 }

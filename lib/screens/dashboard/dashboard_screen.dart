@@ -84,7 +84,11 @@ class DashboardScreenState extends State<DashboardScreen> {
                                                         bool isMessageSent = await sendMessage(communicationMessageAndroid);
                                                         if (!isMessageSent && isConnected) {
                                                                 setState(() => isConnected = false);
-                                                                showDisconnectionDialog(context, () => handleDisconnection(context, widget.flutterSerialCommunicationPlugin));
+                                                                await showDisconnectPopup(
+                                                                        context: context,
+                                                                        plugin: widget.flutterSerialCommunicationPlugin,
+                                                                        requireConfirmation: false // Déconnexion automatique
+                                                                );
                                                         }
                                                 }
                                         );
@@ -107,84 +111,116 @@ class DashboardScreenState extends State<DashboardScreen> {
                 super.dispose();
         }
 
-        @override
         Widget build(BuildContext context) {
-                return Scaffold(
-                        appBar: AppBar(
-                                automaticallyImplyLeading: false,
-                                backgroundColor: secondaryColor,
-                                title: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                                buildConnectionStatus(),
-                                                DebugToggleButton(isDebugVisible: isDebugVisible, onToggle: toggleDebugMode)
-                                        ]
-                                )
-                        ),
-                        body: SafeArea(
-                                child: ValueListenableBuilder<bool>(
-                                        valueListenable: isInitialLoading,
-                                        builder: (context, loading, _) {
-                                                if (loading) return const Center(child: CircularProgressIndicator());
+                return PopScope(
+                        canPop: false,
+                        onPopInvoked: (didPop) async {
+                                // Si l'utilisateur a appuyé sur le bouton retour physique
+                                if (didPop) return;
 
-                                                return SingleChildScrollView(
-                                                        padding: const EdgeInsets.all(defaultPadding),
-                                                        child: Column(
-                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                final shouldLeave = await showDisconnectPopup(
+                                        context: context,
+                                        plugin: widget.flutterSerialCommunicationPlugin,
+                                        requireConfirmation: true
+                                );
+
+                                if (shouldLeave) {
+                                        Navigator.of(context).pop(); // Ferme l'écran
+                                }
+                        },
+                        child: Scaffold(
+                                appBar: AppBar(
+                                        automaticallyImplyLeading: false,
+                                        backgroundColor: secondaryColor,
+                                        title: Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                        buildConnectionStatus(),
+                                                        Row(
                                                                 children: [
-                                                                        if (isDebugVisible) DebugData(debugLogManager: debugLogManager),
-                                                                        const SizedBox(height: defaultPadding),
-                                                                        SensorsGroup(
-                                                                                title: "Les Capteurs Internes",
-                                                                                sensors: getSensors(SensorType.internal),
-                                                                                isDebugMode: isDebugVisible
-                                                                        ),
-                                                                        const SizedBox(height: defaultPadding),
-                                                                        SensorsGroup(
-                                                                                title: "Les Capteurs ModBus",
-                                                                                sensors: getSensors(SensorType.modbus),
-                                                                                isDebugMode: isDebugVisible
-                                                                        ),
-                                                                        const SizedBox(height: defaultPadding),
-                                                                        SensorsGroup(
-                                                                                title: "Les Capteurs Stevenson",
-                                                                                sensors: getSensors(SensorType.stevensonStatus).first.powerStatus == 2
-                                                                                        ? getSensors(SensorType.stevensonStatus)
-                                                                                        : getSensors(SensorType.stevenson),
-                                                                                isDebugMode: isDebugVisible
-                                                                        ),
-                                                                        const SizedBox(height: defaultPadding),
-                                                                        Center(
-                                                                                child: ElevatedButton(
-                                                                                        onPressed: () async {
-                                                                                                final success = await sendCustomMessage("<active>", Uint8List.fromList([0xff, 0xff]));
-                                                                                                // final success = await sendMessage("<active>");
-
-                                                                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                                                                        SnackBar(
-                                                                                                                content: Text(
-                                                                                                                        success
-                                                                                                                                ? "Message envoyé"
-                                                                                                                                : "Échec de l'envoi du message."
-                                                                                                                ),
-                                                                                                                backgroundColor: success ? Colors.green : Colors.red
-                                                                                                        )
-                                                                                                );
-                                                                                        },
-                                                                                        style: ElevatedButton.styleFrom(
-                                                                                                backgroundColor: Colors.blue,
-                                                                                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10)
-                                                                                        ),
-                                                                                        child: const Text(
-                                                                                                "Envoyer Message",
-                                                                                                style: TextStyle(fontSize: 16)
-                                                                                        )
+                                                                        IconButton(
+                                                                                tooltip: "Déconnexion",
+                                                                                icon: const Icon(Icons.logout, color: Colors.white),
+                                                                                onPressed: () => showDisconnectPopup(
+                                                                                        context: context,
+                                                                                        plugin: widget.flutterSerialCommunicationPlugin,
+                                                                                        requireConfirmation: true
                                                                                 )
+                                                                        ),
+                                                                        DebugToggleButton(
+                                                                                isDebugVisible: isDebugVisible,
+                                                                                onToggle: toggleDebugMode
                                                                         )
                                                                 ]
                                                         )
-                                                );
-                                        }
+                                                ]
+                                        )
+                                ),
+                                body: SafeArea(
+                                        child: ValueListenableBuilder<bool>(
+                                                valueListenable: isInitialLoading,
+                                                builder: (context, loading, _) {
+                                                        if (loading) return const Center(child: CircularProgressIndicator());
+
+                                                        return SingleChildScrollView(
+                                                                padding: const EdgeInsets.all(defaultPadding),
+                                                                child: Column(
+                                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                                        children: [
+                                                                                if (isDebugVisible) DebugData(debugLogManager: debugLogManager),
+                                                                                const SizedBox(height: defaultPadding),
+                                                                                SensorsGroup(
+                                                                                        title: "Les Capteurs Internes",
+                                                                                        sensors: getSensors(SensorType.internal),
+                                                                                        isDebugMode: isDebugVisible
+                                                                                ),
+                                                                                const SizedBox(height: defaultPadding),
+                                                                                SensorsGroup(
+                                                                                        title: "Les Capteurs ModBus",
+                                                                                        sensors: getSensors(SensorType.modbus),
+                                                                                        isDebugMode: isDebugVisible
+                                                                                ),
+                                                                                const SizedBox(height: defaultPadding),
+                                                                                SensorsGroup(
+                                                                                        title: "Les Capteurs Stevenson",
+                                                                                        sensors: getSensors(SensorType.stevensonStatus).first.powerStatus == 2
+                                                                                                ? getSensors(SensorType.stevensonStatus)
+                                                                                                : getSensors(SensorType.stevenson),
+                                                                                        isDebugMode: isDebugVisible
+                                                                                ),
+                                                                                const SizedBox(height: defaultPadding),
+                                                                                Center(
+                                                                                        child: ElevatedButton(
+                                                                                                onPressed: () async {
+                                                                                                        final success = await sendCustomMessage("<active>", Uint8List.fromList([0xff, 0xff]));
+                                                                                                        // final success = await sendMessage("<active>");
+
+                                                                                                        ScaffoldMessenger.of(context).showSnackBar(
+                                                                                                                SnackBar(
+                                                                                                                        content: Text(
+                                                                                                                                success
+                                                                                                                                        ? "Message envoyé"
+                                                                                                                                        : "Échec de l'envoi du message."
+                                                                                                                        ),
+                                                                                                                        backgroundColor: success ? Colors.green : Colors.red
+                                                                                                                )
+                                                                                                        );
+                                                                                                },
+                                                                                                style: ElevatedButton.styleFrom(
+                                                                                                        backgroundColor: Colors.blue,
+                                                                                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10)
+                                                                                                ),
+                                                                                                child: const Text(
+                                                                                                        "Envoyer Message",
+                                                                                                        style: TextStyle(fontSize: 16)
+                                                                                                )
+                                                                                        )
+                                                                                )
+                                                                        ]
+                                                                )
+                                                        );
+                                                }
+                                        )
                                 )
                         )
                 );
