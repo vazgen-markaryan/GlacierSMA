@@ -81,13 +81,12 @@ class DashboardScreenState extends State<DashboardScreen> {
 
                                         // Timer de ping toutes les 2s
                                         connectionCheckTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
-                                                        bool isMessageSent = await sendMessage(communicationMessageAndroid);
+                                                        final isMessageSent = await sendMessage(communicationMessageAndroid);
                                                         if (!isMessageSent && isConnected) {
                                                                 setState(() => isConnected = false);
-                                                                await showDisconnectPopup(
+                                                                await showLostConnectionPopup(
                                                                         context: context,
-                                                                        plugin: widget.flutterSerialCommunicationPlugin,
-                                                                        requireConfirmation: false // Déconnexion automatique
+                                                                        plugin: widget.flutterSerialCommunicationPlugin
                                                                 );
                                                         }
                                                 }

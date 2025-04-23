@@ -18,7 +18,7 @@ class DebugToggleButton extends StatelessWidget {
                                 onTap: onToggle,
                                 child: Row(
                                         children: [
-                                                const Text("Debug", style: TextStyle(fontSize: 16, color: Colors.white)),
+                                                const Text("D", style: TextStyle(fontSize: 16, color: Colors.white)), //DEBUG SWITCH
                                                 const SizedBox(width: 8),
                                                 Container(
                                                         width: 60,
