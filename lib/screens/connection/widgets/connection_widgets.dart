@@ -1,26 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:rev_glacier_sma_mobile/constants.dart';
 
-// TODO: Ajouter la fonctionnalité de connexion Bluetooth quand elle sera disponible via Hardware
 // Widget qui affiche la section de connexion Bluetooth
 Widget buildBluetoothSection(BuildContext context) {
         return GestureDetector(
                 onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                        content: Center(
-                                                child: Text(
-                                                        "Connexion Bluetooth à venir",
-                                                        style: const TextStyle(color: Colors.black, fontSize: 18),
-                                                        textAlign: TextAlign.center
-                                                )
-                                        ),
-                                        backgroundColor: Colors.white,
-                                        behavior: SnackBarBehavior.floating,
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                        duration: const Duration(seconds: 2)
-                                )
-                        );
+                        // TODO: Ajouter la fonctionnalité de connexion Bluetooth quand elle sera disponible via Hardware
                 },
                 child: Card(
                         color: secondaryColor,
