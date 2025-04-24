@@ -68,7 +68,7 @@ Future<void> showLostConnectionPopup({
                                 style: TextStyle(color: primaryColor, fontSize: 20, fontWeight: FontWeight.bold)
                         ),
                         content: Text(
-                                "Connexion perdue après $formatted.\nVérifiez le câble ou la switch hardware du Debug Mod.",
+                                "Connexion perdue après: \n$formatted\n\nVérifiez le câble ou la switch hardware du Debug Mod.",
                                 style: const TextStyle(color: Colors.white70, fontSize: 16)
                         ),
                         actions: [

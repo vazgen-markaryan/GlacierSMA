@@ -64,7 +64,12 @@ class SensorsGroup extends StatelessWidget {
                         width: double.infinity,
                         height: 85,
                         child: GestureDetector(
-                                onTap: sensor.data.isNotEmpty ? () => showSensorPopup(context, sensor) : null,
+                                onTapDown: (sensor.data.isNotEmpty && sensor.title != "SD Card")
+                                        ? (details) {
+                                                final tapPosition = details.globalPosition;
+                                                showSensorPopup(context, sensor, tapPosition);
+                                        }
+                                        : null, // Si c'est la carte SD, on ne peut pas clicker
                                 child: Material(
                                         borderRadius: BorderRadius.circular(10),
                                         child: Stack(
@@ -138,11 +143,31 @@ class SensorsGroup extends StatelessWidget {
                 }
         }
 
-        // Affiche la popup de détails du capteur
-        void showSensorPopup(BuildContext context, SensorsData sensor) {
-                showDialog(
+        // Affiche la popup de détails du capteur avec une animation
+        void showSensorPopup(BuildContext context, SensorsData sensor, Offset tapPosition) {
+                final screenSize = MediaQuery.of(context).size;
+
+                // Position du clic exprimée en pourcentage
+                final alignmentX = (tapPosition.dx / screenSize.width) * 2 - 1; // de -1.0 à 1.0
+                final alignmentY = (tapPosition.dy / screenSize.height) * 2 - 1;
+
+                showGeneralDialog(
                         context: context,
-                        builder: (context) => SensorDetailsPopup(sensor: sensor)
+                        barrierColor: Colors.black54,
+                        barrierDismissible: true,
+                        barrierLabel: '',
+                        transitionDuration: const Duration(milliseconds: 300),
+                        pageBuilder: (_, __, ___) => const SizedBox.shrink(),
+                        transitionBuilder: (_, anim, __, ___) {
+                                return Transform.scale(
+                                        scale: anim.value,
+                                        alignment: Alignment(alignmentX, alignmentY),
+                                        child: Opacity(
+                                                opacity: anim.value,
+                                                child: SensorDetailsPopup(sensor: sensor)
+                                        )
+                                );
+                        }
                 );
         }
 }
