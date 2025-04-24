@@ -4,8 +4,7 @@ import 'sensor_details_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-// Notifie automatiquement le widget lorsqu’un capteur du groupe change.
-// Permet de rebuild les capteurs dès que leur `dataNotifier` change.
+// Notifie automatiquement si un capteur du groupe change (valeurs ou status)
 class SensorsGroupNotifier extends ValueNotifier<int> {
         SensorsGroupNotifier(List<SensorsData> sensors) : super(0) {
                 for (var sensor in sensors) {
@@ -17,7 +16,7 @@ class SensorsGroupNotifier extends ValueNotifier<int> {
         void onChange() => value++;
 }
 
-// Widget principal qui affiche un groupe de capteurs avec un titre et une grille des capteurs visibles.
+// Affiche un groupe de capteurs avec un titre et une grille dynamique
 class SensorsGroup extends StatelessWidget {
         final String title;
         final List<SensorsData> sensors;
@@ -37,7 +36,6 @@ class SensorsGroup extends StatelessWidget {
                 return ValueListenableBuilder<int>(
                         valueListenable: notifier,
                         builder: (context, _, __) {
-                                // Filtrer les capteurs si on n’est pas en debug
                                 final filtered = sensors.where((s) => isDebugMode || s.powerStatus != null);
 
                                 return Column(
@@ -56,7 +54,7 @@ class SensorsGroup extends StatelessWidget {
                 );
         }
 
-        //Construit une carte individuelle pour chaque capteur
+        // Construit chaque carte de capteur dans la grille
         Widget buildSensorCard(BuildContext context, SensorsData sensor) {
                 final (iconColor, borderColor, statusLabel) = getStatusUI(sensor.powerStatus);
 
@@ -69,7 +67,7 @@ class SensorsGroup extends StatelessWidget {
                                                 final tapPosition = details.globalPosition;
                                                 showSensorPopup(context, sensor, tapPosition);
                                         }
-                                        : null, // Si c'est la carte SD, on ne peut pas clicker
+                                        : null,
                                 child: Material(
                                         borderRadius: BorderRadius.circular(10),
                                         child: Stack(
@@ -102,7 +100,7 @@ class SensorsGroup extends StatelessWidget {
                                                                 )
                                                         ),
 
-                                                        // Pastille status en haut à droite
+                                                        // Indicateur status en haut à droite
                                                         Positioned(
                                                                 top: -10,
                                                                 right: -10,
@@ -132,30 +130,15 @@ class SensorsGroup extends StatelessWidget {
                 );
         }
 
-        // Retourne la couleur, bordure et libellé à afficher selon le powerStatus
-        (Color, Color, String) getStatusUI(int? status) {
-                switch (status) {
-                        case 0: return (Colors.grey, Colors.grey, "Inconnu");
-                        case 1: return (Colors.green, Colors.green, "Fonctionne");
-                        case 2: return (Colors.yellow, Colors.yellow, "Déconnecté");
-                        case 3: return (Colors.red, Colors.red, "Erreur");
-                        default: return (Colors.black, Colors.black, "Désactivé");
-                }
-        }
-
-        // Affiche la popup de détails du capteur avec une animation
+        // Ouvre la popup stylée avec animation (zoom depuis point de clic)
         void showSensorPopup(BuildContext context, SensorsData sensor, Offset tapPosition) {
                 final screenSize = MediaQuery.of(context).size;
-
-                // Position du clic exprimée en pourcentage
-                final alignmentX = (tapPosition.dx / screenSize.width) * 2 - 1; // de -1.0 à 1.0
+                final alignmentX = (tapPosition.dx / screenSize.width) * 2 - 1;
                 final alignmentY = (tapPosition.dy / screenSize.height) * 2 - 1;
 
                 showGeneralDialog(
                         context: context,
                         barrierColor: Colors.black54,
-                        barrierDismissible: true,
-                        barrierLabel: '',
                         transitionDuration: const Duration(milliseconds: 300),
                         pageBuilder: (_, __, ___) => const SizedBox.shrink(),
                         transitionBuilder: (_, anim, __, ___) {
@@ -169,5 +152,21 @@ class SensorsGroup extends StatelessWidget {
                                 );
                         }
                 );
+        }
+
+        // Donne couleurs/icônes selon le powerStatus (0 = Inconnu, etc.)
+        (Color, Color, String) getStatusUI(int? status) {
+                switch (status) {
+                        case 0:
+                                return (Colors.grey, Colors.grey, "Inconnu");
+                        case 1:
+                                return (Colors.green, Colors.green, "Fonctionne");
+                        case 2:
+                                return (Colors.yellow, Colors.yellow, "Déconnecté");
+                        case 3:
+                                return (Colors.red, Colors.red, "Erreur");
+                        default:
+                        return (Colors.black, Colors.black, "Désactivé");
+                }
         }
 }
