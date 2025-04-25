@@ -1,4 +1,3 @@
-/// data_processor.dart
 /// Parse et traite un bloc de données brut (>=3 lignes CSV) :
 ///  1. Extraction des headers/values  
 ///  2. Mise à jour des logs de debug (STATUS / VALEURS)  
@@ -7,11 +6,11 @@
 ///  5. Notification UI via onDataReceived()
 
 import 'dart:math';
+import '../utils/switch_utils.dart';
 import 'data_feeder.dart';
-import '../../../constants.dart';
+import '../utils/constants.dart';
 import '../sensors/sensors_data.dart';
 import 'package:flutter/material.dart';
-import '../utils/utils.dart';
 import '../debug/debug_log_manager.dart';
 import '../sensors/sensor_status_updater.dart';
 

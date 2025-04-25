@@ -1,10 +1,9 @@
-/// connection_manager.dart
 /// Gestion de la déconnexion utilisateur, manuelle ou automatique (perte de connexion).
 /// Utilise des popups pour confirmer ou informer l'utilisateur avant de retourner à l'écran de connexion.
 
-import '../../../constants.dart';
 import '../connection_screen.dart';
 import 'package:flutter/material.dart';
+import '../../dashboard/utils/constants.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
 
 // Affiche un popup de déconnexion.

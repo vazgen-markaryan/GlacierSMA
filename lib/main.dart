@@ -1,12 +1,11 @@
-// main.dart
-// Point d'entrée de l'application Flutter Glacier SMA.
-// Configure l'apparence de l'app et détermine l'écran initial selon l'environnement (émulateur ou appareil physique).
+/// Point d'entrée de l'application Flutter Glacier SMA.
+/// Configure l'apparence de l'app et détermine l'écran initial selon l'environnement (émulateur ou appareil physique).
 
-import 'constants.dart';
+import 'screens/dashboard/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:rev_glacier_sma_mobile/screens/connection/connection_screen.dart';
-import 'package:rev_glacier_sma_mobile/screens/dashboard/dashboard_screen.dart';
+import 'package:rev_glacier_sma_mobile/screens/dashboard/dash/dashboard_screen.dart';
 
 void main() {
         // Fonction principale qui démarre l'application Flutter
@@ -79,7 +78,7 @@ class MyApp extends StatelessWidget {
 
                                         // Écran d'accueil selon le contexte : émulateur ou appareil réel
                                         home: areWeInDevelopingMode
-                                                ? const DashboardScreen(flutterSerialCommunicationPlugin: null, isConnected: false, connectedDevices: [])
+                                                ? const DashboardScreen(plugin: null, isConnected: false, connectedDevices: [])
                                                 : const ConnectionScreen()
                                 );
                         }
@@ -95,3 +94,5 @@ class MyApp extends StatelessWidget {
 // TODO Déplacer le mode DEBUG dans les paramètres
 // TODO Support multilingue (EN + FR)
 // TODO Déconnexion automatique en cas d'erreur fatale
+// TODO Sensor popup graph real time (ou pas popup mais autre page)
+// TODO legende dans debug mod Status (OK, Warning, Error)

@@ -1,4 +1,3 @@
-/// battery_test_mode.dart
 /// Gestion du mode test pour la simulation des niveaux de batterie.
 
 import 'dart:async';

@@ -1,4 +1,3 @@
-/// battery_indicator.dart
 /// Affiche l’icône de batterie, son animation et gère l’ouverture du popup.
 
 import 'battery_utils.dart';
@@ -54,7 +53,7 @@ class BatteryIndicatorState extends State<BatteryIndicator>
         @override
         void dispose() {
                 controller.dispose();
-                testMode?.stop();  // Arrêt de la simulation si lancée
+                testMode?.stop();
                 super.dispose();
         }
 

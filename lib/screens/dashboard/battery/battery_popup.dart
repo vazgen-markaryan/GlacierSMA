@@ -1,4 +1,3 @@
-/// battery_popup.dart
 /// Affiche un popup stylisé donnant la tension et le pourcentage de batterie.
 
 import 'battery_utils.dart';

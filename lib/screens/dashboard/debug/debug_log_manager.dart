@@ -1,6 +1,4 @@
-/// debug_log_manager.dart
-/// Gère le tampon temporaire de logs et publie la liste formatée
-/// (avec les sections “STATUS” et “VALEURS”) via un ValueNotifier.
+/// Gère le tampon temporaire de logs et publie la liste formatée (avec les sections “STATUS” et “VALEURS”) via un ValueNotifier.
 
 import 'package:flutter/material.dart';
 

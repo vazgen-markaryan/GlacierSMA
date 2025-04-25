@@ -1,4 +1,3 @@
-/// battery_utils.dart
 /// Fournit la fonction getBatteryInfo pour convertir une tension
 /// en pourcentage, chemin d'icône et couleur correspondants.
 

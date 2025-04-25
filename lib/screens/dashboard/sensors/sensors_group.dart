@@ -1,9 +1,8 @@
-/// sensors_group.dart
 /// Affiche un groupe de cartes de capteurs dans une grille responsive,
 /// avec un notifier pour rafraîchir automatiquement quand les données/status changent.
 
 import 'sensors_data.dart';
-import '../../../constants.dart';
+import '../utils/constants.dart';
 import 'sensor_details_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -96,7 +95,9 @@ class SensorsGroup extends StatelessWidget {
                                                                                 const SizedBox(width: defaultPadding),
                                                                                 Expanded(
                                                                                         child: Text(
-                                                                                                sensor.title ?? "Capteur inconnu",
+                                                                                                sensor.title != null
+                                                                                                        ? "${sensor.title}${sensor.code != null ? " (${sensor.code})" : ""}"
+                                                                                                        : "Capteur inconnu",
                                                                                                 style: Theme.of(context).textTheme.bodyLarge
                                                                                         )
                                                                                 )

@@ -1,10 +1,11 @@
-/// sensor_details_popup.dart
 /// Affiche une popup stylisée avec animation pour voir les détails d’un capteur.
 /// Icônes, noms et valeurs dynamiques sont mises à jour via un ValueNotifier.
+/// Affiche également un timer indépendant qui se met à jour chaque seconde.
 
+import 'dart:async';
 import 'sensors_data.dart';
 import 'package:intl/intl.dart';
-import '../../../constants.dart';
+import '../utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -21,6 +22,7 @@ class SensorDetailsPopupState extends State<SensorDetailsPopup>
         with SingleTickerProviderStateMixin {
         late final AnimationController controller;
         late final Animation<double> scale;
+        Timer? timer;  // Timer indépendant pour remettre à jour le timestamp
 
         @override
         void initState() {
@@ -31,11 +33,21 @@ class SensorDetailsPopupState extends State<SensorDetailsPopup>
                         duration: const Duration(milliseconds: 250)
                 )..forward();
                 scale = CurvedAnimation(parent: controller, curve: Curves.easeOutBack);
+
+                // Démarrer un timer qui appelle setState() chaque seconde
+                timer = Timer.periodic(const Duration(seconds: 1), (_) {
+                                setState(() {
+                                                // On rebuild pour rafraîchir le timestamp
+                                        }
+                                );
+                        }
+                );
         }
 
         @override
         void dispose() {
                 controller.dispose();
+                timer?.cancel();
                 super.dispose();
         }
 
@@ -65,8 +77,7 @@ class SensorDetailsPopupState extends State<SensorDetailsPopup>
                                                                         Container(
                                                                                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                                                                                 decoration: const BoxDecoration(
-                                                                                        color: Color(
-                                                                                                0xFF403B3B),
+                                                                                        color: Color(0xFF403B3B),
                                                                                         borderRadius: BorderRadius.only(
                                                                                                 topLeft: Radius.circular(16),
                                                                                                 topRight: Radius.circular(16)
@@ -76,8 +87,8 @@ class SensorDetailsPopupState extends State<SensorDetailsPopup>
                                                                                         children: [
                                                                                                 Expanded(
                                                                                                         child: Text(
-
-                                                                                                                (widget.sensor.title ?? "Détails du capteur") + (widget.sensor.code != null ? " (${widget.sensor.code})" : ""),
+                                                                                                                (widget.sensor.title ?? "Détails du capteur") +
+                                                                                                                        (widget.sensor.code != null ? " (${widget.sensor.code})" : ""),
                                                                                                                 style: const TextStyle(
                                                                                                                         color: primaryColor,
                                                                                                                         fontSize: 20,
@@ -93,7 +104,7 @@ class SensorDetailsPopupState extends State<SensorDetailsPopup>
                                                                                 )
                                                                         ),
 
-                                                                        // Corps : timestamp et liste des valeurs
+                                                                        // Corps : timer + liste des valeurs
                                                                         Flexible(
                                                                                 child: Padding(
                                                                                         padding: const EdgeInsets.all(20),
@@ -112,14 +123,10 @@ class SensorDetailsPopupState extends State<SensorDetailsPopup>
                                                                                                                                 return Column(
                                                                                                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                                                                                                         children: [
-                                                                                                                                                // Affiche la date/heure de mise à jour
+                                                                                                                                                // Timer indépendant mis à jour chaque seconde
                                                                                                                                                 Text(
-                                                                                                                                                        "Mise à jour : ${DateFormat("dd-MM-yyyy 'à' HH:mm:ss").format(DateTime.now())}",
-                                                                                                                                                        style: const TextStyle(
-                                                                                                                                                                color: Colors.white54,
-                                                                                                                                                                fontSize: 16,
-                                                                                                                                                                fontStyle: FontStyle.italic
-                                                                                                                                                        )
+                                                                                                                                                    "Mise à jour : ${DateFormat("dd-MM-yyyy 'à' HH:mm:ss").format(DateTime.now())}",
+                                                                                                                                                        style: const TextStyle(color: Colors.white54, fontSize: 16, fontStyle: FontStyle.italic)
                                                                                                                                                 ),
                                                                                                                                                 const SizedBox(height: 12),
                                                                                                                                                 // Affichage de chaque entrée de donnée
@@ -144,19 +151,13 @@ class SensorDetailsPopupState extends State<SensorDetailsPopup>
                                                                                                                                                                                                                 key.svgLogo,
                                                                                                                                                                                                                 height: 24,
                                                                                                                                                                                                                 width: 24,
-                                                                                                                                                                                                                colorFilter: const ColorFilter.mode(
-                                                                                                                                                                                                                        Colors.white70,
-                                                                                                                                                                                                                        BlendMode.srcIn
-                                                                                                                                                                                                                )
+                                                                                                                                                                                                                colorFilter: const ColorFilter.mode(Colors.white70, BlendMode.srcIn)
                                                                                                                                                                                                         ),
                                                                                                                                                                                                         const SizedBox(width: 8),
                                                                                                                                                                                                         // Nom de la donnée
                                                                                                                                                                                                         Text(
                                                                                                                                                                                                                 key.name,
-                                                                                                                                                                                                                style: const TextStyle(
-                                                                                                                                                                                                                        color: Colors.white70,
-                                                                                                                                                                                                                        fontSize: 15
-                                                                                                                                                                                                                )
+                                                                                                                                                                                                                style: const TextStyle(color: Colors.white70, fontSize: 15)
                                                                                                                                                                                                         )
                                                                                                                                                                                                 ]
                                                                                                                                                                                         ),
@@ -164,10 +165,7 @@ class SensorDetailsPopupState extends State<SensorDetailsPopup>
                                                                                                                                                                                         Flexible(
                                                                                                                                                                                                 child: Text(
                                                                                                                                                                                                         value.toString(),
-                                                                                                                                                                                                        style: const TextStyle(
-                                                                                                                                                                                                                color: Colors.white,
-                                                                                                                                                                                                                fontWeight: FontWeight.bold
-                                                                                                                                                                                                        ),
+                                                                                                                                                                                                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                                                                                                                                                                                                         textAlign: TextAlign.right,
                                                                                                                                                                                                         overflow: TextOverflow.ellipsis
                                                                                                                                                                                                 )

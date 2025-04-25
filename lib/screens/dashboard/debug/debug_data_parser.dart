@@ -1,4 +1,3 @@
-/// debug_data_parser.dart
 /// Affiche les logs de debug (STATUS et VALEURS) dans un tableau,
 /// en écoutant les mises à jour de DebugLogManager via un ValueNotifier.
 

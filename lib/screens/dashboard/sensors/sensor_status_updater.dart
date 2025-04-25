@@ -1,9 +1,8 @@
-/// sensor_status_updater.dart
 /// Analyse le bloc de <status> pour mettre à jour "powerStatus"
 
 import 'dart:math';
 import 'sensors_data.dart';
-import '../../../constants.dart';
+import '../utils/constants.dart';
 
 void updateSensorsData(
         String rawData,

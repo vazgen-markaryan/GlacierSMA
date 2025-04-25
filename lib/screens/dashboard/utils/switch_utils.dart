@@ -1,4 +1,4 @@
-/// utils.dart
+/// switch_utils.dart
 /// Contient des utilitaires pour :
 ///  Obtenir l’unité à afficher selon l’en-tête de donnée Arduino
 ///  Traduire la direction du vent codée (0–16) en texte

@@ -1,11 +1,10 @@
-/// connection_widgets.dart
 /// Contient les widgets pour la section de connexion :
 /// - buildBluetoothSection : carte Bluetooth
 /// - buildCableSection : carte connexion par câble
 /// - buildArrowInstruction : guide visuel entre les sections
 
 import 'package:flutter/material.dart';
-import 'package:rev_glacier_sma_mobile/constants.dart';
+import 'package:rev_glacier_sma_mobile/screens/dashboard/utils/constants.dart';
 
 // Affiche une carte pour la connexion Bluetooth
 Widget buildBluetoothSection(BuildContext context) {

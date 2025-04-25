@@ -1,8 +1,7 @@
-/// sensors_data.dart
 /// Définit le modèle `DataMap` (clé de donnée) et `SensorsData` (état et valeurs),
 /// ainsi que la liste par défaut de tous les capteurs et la fonction d’accès.
 
-import '../../../constants.dart';
+import '../utils/constants.dart';
 import 'package:flutter/material.dart';
 
 class DataMap {

@@ -1,8 +1,7 @@
-/// data_capture.dart
 /// Écoute le flux série et délègue chaque bloc complet de données à [processRawData].
 
 import "data_processor.dart";
-import "../../../constants.dart";
+import "../utils/constants.dart";
 import "../sensors/sensors_data.dart";
 import "package:flutter/services.dart";
 import "package:flutter/material.dart";
@@ -25,7 +24,8 @@ void readMessage({
         var buffer = "";
         var isCapturing = false;
 
-        messageChannel?.receiveBroadcastStream().listen((event) {
+        messageChannel?.receiveBroadcastStream().listen(
+                (event) {
                         if (event is Uint8List) {
                                 buffer += String.fromCharCodes(event);
 

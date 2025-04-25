@@ -1,4 +1,3 @@
-/// debug_toggle_button.dart
 /// Bouton Debug qui bascule l’affichage des logs de debug dans l’UI.
 
 import 'package:flutter/material.dart';

@@ -1,12 +1,11 @@
-/// connection_screen.dart
 /// Ecran principal de connexion pour Glacier SMA.
 /// Affiche les options de connexion Bluetooth et câble,
 /// Gère la détection des appareils via USB série.
 
 import 'package:flutter/material.dart';
 import 'managers/connection_manager.dart';
-import 'package:rev_glacier_sma_mobile/constants.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
+import 'package:rev_glacier_sma_mobile/screens/dashboard/utils/constants.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
 import 'package:rev_glacier_sma_mobile/screens/connection/widgets/connection_widgets.dart';
 
@@ -27,6 +26,7 @@ class ConnectionScreenState extends State<ConnectionScreen> {
         Widget build(BuildContext context) {
                 return Scaffold(
                         appBar: AppBar(
+                                automaticallyImplyLeading: false,
                                 title: const Center(child: Text("Glacier SMA Connexion"))
                         ),
                         body: LayoutBuilder(

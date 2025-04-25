@@ -1,11 +1,11 @@
-/// connection_manager.dart
 /// Gère la détection et la sélection des appareils connectés via port série.
 /// Affiche une liste des appareils disponibles et empêche le spam de SnackBars.
 
 import 'package:flutter/material.dart';
-import '../../dashboard/dashboard_screen.dart';
-import 'package:rev_glacier_sma_mobile/constants.dart';
+import '../../dashboard/dash/dashboard_screen.dart';
+import '../../dashboard/utils/custom_snackbar.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
+import 'package:rev_glacier_sma_mobile/screens/dashboard/utils/constants.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
 
 // Indicateur global pour empêcher l'affichage répété des SnackBars lorsqu'aucun appareil n'est trouvé
@@ -33,21 +33,20 @@ Future<void> showDeviceSelectionDialog(
                 isShowingDeviceSnackbar = true;
 
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                                content: Center(
-                                        child: Text(
-                                                "Aucun appareil trouvé. Vérifiez le câble ou la Switch Hardware.",
-                                                style: TextStyle(color: Colors.black, fontSize: 18),
-                                                textAlign: TextAlign.center
-                                        )
-                                ),
+
+                final controller = ScaffoldMessenger.of(context).showSnackBar(
+                        buildAppSnackBar(
+                                message: "Aucun appareil trouvé. Vérifiez le câble ou la Switch Hardware.",
+                                iconData: Icons.error,
                                 backgroundColor: Colors.white,
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                duration: Duration(seconds: 2)
+                                textColor: Colors.black,
+                                iconColor: Colors.black,
+                                duration: const Duration(seconds: 3)
                         )
-                ).closed.then((_) => isShowingDeviceSnackbar = false);
+                );
+
+                // Quand il ferme, on réactive le flag
+                controller.closed.then((_) => isShowingDeviceSnackbar = false);
 
                 return;
         }
@@ -91,7 +90,7 @@ Future<void> showDeviceSelectionDialog(
                                                                                                 context,
                                                                                                 MaterialPageRoute(
                                                                                                         builder: (context) => DashboardScreen(
-                                                                                                                flutterSerialCommunicationPlugin: flutterSerialCommunicationPlugin,
+                                                                                                                plugin: flutterSerialCommunicationPlugin,
                                                                                                                 isConnected: true,
                                                                                                                 connectedDevices: connectedDevices
                                                                                                         )
@@ -101,10 +100,9 @@ Future<void> showDeviceSelectionDialog(
                                                                                 else {
                                                                                         // Si la connexion échoue, ferme la boîte de dialogue et affiche un SnackBar
                                                                                         Navigator.pop(context);
-                                                                                        ScaffoldMessenger.of(context).showSnackBar(
-                                                                                                SnackBar(
-                                                                                                        content: Text("Échec de la connexion. Vérifiez le câble ou attribuez la permission.")
-                                                                                                )
+                                                                                        showAppSnackBar(
+                                                                                                context,
+                                                                                                message: 'Échec de la connexion. Vérifiez le câble ou attribuez la permission.'
                                                                                         );
                                                                                 }
                                                                         }

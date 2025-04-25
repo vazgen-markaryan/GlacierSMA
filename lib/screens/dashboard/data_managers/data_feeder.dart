@@ -1,11 +1,10 @@
-/// data_feeder.dart
 /// Analyse une chaîne de données brutes au format texte (3 lignes : entête, en-têtes CSV, valeurs CSV)
 /// Met à jour chaque capteur de la liste "sensorGroups" si ses données ont changé.
 /// Parcourt chaque groupe de capteurs et met à jour leurs "dataNotifier".
 /// si une nouvelle valeur est détectée dans >rawData".
 
 import '../sensors/sensors_data.dart';
-import '../utils/utils.dart';
+import '../utils/switch_utils.dart';
 
 void populateSensorData(String rawData, List<List<SensorsData>> sensorGroups) {
         // Sépare la chaîne reçue en lignes
