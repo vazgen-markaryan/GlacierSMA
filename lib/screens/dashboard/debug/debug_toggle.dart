@@ -1,3 +1,6 @@
+/// debug_toggle_button.dart
+/// Bouton Debug qui bascule l’affichage des logs de debug dans l’UI.
+
 import 'package:flutter/material.dart';
 
 class DebugToggleButton extends StatelessWidget {
@@ -18,12 +21,13 @@ class DebugToggleButton extends StatelessWidget {
                                 onTap: onToggle,
                                 child: Row(
                                         children: [
-                                                const Text("D", style: TextStyle(fontSize: 16, color: Colors.white)), //DEBUG SWITCH
+                                                const Text("Debug", style: TextStyle(fontSize: 16, color: Colors.white)),
                                                 const SizedBox(width: 8),
                                                 Container(
                                                         width: 60,
                                                         height: 30,
                                                         decoration: BoxDecoration(
+                                                                // Vert si activé, gris sinon
                                                                 color: isDebugVisible ? Colors.green : Colors.grey,
                                                                 borderRadius: BorderRadius.circular(15)
                                                         ),

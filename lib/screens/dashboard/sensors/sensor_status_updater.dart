@@ -1,6 +1,9 @@
+/// sensor_status_updater.dart
+/// Analyse le bloc de <status> pour mettre à jour "powerStatus"
+
 import 'dart:math';
-import '../../../constants.dart';
 import 'sensors_data.dart';
+import '../../../constants.dart';
 
 void updateSensorsData(
         String rawData,
@@ -10,48 +13,50 @@ void updateSensorsData(
         void Function(int) setHum,
         void Function(int) setPres
 ) {
+        // Ne rien faire si pas de balise <status>
         if (!rawData.contains(communicationMessageStatus)) return;
 
-        final headers = rawData.split('\n')[1].split(',').map((h) => h.trim().toLowerCase()).toList();
-        final values = rawData.split('\n')[2].split(',').map((v) => int.tryParse(v.trim()) ?? 0).toList();
+        // Extraire headers et valeurs numériques
+        final lines = rawData.split('\n');
+        final headers = lines[1].split(',').map((h) => h.trim().toLowerCase()).toList();
+        final values = lines[2].split(',').map((v) => int.tryParse(v.trim()) ?? 0).toList();
 
+        // Fonction interne pour mettre à jour chaque liste de capteurs
         void updateSensorStatus(List<SensorsData> sensors) {
                 for (var sensor in sensors) {
                         if (sensor.header == null) continue;
-
-                        if (headers.contains(sensor.header!.toLowerCase())) {
-                                sensor.powerStatus = values[headers.indexOf(sensor.header!.toLowerCase())];
-                        } else {
-                                sensor.powerStatus = null;
-                        }
-
-                        // Force un notifyListeners pour que l'UI réagisse au changement
+                        final idx = headers.indexOf(sensor.header!.toLowerCase());
+                        sensor.powerStatus = (idx != -1) ? values[idx] : null;
+                        // Forcer la notif même si valeur inchangée
                         sensor.dataNotifier.value = sensor.dataNotifier.value;
                 }
         }
 
+        // Mise à jour des 4 groupes
         updateSensorStatus(getSensors(SensorType.internal));
         updateSensorStatus(getSensors(SensorType.modbus));
         updateSensorStatus(getSensors(SensorType.stevenson));
         updateSensorStatus(getSensors(SensorType.stevensonStatus));
 
+        // Extraire statuts pour Stevenson local (temp/hum/pres)
         final stevenson = getSensors(SensorType.stevenson).first;
-
         int? localTemp, localHum, localPres;
-
-        final stevensonMapping = {
-                stevenson.temp?.toLowerCase():(int status) => localTemp = status,
-                stevenson.hum?.toLowerCase():(int status) => localHum = status,
-                stevenson.pres?.toLowerCase():(int status) => localPres = status
+        final mapping = {
+                stevenson.temp?.toLowerCase():(int s) => localTemp = s,
+                stevenson.hum?.toLowerCase():(int s) => localHum = s,
+                stevenson.pres?.toLowerCase():(int s) => localPres = s
         };
 
-        for (int i = 0; i < headers.length; i++) {
-                stevensonMapping[headers[i]]?.call(values[i]);
+        for (var i = 0; i < headers.length; i++) {
+                mapping[headers[i]]?.call(values[i]);
         }
 
+        // Notifier les callbacks externes
         setTemp(localTemp ?? 0);
         setHum(localHum ?? 0);
         setPres(localPres ?? 0);
 
-        stevenson.powerStatus = max(localTemp ?? 0, max(localHum ?? 0, localPres ?? 0));
+        // Met à jour le powerStatus global de Stevenson
+        stevenson.powerStatus =
+        max(localTemp ?? 0, max(localHum ?? 0, localPres ?? 0));
 }

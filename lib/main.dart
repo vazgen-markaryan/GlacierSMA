@@ -1,3 +1,7 @@
+// main.dart
+// Point d'entrée de l'application Flutter Glacier SMA.
+// Configure l'apparence de l'app et détermine l'écran initial selon l'environnement (émulateur ou appareil physique).
+
 import 'constants.dart';
 import 'package:flutter/material.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -5,6 +9,7 @@ import 'package:rev_glacier_sma_mobile/screens/connection/connection_screen.dart
 import 'package:rev_glacier_sma_mobile/screens/dashboard/dashboard_screen.dart';
 
 void main() {
+        // Fonction principale qui démarre l'application Flutter
         runApp(const MyApp());
 }
 
@@ -13,6 +18,7 @@ class MyApp extends StatelessWidget {
 
         @override
         Widget build(BuildContext context) {
+                // Fonction interne pour détecter si l'app tourne sur un émulateur
                 Future<bool> isRunningOnEmulator() async {
                         final deviceInfo = DeviceInfoPlugin();
                         final androidInfo = await deviceInfo.androidInfo;
@@ -22,15 +28,14 @@ class MyApp extends StatelessWidget {
                 return FutureBuilder<bool>(
                         future: isRunningOnEmulator(),
                         builder: (context, snapshot) {
-                                // Boolean pour basculer entre ConnectionScreen et DashboardScreen
-                                //  Depend de l'environnement de développement
-                                //  Si emulateur, on affiche le DashboardScreen
-                                //  Si pas emulateur, on affiche le ConnectionScreen
+                                // Détermine si on est en mode développement (émulateur)
                                 final areWeInDevelopingMode = snapshot.data ?? false;
 
                                 return MaterialApp(
                                         debugShowCheckedModeBanner: false,
                                         title: 'Glacier SMA',
+
+                                        // Définition du thème général de l'application (mode sombre)
                                         theme: ThemeData.dark().copyWith(
                                                 primaryColor: primaryColor,
                                                 scaffoldBackgroundColor: backgroundColor,
@@ -42,7 +47,7 @@ class MyApp extends StatelessWidget {
                                                         onPrimary: Colors.white,
                                                         onSecondary: Colors.white,
                                                         onSurface: Colors.white,
-                                                        onError: Colors.white
+                                                        onError: Colors.red
                                                 ),
                                                 textTheme: ThemeData.dark().textTheme.apply(
                                                         bodyColor: Colors.white,
@@ -72,23 +77,21 @@ class MyApp extends StatelessWidget {
                                                 )
                                         ),
 
+                                        // Écran d'accueil selon le contexte : émulateur ou appareil réel
                                         home: areWeInDevelopingMode
                                                 ? const DashboardScreen(flutterSerialCommunicationPlugin: null, isConnected: false, connectedDevices: [])
                                                 : const ConnectionScreen()
                                 );
-
                         }
                 );
         }
 }
 
-//TODO bottom navigation bar ou possiblement slide menu
-//TODO settings min max sensors value menu + messages de notification si dehors des limites
-//TODO settings pour power on off les sensors
-//TODO deplacer DEBUG switch dans settings menu
-//TODO Internationalisation EN + FR
-//TODO vérifier horizontal mode partout
-//TODO rediger README au fur et à mesure
-//TODO disconnect lors de <fatal> error
+// TODO's pour les futures améliorations de l'application :
 
-//TODO faire plus de TODOs :)
+// TODO Ajouter une barre de navigation inférieure ou un menu latéral
+// TODO Créer des réglages pour les limites min/max des capteurs avec notifications
+// TODO Activer/désactiver manuellement les capteurs via paramètres
+// TODO Déplacer le mode DEBUG dans les paramètres
+// TODO Support multilingue (EN + FR)
+// TODO Déconnexion automatique en cas d'erreur fatale

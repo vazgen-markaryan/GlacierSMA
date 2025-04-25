@@ -1,3 +1,7 @@
+/// sensors_data.dart
+/// Définit le modèle `DataMap` (clé de donnée) et `SensorsData` (état et valeurs),
+/// ainsi que la liste par défaut de tous les capteurs et la fonction d’accès.
+
 import '../../../constants.dart';
 import 'package:flutter/material.dart';
 
@@ -24,9 +28,10 @@ class DataMap {
 }
 
 class SensorsData {
-        String? svgIcon, title, header, temp, pres, hum, antenna;
+        String? svgIcon, title, header, temp, pres, hum, antenna, code;
         Color? color;
 
+        // Notifiers pour valeurs et statut (powerStatus)
         final ValueNotifier<Map<DataMap, dynamic>> dataNotifier;
         final ValueNotifier<int?> powerStatusNotifier;
 
@@ -36,7 +41,7 @@ class SensorsData {
         SensorsData({
                 this.svgIcon, this.title, this.color,
                 this.header, this.temp, this.pres,
-                this.hum, this.antenna,
+                this.hum, this.antenna, this.code,
                 required Map<DataMap, dynamic> data,
                 int? powerStatus
         }) : dataNotifier = ValueNotifier(data),
@@ -44,6 +49,7 @@ class SensorsData {
 
         Map<DataMap, dynamic> get data => dataNotifier.value;
 
+        // Méthode utilitaire pour changer une valeur et notifier
         void updateData(DataMap key, dynamic newValue) {
                 final updated = Map<DataMap, dynamic>.from(dataNotifier.value);
                 updated[key] = newValue;
@@ -51,6 +57,7 @@ class SensorsData {
         }
 }
 
+// Fonction d’accès à la liste de capteurs selon le type
 List<SensorsData> getSensors(SensorType type) {
         switch (type) {
                 case SensorType.internal:
@@ -68,27 +75,28 @@ List<SensorsData> internalSensors = [
         SensorsData(
                 title: "Thermo-Hygro-Baromètre",
                 header: "bme280_status",
+                code: "BME280",
                 svgIcon: microchip,
                 data: {
-                        DataMap(name: "Temperature", header: "bme280_temperature", svgLogo: temperature) : "default_value",
-                        DataMap(name: "Pression", header: "bme280_pression", svgLogo: pressure) : "default_value",
-                        DataMap(name: "Altitude", header: "bme280_altitude", svgLogo: altitude) : "default_value",
-                        DataMap(name: "Humidité", header: "bme280_humidity", svgLogo: humidity) : "default_value"
+                        DataMap(name: "Temperature", header: "bme280_temperature", svgLogo: temperature) : "Placeholder par défaut",
+                        DataMap(name: "Pression", header: "bme280_pression", svgLogo: pressure) : "Placeholder par défaut",
+                        DataMap(name: "Altitude", header: "bme280_altitude", svgLogo: altitude) : "Placeholder par défaut",
+                        DataMap(name: "Humidité", header: "bme280_humidity", svgLogo: humidity) : "Placeholder par défaut"
                 }
         ),
 
         SensorsData(
                 title: "Accéléromètre",
                 header: "lsm303_status",
-
+                code: "LSM303",
                 svgIcon: microchip,
                 data: {
-                        DataMap(name: "Accélération X", header: "lsm303_accel_x", svgLogo: acceleration) : "default_value",
-                        DataMap(name: "Accélération Y", header: "lsm303_accel_y", svgLogo: acceleration) : "default_value",
-                        DataMap(name: "Accélération Z", header: "lsm303_accel_z", svgLogo: acceleration) : "default_value",
-                        DataMap(name: "Roll", header: "lsm303_roll", svgLogo: pitchAndRoll) : "default_value",
-                        DataMap(name: "Pitch", header: "lsm303_pitch", svgLogo: pitchAndRoll) : "default_value",
-                        DataMap(name: "Accélération Range", header: "lsm303_accel_range", svgLogo: range) : "default_value"
+                        DataMap(name: "Accélération X", header: "lsm303_accel_x", svgLogo: acceleration) : "Placeholder par défaut",
+                        DataMap(name: "Accélération Y", header: "lsm303_accel_y", svgLogo: acceleration) : "Placeholder par défaut",
+                        DataMap(name: "Accélération Z", header: "lsm303_accel_z", svgLogo: acceleration) : "Placeholder par défaut",
+                        DataMap(name: "Roll", header: "lsm303_roll", svgLogo: pitchAndRoll) : "Placeholder par défaut",
+                        DataMap(name: "Pitch", header: "lsm303_pitch", svgLogo: pitchAndRoll) : "Placeholder par défaut",
+                        DataMap(name: "Accélération Range", header: "lsm303_accel_range", svgLogo: range) : "Placeholder par défaut"
                 }
         ),
 
@@ -98,11 +106,11 @@ List<SensorsData> internalSensors = [
                 antenna: "gps_antenna_status",
                 svgIcon: gps,
                 data: {
-                        DataMap(name: "Latitude", header: "gps_latitude", svgLogo: gps) : "default_value",
-                        DataMap(name: "Longitude", header: "gps_longitude", svgLogo: gps) : "default_value",
-                        DataMap(name: "Satelites", header: "gps_satelites", svgLogo: gps) : "default_value",
-                        DataMap(name: "HDOP", header: "gps_hdop", svgLogo: gps) : "default_value",
-                        DataMap(name: "Antenne", header: "gps_antenna_status", svgLogo: gps) : "default_value"
+                        DataMap(name: "Latitude", header: "gps_latitude", svgLogo: gps) : "Placeholder par défaut",
+                        DataMap(name: "Longitude", header: "gps_longitude", svgLogo: gps) : "Placeholder par défaut",
+                        DataMap(name: "Satelites", header: "gps_satelites", svgLogo: gps) : "Placeholder par défaut",
+                        DataMap(name: "HDOP", header: "gps_hdop", svgLogo: gps) : "Placeholder par défaut",
+                        DataMap(name: "Antenne", header: "gps_antenna_status", svgLogo: gps) : "Placeholder par défaut"
                 }
         ),
 
@@ -120,7 +128,7 @@ List<SensorsData> modBusSensors = [
                 header: "wind_speed_status",
                 svgIcon: ventilation,
                 data: {
-                        DataMap(name: "Vitesse", header: "wind_speed", svgLogo: windSpeed) : "default_value"
+                        DataMap(name: "Vitesse", header: "wind_speed", svgLogo: windSpeed) : "Placeholder par défaut"
                 }
         ),
 
@@ -129,28 +137,30 @@ List<SensorsData> modBusSensors = [
                 header: "wind_direction_status",
                 svgIcon: ventilation,
                 data: {
-                        DataMap(name: "Angle", header: "wind_direction_angle", svgLogo: windAngle) : "default_value",
-                        DataMap(name: "Orientation", header: "wind_direction_facing", svgLogo: windDirection) : "default_value"
+                        DataMap(name: "Angle", header: "wind_direction_angle", svgLogo: windAngle) : "Placeholder par défaut",
+                        DataMap(name: "Orientation", header: "wind_direction_facing", svgLogo: windDirection) : "Placeholder par défaut"
                 }
         ),
 
         SensorsData(
                 title: "Luxmètre",
                 header: "mb_asl20_status",
+                code: "ASL20",
                 svgIcon: luxmetre,
                 data: {
-                        DataMap(name: "Luminosité", header: "mb_asl20", svgLogo: luxmetre) : "default_value"
+                        DataMap(name: "Luminosité", header: "mb_asl20", svgLogo: luxmetre) : "Placeholder par défaut"
                 }
         ),
 
         SensorsData(
                 title: "Thermo-Hygro-Baromètre",
                 header: "mb_bme280_status",
+                code: "BME280",
                 svgIcon: microchip,
                 data: {
-                        DataMap(name: "Temperature", header: "mb_bme280_temp", svgLogo: temperature) : "default_value",
-                        DataMap(name: "Pression", header: "mb_bme280_press", svgLogo: pressure) : "default_value",
-                        DataMap(name: "Humidité", header: "mb_bme280_hum", svgLogo: humidity) : "default_value"
+                        DataMap(name: "Temperature", header: "mb_bme280_temp", svgLogo: temperature) : "Placeholder par défaut",
+                        DataMap(name: "Pression", header: "mb_bme280_press", svgLogo: pressure) : "Placeholder par défaut",
+                        DataMap(name: "Humidité", header: "mb_bme280_hum", svgLogo: humidity) : "Placeholder par défaut"
                 }
         )
 ];
@@ -161,20 +171,22 @@ List<SensorsData> stevensonSensors = [
                 temp: "steve_bme280_temp_status",
                 pres: "steve_bme280_pres_status",
                 hum: "steve_bme280_hum_status",
+                code: "BME280",
                 svgIcon: microchip,
                 data: {
-                        DataMap(name: "Temperature", header: "steve_bme280_temp", svgLogo: temperature) : "default_value",
-                        DataMap(name: "Pression", header: "steve_bme280_press", svgLogo: pressure) : "default_value",
-                        DataMap(name: "Humidité", header: "steve_bme280_hum", svgLogo: humidity) : "default_value"
+                        DataMap(name: "Temperature", header: "steve_bme280_temp", svgLogo: temperature) : "Placeholder par défaut",
+                        DataMap(name: "Pression", header: "steve_bme280_press", svgLogo: pressure) : "Placeholder par défaut",
+                        DataMap(name: "Humidité", header: "steve_bme280_hum", svgLogo: humidity) : "Placeholder par défaut"
                 }
         ),
 
         SensorsData(
                 title: "Luxmètre",
                 header: "steve_veml7700_status",
+                code: "VEML7700",
                 svgIcon: luxmetre,
                 data: {
-                        DataMap(name: "Luminosité", header: "steve_veml7700", svgLogo: luxmetre) : "default_value"
+                        DataMap(name: "Luminosité", header: "steve_veml7700", svgLogo: luxmetre) : "Placeholder par défaut"
                 }
         )
 ];

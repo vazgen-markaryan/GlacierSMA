@@ -1,6 +1,9 @@
-import 'dart:async';
+/// battery_indicator.dart
+/// Affiche l’icône de batterie, son animation et gère l’ouverture du popup.
+
 import 'battery_utils.dart';
 import 'battery_popup.dart';
+import 'battery_test_mode.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -11,7 +14,8 @@ class BatteryIndicator extends StatefulWidget {
         const BatteryIndicator({
                 super.key,
                 required this.voltageNotifier,
-                //  Si on est en mode test, on simule les niveaux de batterie
+
+                // Variable pour activer le mode test
                 this.enableTestMode = false
         });
 
@@ -19,17 +23,14 @@ class BatteryIndicator extends StatefulWidget {
         State<BatteryIndicator> createState() => BatteryIndicatorState();
 }
 
-class BatteryIndicatorState extends State<BatteryIndicator> with SingleTickerProviderStateMixin {
+class BatteryIndicatorState extends State<BatteryIndicator>
+        with SingleTickerProviderStateMixin {
         late final AnimationController controller;
         late final Animation<double> pulse;
         bool isPopupVisible = false;
 
-        // Variables pour le mode test
-        Timer? testModeTimer;
-        int currentTestIndex = 0;
-
-        // Voltages de test pour simuler les états batterie
-        final List<double> testVoltages = [12.7, 12.0, 11.2];
+        // Utilitaire de simulation (extrait dans battery_test_mode.dart)
+        BatteryTestMode? testMode;
 
         @override
         void initState() {
@@ -43,20 +44,17 @@ class BatteryIndicatorState extends State<BatteryIndicator> with SingleTickerPro
 
                 pulse = Tween(begin: 1.0, end: 1.2).animate(controller);
 
-                // Mode test : alterne les niveaux de batterie toutes les 2 secondes
+                // Si mode test activé, démarrer la simulation
                 if (widget.enableTestMode) {
-                        testModeTimer = Timer.periodic(const Duration(seconds: 2), (_) {
-                                        widget.voltageNotifier.value = testVoltages[currentTestIndex];
-                                        currentTestIndex = (currentTestIndex + 1) % testVoltages.length;
-                                }
-                        );
+                        testMode = BatteryTestMode(widget.voltageNotifier)
+                        ..start();
                 }
         }
 
         @override
         void dispose() {
                 controller.dispose();
-                testModeTimer?.cancel();
+                testMode?.stop();  // Arrêt de la simulation si lancée
                 super.dispose();
         }
 
@@ -65,10 +63,7 @@ class BatteryIndicatorState extends State<BatteryIndicator> with SingleTickerPro
                 return ValueListenableBuilder<double?>(
                         valueListenable: widget.voltageNotifier,
                         builder: (context, voltage, _) {
-                                // Récupération du pourcentage, icône et couleur à partir du voltage
                                 final (percent, iconPath, color) = getBatteryInfo(voltage);
-
-                                //Variable pour savoir si la batterie est faible
                                 final isLow = percent < 0.33;
 
                                 return Builder(
@@ -76,43 +71,8 @@ class BatteryIndicatorState extends State<BatteryIndicator> with SingleTickerPro
                                                 return Stack(
                                                         clipBehavior: Clip.none,
                                                         children: [
-                                                                // Icône principale avec effet de clignotement si batterie faible
                                                                 GestureDetector(
-                                                                        onTap: () {
-                                                                                if (isPopupVisible) return;
-                                                                                setState(() => isPopupVisible = true);
-
-                                                                                final renderObject = targetContext.findRenderObject();
-                                                                                if (renderObject is! RenderBox) return;
-
-                                                                                final overlay = Overlay.of(context);
-                                                                                late final OverlayEntry entry;
-
-                                                                                final box = renderObject;
-                                                                                final position = box.localToGlobal(Offset.zero);
-
-                                                                                // Création d’un overlay avec popup
-                                                                                entry = OverlayEntry(
-                                                                                        builder: (_) => GestureDetector(
-                                                                                                behavior: HitTestBehavior.translucent,
-                                                                                                onTap: () {
-                                                                                                        entry.remove();
-                                                                                                        setState(() => isPopupVisible = false);
-                                                                                                },
-                                                                                                child: Stack(
-                                                                                                        children: [
-                                                                                                                BatteryPopup(
-                                                                                                                        voltageNotifier: widget.voltageNotifier,
-                                                                                                                        color: color,
-                                                                                                                        position: position
-                                                                                                                )
-                                                                                                        ]
-                                                                                                )
-                                                                                        )
-                                                                                );
-
-                                                                                overlay.insert(entry);
-                                                                        },
+                                                                        onTap: () => showPopup(targetContext, color),
                                                                         child: AnimatedBuilder(
                                                                                 animation: pulse,
                                                                                 builder: (_, child) => Transform.scale(
@@ -127,8 +87,6 @@ class BatteryIndicatorState extends State<BatteryIndicator> with SingleTickerPro
                                                                                 )
                                                                         )
                                                                 ),
-
-                                                                // Indicateur de "cliquabilité"
                                                                 Positioned(
                                                                         top: -3,
                                                                         right: -3,
@@ -151,5 +109,37 @@ class BatteryIndicatorState extends State<BatteryIndicator> with SingleTickerPro
                                 );
                         }
                 );
+        }
+
+        // Ouvre le popup de détails de batterie
+        void showPopup(BuildContext targetContext, Color color) {
+                if (isPopupVisible) return;
+                setState(() => isPopupVisible = true);
+
+                final renderObject = targetContext.findRenderObject();
+                if (renderObject is! RenderBox) return;
+                final box = renderObject;
+                final position = box.localToGlobal(Offset.zero);
+                final overlay = Overlay.of(context);
+                late final OverlayEntry entry;
+
+                entry = OverlayEntry(
+                        builder: (_) => GestureDetector(
+                                behavior: HitTestBehavior.translucent,
+                                onTap: () {
+                                        entry.remove();
+                                        setState(() => isPopupVisible = false);
+                                },
+                                child: Stack(children: [
+                                                BatteryPopup(
+                                                        voltageNotifier: widget.voltageNotifier,
+                                                        color: color,
+                                                        position: position
+                                                )
+                                        ])
+                        )
+                );
+
+                overlay.insert(entry);
         }
 }

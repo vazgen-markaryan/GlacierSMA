@@ -1,3 +1,7 @@
+/// sensor_details_popup.dart
+/// Affiche une popup stylisée avec animation pour voir les détails d’un capteur.
+/// Icônes, noms et valeurs dynamiques sont mises à jour via un ValueNotifier.
+
 import 'sensors_data.dart';
 import 'package:intl/intl.dart';
 import '../../../constants.dart';
@@ -21,11 +25,11 @@ class SensorDetailsPopupState extends State<SensorDetailsPopup>
         @override
         void initState() {
                 super.initState();
+                // Animation d’apparition avec effet easeOutBack
                 controller = AnimationController(
                         vsync: this,
                         duration: const Duration(milliseconds: 250)
                 )..forward();
-
                 scale = CurvedAnimation(parent: controller, curve: Curves.easeOutBack);
         }
 
@@ -44,6 +48,7 @@ class SensorDetailsPopupState extends State<SensorDetailsPopup>
                                 scale: scale,
                                 child: Center(
                                         child: ConstrainedBox(
+                                                // Limiter largeur et hauteur max de la popup
                                                 constraints: BoxConstraints(
                                                         maxWidth: 500,
                                                         maxHeight: MediaQuery.of(context).size.height * 0.75
@@ -56,11 +61,12 @@ class SensorDetailsPopupState extends State<SensorDetailsPopup>
                                                         child: Column(
                                                                 mainAxisSize: MainAxisSize.min,
                                                                 children: [
-                                                                        // Header stylisé
+                                                                        // Header stylisé avec titre et bouton de fermeture
                                                                         Container(
                                                                                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                                                                                 decoration: const BoxDecoration(
-                                                                                        color: Color(0xFF1F1F1F),
+                                                                                        color: Color(
+                                                                                                0xFF403B3B),
                                                                                         borderRadius: BorderRadius.only(
                                                                                                 topLeft: Radius.circular(16),
                                                                                                 topRight: Radius.circular(16)
@@ -70,7 +76,8 @@ class SensorDetailsPopupState extends State<SensorDetailsPopup>
                                                                                         children: [
                                                                                                 Expanded(
                                                                                                         child: Text(
-                                                                                                                widget.sensor.title ?? "Détails du capteur",
+
+                                                                                                                (widget.sensor.title ?? "Détails du capteur") + (widget.sensor.code != null ? " (${widget.sensor.code})" : ""),
                                                                                                                 style: const TextStyle(
                                                                                                                         color: primaryColor,
                                                                                                                         fontSize: 20,
@@ -80,13 +87,13 @@ class SensorDetailsPopupState extends State<SensorDetailsPopup>
                                                                                                 ),
                                                                                                 GestureDetector(
                                                                                                         onTap: () => Navigator.of(context).pop(),
-                                                                                                        child: const Icon(Icons.close, color: Colors.red, size: 28)
+                                                                                                        child: const Icon(Icons.close, color: Colors.red, size: 30)
                                                                                                 )
                                                                                         ]
                                                                                 )
                                                                         ),
 
-                                                                        // Corps de la popup
+                                                                        // Corps : timestamp et liste des valeurs
                                                                         Flexible(
                                                                                 child: Padding(
                                                                                         padding: const EdgeInsets.all(20),
@@ -105,6 +112,7 @@ class SensorDetailsPopupState extends State<SensorDetailsPopup>
                                                                                                                                 return Column(
                                                                                                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                                                                                                         children: [
+                                                                                                                                                // Affiche la date/heure de mise à jour
                                                                                                                                                 Text(
                                                                                                                                                         "Mise à jour : ${DateFormat("dd-MM-yyyy 'à' HH:mm:ss").format(DateTime.now())}",
                                                                                                                                                         style: const TextStyle(
@@ -114,14 +122,14 @@ class SensorDetailsPopupState extends State<SensorDetailsPopup>
                                                                                                                                                         )
                                                                                                                                                 ),
                                                                                                                                                 const SizedBox(height: 12),
-                                                                                                                                                ...items.map((entry) {
+                                                                                                                                                // Affichage de chaque entrée de donnée
+                                                                                                                                                ...items.map(
+                                                                                                                                                        (entry) {
                                                                                                                                                                 final key = entry.key;
                                                                                                                                                                 final value = entry.value;
-
                                                                                                                                                                 return Container(
                                                                                                                                                                         margin: const EdgeInsets.only(bottom: 10),
-                                                                                                                                                                        padding: const EdgeInsets.symmetric(
-                                                                                                                                                                                vertical: 6, horizontal: 8),
+                                                                                                                                                                        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
                                                                                                                                                                         decoration: BoxDecoration(
                                                                                                                                                                                 color: Colors.white10,
                                                                                                                                                                                 borderRadius: BorderRadius.circular(8)
@@ -131,6 +139,7 @@ class SensorDetailsPopupState extends State<SensorDetailsPopup>
                                                                                                                                                                                 children: [
                                                                                                                                                                                         Row(
                                                                                                                                                                                                 children: [
+                                                                                                                                                                                                        // Icône SVG de la donnée
                                                                                                                                                                                                         SvgPicture.asset(
                                                                                                                                                                                                                 key.svgLogo,
                                                                                                                                                                                                                 height: 24,
@@ -141,6 +150,7 @@ class SensorDetailsPopupState extends State<SensorDetailsPopup>
                                                                                                                                                                                                                 )
                                                                                                                                                                                                         ),
                                                                                                                                                                                                         const SizedBox(width: 8),
+                                                                                                                                                                                                        // Nom de la donnée
                                                                                                                                                                                                         Text(
                                                                                                                                                                                                                 key.name,
                                                                                                                                                                                                                 style: const TextStyle(
@@ -150,6 +160,7 @@ class SensorDetailsPopupState extends State<SensorDetailsPopup>
                                                                                                                                                                                                         )
                                                                                                                                                                                                 ]
                                                                                                                                                                                         ),
+                                                                                                                                                                                        // Valeur
                                                                                                                                                                                         Flexible(
                                                                                                                                                                                                 child: Text(
                                                                                                                                                                                                         value.toString(),
@@ -165,7 +176,7 @@ class SensorDetailsPopupState extends State<SensorDetailsPopup>
                                                                                                                                                                         )
                                                                                                                                                                 );
                                                                                                                                                         }
-                                                                                                                                                )
+                                                                                                                                                ).toList()
                                                                                                                                         ]
                                                                                                                                 );
                                                                                                                         }

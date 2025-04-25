@@ -1,6 +1,10 @@
-/// Contient des fonctions utilitaires pour gérer les unités, la direction du vent, et l'état de l'antenne GPS.
+/// utils.dart
+/// Contient des utilitaires pour :
+///  Obtenir l’unité à afficher selon l’en-tête de donnée Arduino
+///  Traduire la direction du vent codée (0–16) en texte
+///  Convertir le code d’état de l’antenne GPS en valeur lisible
 
-// WARNING: NE JAMAIS CHANGER LES CASES S'ILS NE SONT PAS CHANGÉS DANS LE CODE ARDUINO
+// WARNING: NE JAMAIS CHANGER CES CAS S’ILS NE SONT PAS CHANGÉS DANS LE CODE ARDUINO
 String getUnitForHeader(String header) {
         switch (header.toLowerCase()) {
                 case "bme280_temperature":
@@ -33,23 +37,23 @@ String getUnitForHeader(String header) {
                 case "mb_asl20":
                 case "steve_veml7700":
                         return " lux";
-                default:
-                return "";
+                default: return "";
         }
 }
 
+// Convertit le code de direction du vent (0–16) en texte français.
 String getWindDirectionFacing(int value) {
         switch (value) {
-                case 0: return "Nord";
-                case 1: return "Nord-nord-est";
-                case 2: return "Nord-est";
-                case 3: return "Est-nord-est";
-                case 4: return "Est";
-                case 5: return "Est-sud-est";
-                case 6: return "Sud-est";
-                case 7: return "Sud-sud-est";
-                case 8: return "Sud";
-                case 9: return "Sud-sud-ouest";
+                case 0:  return "Nord";
+                case 1:  return "Nord-nord-est";
+                case 2:  return "Nord-est";
+                case 3:  return "Est-nord-est";
+                case 4:  return "Est";
+                case 5:  return "Est-sud-est";
+                case 6:  return "Sud-est";
+                case 7:  return "Sud-sud-est";
+                case 8:  return "Sud";
+                case 9:  return "Sud-sud-ouest";
                 case 10: return "Sud-ouest";
                 case 11: return "Ouest-sud-ouest";
                 case 12: return "Ouest";
@@ -61,12 +65,13 @@ String getWindDirectionFacing(int value) {
         }
 }
 
+// Traduit le code d’état de l’antenne GPS en valeur lisible.
 String getGPSAntennaRealValue(int value) {
         switch (value) {
                 case 0: return "Inconnu";
                 case 1: return "Externe";
                 case 2: return "Interne";
-                case 3: return "Court-circuit d'antenne externe";
+                case 3: return "Court-circuit d’antenne externe";
                 default: return "Inconnu";
         }
 }

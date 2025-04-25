@@ -1,11 +1,17 @@
+/// connection_widgets.dart
+/// Contient les widgets pour la section de connexion :
+/// - buildBluetoothSection : carte Bluetooth
+/// - buildCableSection : carte connexion par câble
+/// - buildArrowInstruction : guide visuel entre les sections
+
 import 'package:flutter/material.dart';
 import 'package:rev_glacier_sma_mobile/constants.dart';
 
-// Widget qui affiche la section de connexion Bluetooth
+// Affiche une carte pour la connexion Bluetooth
 Widget buildBluetoothSection(BuildContext context) {
         return GestureDetector(
                 onTap: () {
-                        // TODO: Ajouter la fonctionnalité de connexion Bluetooth quand elle sera disponible via Hardware
+                        // TODO : Ajouter la fonctionnalité de connexion Bluetooth via le hardware
                 },
                 child: Card(
                         color: secondaryColor,
@@ -24,7 +30,7 @@ Widget buildBluetoothSection(BuildContext context) {
         );
 }
 
-// Widget qui crée une flèche avec un texte au milieu seulement pour le Mode Verticale
+// Affiche une carte pour la connexion par câble
 Widget buildCableSection(BuildContext context, Function onTap) {
         return GestureDetector(
                 onTap: () async => onTap(),
@@ -45,7 +51,7 @@ Widget buildCableSection(BuildContext context, Function onTap) {
         );
 }
 
-// Widget qui crée une flèche avec un texte au milieu seulement pour le Mode Verticale
+// Affiche une flèche avec un texte centré pour indiquer le choix du mode de connexion
 Widget buildArrowInstruction() {
         return Row(
                 children: const[

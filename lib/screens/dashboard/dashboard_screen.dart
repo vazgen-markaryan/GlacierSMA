@@ -1,13 +1,13 @@
 import 'dart:async';
 import '../../constants.dart';
 import 'sensors/sensors_data.dart';
-import 'functions/data_reader.dart';
+import 'data_managers/data_capture.dart';
 import 'sensors/sensors_group.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'debug_menu/debug_toggle.dart';
-import 'debug_menu/debug_data_parser.dart';
-import 'debug_menu/debug_log_manager.dart';
+import 'debug/debug_toggle.dart';
+import 'debug/debug_data_parser.dart';
+import 'debug/debug_log_manager.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import '../connection/managers/disconnection_manager.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
@@ -292,8 +292,6 @@ class DashboardScreenState extends State<DashboardScreen> {
                         return false;
                 }
         }
-
-
 }
 
 //TEMPORARY

@@ -1,8 +1,16 @@
+/// connection_manager.dart
+/// Gestion de la déconnexion utilisateur, manuelle ou automatique (perte de connexion).
+/// Utilise des popups pour confirmer ou informer l'utilisateur avant de retourner à l'écran de connexion.
+
 import '../../../constants.dart';
 import '../connection_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
 
+// Affiche un popup de déconnexion.
+// Si [requireConfirmation] est vrai, demande confirmation avant de se déconnecter.
+// Sinon, déconnecte immédiatement.
+// Retourne "true" si déconnecté, "false" si annulé par l'utilisateur.
 Future<bool> showDisconnectPopup({
         required BuildContext context,
         required FlutterSerialCommunication? plugin,
@@ -41,7 +49,7 @@ Future<bool> showDisconnectPopup({
                 }
         }
 
-        // Appel automatique en cas de déconnexion (sans confirmation)
+        // Déconnexion sans confirmation
         await plugin?.disconnect();
         Navigator.pushReplacement(
                 context,
@@ -50,13 +58,16 @@ Future<bool> showDisconnectPopup({
         return true;
 }
 
+// Affiche un popup lorsque la connexion est perdue automatiquement.
+// Affiche la durée écoulée avant la coupure.
+// Déconnecte et retourne à l'écran de connexion.
 Future<void> showLostConnectionPopup({
         required BuildContext context,
         required FlutterSerialCommunication? plugin,
         required Duration elapsedTime
 }) async {
-
-        final formatted = "${elapsedTime.inHours}h ${elapsedTime.inMinutes.remainder(60)}m ${elapsedTime.inSeconds.remainder(60)}s";
+        final formatted =
+                "${elapsedTime.inHours}h ${elapsedTime.inMinutes.remainder(60)}m ${elapsedTime.inSeconds.remainder(60)}s";
 
         await showDialog(
                 context: context,

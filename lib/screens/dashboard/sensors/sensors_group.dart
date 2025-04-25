@@ -1,22 +1,24 @@
+/// sensors_group.dart
+/// Affiche un groupe de cartes de capteurs dans une grille responsive,
+/// avec un notifier pour rafraîchir automatiquement quand les données/status changent.
+
 import 'sensors_data.dart';
 import '../../../constants.dart';
 import 'sensor_details_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-// Notifie automatiquement si un capteur du groupe change (valeurs ou status)
 class SensorsGroupNotifier extends ValueNotifier<int> {
         SensorsGroupNotifier(List<SensorsData> sensors) : super(0) {
+                // Écouter chaque capteur pour déclencher un rebuild du groupe
                 for (var sensor in sensors) {
                         sensor.dataNotifier.addListener(onChange);
                         sensor.powerStatusNotifier.addListener(onChange);
                 }
         }
-
         void onChange() => value++;
 }
 
-// Affiche un groupe de capteurs avec un titre et une grille dynamique
 class SensorsGroup extends StatelessWidget {
         final String title;
         final List<SensorsData> sensors;
@@ -36,6 +38,7 @@ class SensorsGroup extends StatelessWidget {
                 return ValueListenableBuilder<int>(
                         valueListenable: notifier,
                         builder: (context, _, __) {
+                                // Filtrer les capteurs selon le mode debug ou leur powerStatus
                                 final filtered = sensors.where((s) => isDebugMode || s.powerStatus != null);
 
                                 return Column(
@@ -54,7 +57,7 @@ class SensorsGroup extends StatelessWidget {
                 );
         }
 
-        // Construit chaque carte de capteur dans la grille
+        // Construit une carte pour chaque capteur
         Widget buildSensorCard(BuildContext context, SensorsData sensor) {
                 final (iconColor, borderColor, statusLabel) = getStatusUI(sensor.powerStatus);
 
@@ -62,6 +65,7 @@ class SensorsGroup extends StatelessWidget {
                         width: double.infinity,
                         height: 85,
                         child: GestureDetector(
+                                // N’ouvrir la popup que si le capteur a des données
                                 onTapDown: (sensor.data.isNotEmpty && sensor.title != "SD Card")
                                         ? (details) {
                                                 final tapPosition = details.globalPosition;
@@ -99,8 +103,7 @@ class SensorsGroup extends StatelessWidget {
                                                                         ]
                                                                 )
                                                         ),
-
-                                                        // Indicateur status en haut à droite
+                                                        // Étiquette de statut en coin
                                                         Positioned(
                                                                 top: -10,
                                                                 right: -10,
@@ -130,7 +133,7 @@ class SensorsGroup extends StatelessWidget {
                 );
         }
 
-        // Ouvre la popup stylée avec animation (zoom depuis point de clic)
+        // Affiche la popup depuis le point de clic avec animation de zoom
         void showSensorPopup(BuildContext context, SensorsData sensor, Offset tapPosition) {
                 final screenSize = MediaQuery.of(context).size;
                 final alignmentX = (tapPosition.dx / screenSize.width) * 2 - 1;
@@ -154,19 +157,14 @@ class SensorsGroup extends StatelessWidget {
                 );
         }
 
-        // Donne couleurs/icônes selon le powerStatus (0 = Inconnu, etc.)
+        // Retourne couleurs et label selon le statut (0–3)
         (Color, Color, String) getStatusUI(int? status) {
                 switch (status) {
-                        case 0:
-                                return (Colors.grey, Colors.grey, "Inconnu");
-                        case 1:
-                                return (Colors.green, Colors.green, "Fonctionne");
-                        case 2:
-                                return (Colors.yellow, Colors.yellow, "Déconnecté");
-                        case 3:
-                                return (Colors.red, Colors.red, "Erreur");
-                        default:
-                        return (Colors.black, Colors.black, "Désactivé");
+                        case 0: return (Colors.grey, Colors.grey, "Inconnu");
+                        case 1: return (Colors.green, Colors.green, "Fonctionne");
+                        case 2: return (Colors.yellow, Colors.yellow, "Déconnecté");
+                        case 3: return (Colors.red, Colors.red, "Erreur");
+                        default: return (Colors.black, Colors.black, "Désactivé");
                 }
         }
 }
