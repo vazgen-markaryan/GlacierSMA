@@ -1,9 +1,8 @@
-/// Affiche un groupe de cartes de capteurs dans une grille responsive,
-/// avec un notifier pour rafraîchir automatiquement quand les données/status changent.
+/// Affiche un groupe de cartes de capteurs dans une grille responsive, avec un notifier pour rafraîchir automatiquement quand les données/status changent.
 
 import 'sensors_data.dart';
 import '../utils/constants.dart';
-import 'sensor_details_popup.dart';
+import 'sensor_data_popup/sensor_details_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 

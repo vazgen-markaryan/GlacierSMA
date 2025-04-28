@@ -2,8 +2,8 @@
 /// Affiche une liste des appareils disponibles et empêche le spam de SnackBars.
 
 import 'package:flutter/material.dart';
-import '../../dashboard/dash/dashboard_screen.dart';
 import '../../dashboard/utils/custom_snackbar.dart';
+import '../../dashboard/dash/dashboard_screen.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
 import 'package:rev_glacier_sma_mobile/screens/dashboard/utils/constants.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';

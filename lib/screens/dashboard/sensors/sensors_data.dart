@@ -1,5 +1,4 @@
-/// Définit le modèle `DataMap` (clé de donnée) et `SensorsData` (état et valeurs),
-/// ainsi que la liste par défaut de tous les capteurs et la fonction d’accès.
+/// Définit le modèle "DataMap" et "SensorsData", ainsi que la liste par défaut de tous les capteurs et la fonction d’accès.
 
 import '../utils/constants.dart';
 import 'package:flutter/material.dart';

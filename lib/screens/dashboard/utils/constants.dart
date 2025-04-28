@@ -1,5 +1,4 @@
-// constants.dart
-// Contient toutes les constantes partagées dans l'application.
+/// Contient toutes les constantes partagées dans l'application.
 
 import 'package:flutter/material.dart';
 

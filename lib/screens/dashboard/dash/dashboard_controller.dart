@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import '../sensors/sensors_data.dart';
 import '../debug/debug_log_manager.dart';
-import '../data_managers/data_capture.dart';
+import '../data_managers/data_reader.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';

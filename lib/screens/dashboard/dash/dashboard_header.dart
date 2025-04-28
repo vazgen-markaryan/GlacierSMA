@@ -1,5 +1,4 @@
-/// Widget pour l’en-tête du Dashboard : statut USB, batterie et toggle debug,
-/// avec gestion de l’overflow pour que le texte ne déborde pas.
+/// Widget pour l’en-tête du Dashboard : statut USB, batterie et toggle debug, avec gestion de l’overflow pour que le texte ne déborde pas.
 
 import '../debug/debug_toggle.dart';
 import 'package:flutter/material.dart';

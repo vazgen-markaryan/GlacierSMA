@@ -6,9 +6,9 @@
 ///  5. Notification UI via onDataReceived()
 
 import 'dart:math';
-import '../utils/switch_utils.dart';
 import 'data_feeder.dart';
 import '../utils/constants.dart';
+import '../utils/switch_utils.dart';
 import '../sensors/sensors_data.dart';
 import 'package:flutter/material.dart';
 import '../debug/debug_log_manager.dart';

@@ -3,8 +3,8 @@
 /// Parcourt chaque groupe de capteurs et met à jour leurs "dataNotifier".
 /// si une nouvelle valeur est détectée dans >rawData".
 
-import '../sensors/sensors_data.dart';
 import '../utils/switch_utils.dart';
+import '../sensors/sensors_data.dart';
 
 void populateSensorData(String rawData, List<List<SensorsData>> sensorGroups) {
         // Sépare la chaîne reçue en lignes

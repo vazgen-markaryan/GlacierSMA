@@ -1,5 +1,4 @@
-/// Fournit la fonction getBatteryInfo pour convertir une tension
-/// en pourcentage, chemin d'icône et couleur correspondants.
+/// Fournit la fonction getBatteryInfo pour convertir une tension en pourcentage, chemin d'icône et couleur correspondants.
 
 import 'package:flutter/material.dart';
 
