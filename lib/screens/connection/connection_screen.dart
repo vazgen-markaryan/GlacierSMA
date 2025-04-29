@@ -3,11 +3,11 @@
 /// Gère la détection des appareils via USB série.
 
 import 'package:flutter/material.dart';
-import 'managers/connection_manager.dart';
+import 'components/connection_manager.dart';
+import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
-import 'package:rev_glacier_sma_mobile/screens/dashboard/utils/constants.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
-import 'package:rev_glacier_sma_mobile/screens/connection/widgets/connection_widgets.dart';
+import 'package:rev_glacier_sma_mobile/screens/connection/components/connection_widgets.dart';
 
 class ConnectionScreen extends StatefulWidget {
         const ConnectionScreen({super.key});
@@ -47,16 +47,19 @@ class ConnectionScreenState extends State<ConnectionScreen> {
                                                                         const SizedBox(width: defaultPadding),
                                                                         Expanded(
                                                                                 child: buildCableSection(context, () async {
-                                                                                                // Met à jour la liste des appareils avant d'afficher la boîte de sélection
+                                                                                                // 1. Récupère et affiche la liste
                                                                                                 await getAllCableConnectedDevices(
                                                                                                         flutterSerialCommunicationPlugin,
                                                                                                         (devices) => setState(() => connectedDevices = devices)
                                                                                                 );
+                                                                                                // 2. Ouvre le dialogue, attend la fermeture (sélection ou annulation)
                                                                                                 await showDeviceSelectionDialog(
                                                                                                         context,
                                                                                                         connectedDevices,
                                                                                                         flutterSerialCommunicationPlugin
                                                                                                 );
+                                                                                                // 3. Quand le dialogue est fermé, on vide les appareils
+                                                                                                setState(() => connectedDevices.clear());
                                                                                         }
                                                                                 )
                                                                         )
