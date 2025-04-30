@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_snackbar.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/dashboard_screen.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/home_screen.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
 
 // Indicateur global pour empêcher le spam de SnackBars
@@ -41,7 +41,7 @@ Future<void> showDeviceSelectionDialog(
                 final controller = ScaffoldMessenger.of(context).showSnackBar(
                         buildAppSnackBar(
                                 message:
-                                "Aucun appareil compatible n'est trouvé. Assurez-vous d'utiliser le bon code Arduino.",
+                                "Aucun appareil compatible n'est trouvé:\n1. Flashez le code RevGlacierSMA\n2. Vérifiez le câble\n3. Vérifiez le Debug Switch physique.",
                                 iconData: Icons.error,
                                 backgroundColor: Colors.white,
                                 textColor: Colors.black,
@@ -93,7 +93,7 @@ Future<void> showDeviceSelectionDialog(
                                                                                 Navigator.pushReplacement(
                                                                                         context,
                                                                                         MaterialPageRoute(
-                                                                                                builder: (_) => DashboardScreen(
+                                                                                                builder: (_) => home_screen(
                                                                                                         plugin: plugin,
                                                                                                         isConnected: true,
                                                                                                         connectedDevices: compatibleDevices

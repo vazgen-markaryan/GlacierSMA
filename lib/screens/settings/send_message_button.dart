@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_snackbar.dart';
 
 class SendMessageButton extends StatelessWidget {
-        final Future<bool> Function(String, Uint8List) sendCustomMessage;
+        final Future<bool> Function(String, Uint8List) sendOnOffMessage;
 
         const SendMessageButton({
                 super.key,
-                required this.sendCustomMessage
+                required this.sendOnOffMessage
         });
 
         @override
@@ -17,10 +17,7 @@ class SendMessageButton extends StatelessWidget {
                 return Center(
                         child: ElevatedButton(
                                 onPressed: () async {
-                                        final success = await sendCustomMessage(
-                                                '<active>',
-                                                Uint8List.fromList([0xff, 0xff])
-                                        );
+                                        final success = await sendOnOffMessage('<active>', Uint8List.fromList([0xff, 0xff]));
                                         showCustomSnackBar(
                                                 context,
                                                 message: success ? 'Message envoyé' : 'Échec de l’envoi du message.',

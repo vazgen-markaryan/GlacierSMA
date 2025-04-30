@@ -2,38 +2,33 @@
 /// Inclut un Stopwatch pour mesurer le temps écoulé depuis la connexion initiale.
 
 import 'dart:async';
-import 'message_service.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import '../sensors/sensors_data.dart';
-import '../data_managers/data_reader.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import '../../debug_log/components/debug_log_updater.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
+import 'package:rev_glacier_sma_mobile/utils/message_service.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_reader.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_processor.dart';
+import 'package:rev_glacier_sma_mobile/screens/debug_log/components/debug_log_updater.dart';
 
 class DashboardController {
         final FlutterSerialCommunication? plugin;
         final List<DeviceInfo> connectedDevices;
         final DebugLogUpdater debugLogManager;
         final MessageService messageService;
-
-        // Callback pour notifier la perte de connexion, avec la durée écoulée.
         final void Function(Duration elapsed) onConnectionLost;
-
         late final ValueNotifier<bool> isInitialLoading;
         final ValueNotifier<double?> batteryVoltage = ValueNotifier(null);
-
+        final ValueNotifier<RawData?> firmwareNotifier = ValueNotifier(null);
+        final ValueNotifier<int?> activeMaskNotifier = ValueNotifier(null);
         Timer? pingTimer;
         EventChannel? messageChannel;
         bool isEmulator = false;
-
-        // Stevenson statuses
-        int stevensonTemp = 0, stevensonHum = 0, stevensonPress = 0;
-
-        // Pour mesurer le temps depuis la connexion
         late final Stopwatch connectionStopwatch;
+        int stevensonTemp = 0, stevensonHum = 0, stevensonPress = 0;
 
         DashboardController({
                 required this.plugin,
@@ -45,29 +40,28 @@ class DashboardController {
                 isInitialLoading = ValueNotifier(true);
         }
 
-        // Initialise la connexion série et démarre la capture.
         Future<void> init(void Function() onDataReceived) async {
                 final info = await DeviceInfoPlugin().androidInfo;
                 isEmulator = !info.isPhysicalDevice;
 
                 if (isEmulator) {
-                        // UI-only : simuler un délai de chargement
+                        // Simule un chargement rapide en émulateur
                         await Future.delayed(const Duration(seconds: 1));
                         isInitialLoading.value = false;
                         return;
                 }
 
-                // Appareil réel : démarrer le stopwatch avant la communication
+                // Vrai matériel : démarrage du stopwatch
                 connectionStopwatch = Stopwatch()..start();
 
-                // Setup du canal série
+                // Prépare la liaison série
                 messageChannel = plugin?.getSerialMessageListener();
                 plugin?.setDTR(true);
 
-                // Démarrer la lecture
+                // Lance la lecture du port série
                 readMessage(
                         messageChannel: messageChannel,
-                        sendMessage: messageService.sendMessage,
+                        sendAndroidMessage: messageService.sendHeartbeat,
                         debugLogManager: debugLogManager,
                         getSensors: getSensors,
                         setTemp: (v) => stevensonTemp = v,
@@ -83,12 +77,14 @@ class DashboardController {
                                 if (hasData) isInitialLoading.value = false;
                                 onDataReceived();
                         },
-                        batteryVoltage: batteryVoltage
+                        batteryVoltage: batteryVoltage,
+                        onIdReceived: (idData) {firmwareNotifier.value = idData;},
+                        onActiveReceived: (mask) => activeMaskNotifier.value = mask
                 );
 
-                // Ping toutes les 2s pour vérifier la connexion
+                // Ping toutes les 2s pour détecter la perte de connexion
                 pingTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
-                                final ok = await messageService.sendMessage(communicationMessageAndroid);
+                                final ok = await messageService.sendHeartbeat(communicationMessageAndroid);
                                 if (!ok) {
                                         pingTimer?.cancel();
                                         connectionStopwatch.stop();
@@ -102,5 +98,7 @@ class DashboardController {
                 pingTimer?.cancel();
                 isInitialLoading.dispose();
                 batteryVoltage.dispose();
+                firmwareNotifier.dispose();
+                activeMaskNotifier.dispose();
         }
 }

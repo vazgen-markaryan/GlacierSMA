@@ -1,10 +1,3 @@
-/// Parse et traite un bloc de données brut (>=3 lignes CSV) :
-///  1. Extraction des headers/values  
-///  2. Mise à jour des logs de components (STATUS / VALEURS)
-///  3. Mise à jour du voltage de batterie  
-///  4. Mise à jour des capteurs (populateSensorData + updateSensorsData)  
-///  5. Notification UI via onDataReceived()
-
 import 'dart:math';
 import 'data_feeder.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +14,7 @@ class RawData {
         RawData(this.headers, this.values);
 }
 
-/// Utility pour parser le CSV d’un bloc de données brutal.
+/// Utility pour parser le CSV d’un bloc de données brut.
 class RawDataParser {
         /// Prend rawData (>=3 lignes) et renvoie [RawData] propre.
         static RawData parse(String rawData) {
@@ -33,7 +26,7 @@ class RawDataParser {
         }
 }
 
-/// Traite un bloc `rawData` : logs, batterie, capteurs et callback UI.
+/// Traite un bloc `rawData` :
 void processRawData({
         required String rawData,
         required DebugLogUpdater debugLogManager,
@@ -42,15 +35,35 @@ void processRawData({
         required void Function(int) setHum,
         required void Function(int) setPres,
         required void Function() onDataReceived,
-        required ValueNotifier<double?> batteryVoltage
+        required ValueNotifier<double?> batteryVoltage,
+        required void Function(int mask) onActiveReceived
 }) {
-        // 1. Parsing CSV
+
+        // Recupération de sensor status
+        if (rawData.contains('<active>')) {
+                final lines = rawData.split('\n');
+                if (lines.length >= 2) {
+                        final maskStr = lines[1].trim();
+                        try {
+                                // supprime le préfixe « 0x »
+                                final hex = maskStr.startsWith('0x') ? maskStr.substring(2) : maskStr;
+                                final mask = int.parse(hex, radix: 16);
+                                onActiveReceived(mask);
+                        }
+                        catch (_) {
+                                /* ignore parse errors */
+                        }
+                }
+                return;
+        }
+
+        // Parsing CSV
         final parsed = RawDataParser.parse(rawData);
         final headers = parsed.headers;
         final values = parsed.values;
         final maxHeaderLength = headers.fold<int>(0, (prev, h) => max(prev, h.length));
 
-        // 2. Logs STATUS
+        // Logs STATUS
         if (rawData.contains('<status>')) {
                 final statusLog = 'Status:\n' +
                         headers.asMap().entries.map((e) {
@@ -62,7 +75,7 @@ void processRawData({
                 debugLogManager.setLogChunk(1, statusLog);
         }
 
-        // 3. Logs DATA + batterie
+        // Logs DATA + Batterie
         if (rawData.contains('<data>')) {
                 // Batterie
                 final batIdx = headers.indexWhere((h) => h.toLowerCase() == 'battery_voltage');
@@ -84,10 +97,10 @@ void processRawData({
                 debugLogManager.setLogChunk(2, dataLog);
         }
 
-        // 4. Publier les logs
+        // Publication des logs
         debugLogManager.updateLogs();
 
-        // 5. Mise à jour des capteurs
+        // Mise à jour des capteurs
         if (rawData.contains('<data>')) {
                 populateSensorData(
                         rawData,
@@ -109,7 +122,7 @@ void processRawData({
                 );
         }
 
-        // 6. Notification UI
+        // Notification UI si au moins un capteur actif
         final hasData = [
                 ...getSensors(SensorType.internal),
                 ...getSensors(SensorType.modbus),

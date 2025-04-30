@@ -1,10 +1,11 @@
 import 'bottom_navbar.dart';
 import 'package:flutter/material.dart';
+import '../../utils/message_service.dart';
 import '../settings/settings_screen.dart';
 import '../debug_log/debug_screen.dart';
 import 'dashboard/dashboard_body.dart';
-import 'dashboard/message_service.dart';
 import 'dashboard/dashboard_header.dart';
+import '../settings/sensor_config_screen.dart';
 import 'dashboard/dashboard_controller.dart';
 import '../debug_log/components/debug_log_updater.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
@@ -13,17 +14,14 @@ import 'package:flutter_serial_communication/models/device_info.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
 
-/// Écran principal de l'application (accueil) qui gère l'affichage de :
-/// - Dashboard
-/// - Debug
-/// - Paramètres
+/// Écran principal de l'application (accueil) qui gère l'affichage
 /// Il gère aussi l’état de connexion et l'affichage de la barre de navigation inférieure.
-class DashboardScreen extends StatefulWidget {
+class home_screen extends StatefulWidget {
         final FlutterSerialCommunication? plugin;
         final bool isConnected;
         final List<DeviceInfo> connectedDevices;
 
-        const DashboardScreen({
+        const home_screen({
                 Key? key,
                 required this.plugin,
                 required this.isConnected,
@@ -31,10 +29,10 @@ class DashboardScreen extends StatefulWidget {
         }) : super(key: key);
 
         @override
-        State<DashboardScreen> createState() => DashboardScreenState();
+        State<home_screen> createState() => home_screenState();
 }
 
-class DashboardScreenState extends State<DashboardScreen> {
+class home_screenState extends State<home_screen> {
         late final DashboardController controller;
         late final MessageService messageService;
         late bool isConnected;
@@ -49,6 +47,7 @@ class DashboardScreenState extends State<DashboardScreen> {
         final List<String> pageTitles = [
                 'Tableau de bord',
                 'Debug Logs',
+                'Configuration',
                 'Paramètres'
         ];
 
@@ -89,16 +88,21 @@ class DashboardScreenState extends State<DashboardScreen> {
                                         if (loading) return const Center(child: CircularProgressIndicator());
                                         return DashboardBody(
                                                 debugLogManager: controller.debugLogManager,
-                                                getSensors: getSensors,
-                                                sendCustomMessage: messageService.sendCustomMessage
+                                                getSensors: getSensors
                                         );
                                 }
                         ),
                         // Page Debug
                         DebugScreen(debugLogManager: controller.debugLogManager),
 
+                        // Page Configuration capteurs
+                        SensorConfigScreen(
+                                activeMaskNotifier: controller.activeMaskNotifier,
+                                messageService: messageService
+                        ),
+
                         // Page Paramètres
-                        const SettingsScreen()
+                        SettingsScreen(firmwareNotifier: controller.firmwareNotifier)
                 ];
         }
 

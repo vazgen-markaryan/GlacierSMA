@@ -26,8 +26,11 @@ class DataMap {
 }
 
 class SensorsData {
-        String? svgIcon, title, header, temp, pres, hum, antenna, code;
+        String? svgIcon, title, header, temp, pres, hum, code;
         Color? color;
+
+        // Bit index (0…15) utilisé par le masque de configuration.
+        final int? bitIndex;
 
         // Notifiers pour valeurs et statut (powerStatus)
         final ValueNotifier<Map<DataMap, dynamic>> dataNotifier;
@@ -39,7 +42,7 @@ class SensorsData {
         SensorsData({
                 this.svgIcon, this.title, this.color,
                 this.header, this.temp, this.pres,
-                this.hum, this.antenna, this.code,
+                this.hum, this.code, this.bitIndex,
                 required Map<DataMap, dynamic> data,
                 int? powerStatus
         }) : dataNotifier = ValueNotifier(data),
@@ -74,6 +77,7 @@ List<SensorsData> internalSensors = [
                 title: "Thermo-Hygro-Baromètre",
                 header: "bme280_status",
                 code: "BME280",
+                bitIndex: 0,
                 svgIcon: microchip,
                 data: {
                         DataMap(name: "Temperature", header: "bme280_temperature", svgLogo: temperature) : "Placeholder par défaut",
@@ -87,6 +91,7 @@ List<SensorsData> internalSensors = [
                 title: "Accéléromètre",
                 header: "lsm303_status",
                 code: "LSM303",
+                bitIndex: 2,
                 svgIcon: microchip,
                 data: {
                         DataMap(name: "Accélération X", header: "lsm303_accel_x", svgLogo: acceleration) : "Placeholder par défaut",
@@ -101,14 +106,13 @@ List<SensorsData> internalSensors = [
         SensorsData(
                 title: "GPS",
                 header: "gps_status",
-                antenna: "gps_antenna_status",
+                bitIndex: 8,
                 svgIcon: gps,
                 data: {
                         DataMap(name: "Latitude", header: "gps_latitude", svgLogo: gps) : "Placeholder par défaut",
                         DataMap(name: "Longitude", header: "gps_longitude", svgLogo: gps) : "Placeholder par défaut",
                         DataMap(name: "Satelites", header: "gps_satelites", svgLogo: gps) : "Placeholder par défaut",
-                        DataMap(name: "HDOP", header: "gps_hdop", svgLogo: gps) : "Placeholder par défaut",
-                        DataMap(name: "Antenne", header: "gps_antenna_status", svgLogo: gps) : "Placeholder par défaut"
+                        DataMap(name: "HDOP", header: "gps_hdop", svgLogo: gps) : "Placeholder par défaut"
                 }
         ),
 
@@ -124,6 +128,7 @@ List<SensorsData> modBusSensors = [
         SensorsData(
                 title: "Anémomètre",
                 header: "wind_speed_status",
+                bitIndex: 3,
                 svgIcon: ventilation,
                 data: {
                         DataMap(name: "Vitesse", header: "wind_speed", svgLogo: windSpeed) : "Placeholder par défaut"
@@ -133,6 +138,7 @@ List<SensorsData> modBusSensors = [
         SensorsData(
                 title: "Girouette",
                 header: "wind_direction_status",
+                bitIndex: 4,
                 svgIcon: ventilation,
                 data: {
                         DataMap(name: "Angle", header: "wind_direction_angle", svgLogo: windAngle) : "Placeholder par défaut",
@@ -144,6 +150,7 @@ List<SensorsData> modBusSensors = [
                 title: "Luxmètre",
                 header: "mb_asl20_status",
                 code: "ASL20",
+                bitIndex: 6,
                 svgIcon: luxmetre,
                 data: {
                         DataMap(name: "Luminosité", header: "mb_asl20", svgLogo: luxmetre) : "Placeholder par défaut"
@@ -154,6 +161,7 @@ List<SensorsData> modBusSensors = [
                 title: "Thermo-Hygro-Baromètre",
                 header: "mb_bme280_status",
                 code: "BME280",
+                bitIndex: 7,
                 svgIcon: microchip,
                 data: {
                         DataMap(name: "Temperature", header: "mb_bme280_temp", svgLogo: temperature) : "Placeholder par défaut",
@@ -193,6 +201,7 @@ List<SensorsData> stevensonStatus = [
         SensorsData(
                 title: "Stevenson",
                 header: "steve_status",
+                bitIndex: 5,
                 svgIcon: microchip,
                 data: {} // Doit être vide
         )

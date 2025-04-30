@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_processor.dart';
 
-/// Écran Paramètres affichant différentes sections d’options non interactives.
-/// Présente des catégories comme Général, Aide et Confidentialité.
+/// Écran Paramètres
 class SettingsScreen extends StatelessWidget {
-        const SettingsScreen({Key? key}) : super(key: key);
+        final ValueNotifier<RawData?> firmwareNotifier;
+
+        const SettingsScreen({
+                Key? key,
+                required this.firmwareNotifier,
+        }) : super(key: key);
 
         @override
         Widget build(BuildContext context) {
@@ -11,64 +17,146 @@ class SettingsScreen extends StatelessWidget {
                         padding: const EdgeInsets.all(16),
                         child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: const[
+                                children: [
+                                        SettingsSection(
+                                                title: 'Help & Support',
+                                                children: [
+                                                        // About tile avec ExpansionTile
+                                                        ValueListenableBuilder<RawData?>(
+                                                                valueListenable: firmwareNotifier,
+                                                                builder: (ctx, idData, _) {
+                                                                        if (idData == null) {
+                                                                                return const ListTile(
+                                                                                        leading: Icon(Icons.info_outline_rounded),
+                                                                                        title: Text('À propos'),
+                                                                                        subtitle: Text('En attente de données...'),
+                                                                                        trailing: Icon(Icons.arrow_forward_ios)
+                                                                                );
+                                                                        }
+                                                                        final name = idData.values[0];
+                                                                        final repo = idData.values[1];
+                                                                        final hash = idData.values[2];
+                                                                        final dirty = idData.values[3] == '1';
+                                                                        final dateS = int.tryParse(idData.values[4]) ?? 0;
+                                                                        final buildD = DateTime.fromMillisecondsSinceEpoch(dateS * 1000);
+                                                                        final user = idData.values[5];
+                                                                        final email = idData.values[6];
+                                                                        final repoUrl = '$repo/tree/$hash';
 
-                                        // Section : Général
-                                        Text(
-                                                "General",
-                                                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500)
-                                        ),
-                                        SizedBox(height: 12),
-                                        ListTile(
-                                                leading: Icon(Icons.security),
-                                                title: Text("Security"),
-                                                trailing: Icon(Icons.arrow_forward_ios)
-                                        ),
-                                        ListTile(
-                                                leading: Icon(Icons.browse_gallery_outlined),
-                                                title: Text("Reminders"),
-                                                trailing: Icon(Icons.arrow_forward_ios)
-                                        ),
-                                        ListTile(
-                                                leading: Icon(Icons.collections_bookmark_rounded),
-                                                title: Text("History"),
-                                                trailing: Icon(Icons.arrow_forward_ios)
-                                        ),
+                                                                        return ExpansionTile(
+                                                                                leading: const Icon(Icons.info_outline_rounded),
+                                                                                title: Text("À propos"),
+                                                                                childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                                                                trailing: const Icon(Icons.expand_more),
+                                                                                children: [
+                                                                                        LabelRow(label: 'Micrologiciel', value: name),
+                                                                                        LinkRow(
+                                                                                                label: 'GitRepository (Privé)',
+                                                                                                url: repoUrl,
+                                                                                                onError: () => ScaffoldMessenger.of(context).showSnackBar(
+                                                                                                        const SnackBar(content: Text("Impossible d'ouvrir le lien"))
+                                                                                                )
+                                                                                        ),
+                                                                                        LabelRow(label: 'Commit', value: dirty ? 'Modifié' : 'Exacte'),
+                                                                                        LabelRow(
+                                                                                                label: 'Compilé le',
+                                                                                                value:
+                                                                                                '${buildD.hour.toString().padLeft(2, '0')}:${buildD.minute.toString().padLeft(2, '0')} '
+                                                                                                '${buildD.day.toString().padLeft(2, '0')}/${buildD.month.toString().padLeft(2, '0')}/${buildD.year}'
+                                                                                        ),
+                                                                                        LabelRow(label: 'Compilé par', value: user),
+                                                                                        LabelRow(label: 'Email', value: email)
+                                                                                ]
+                                                                        );
+                                                                }
+                                                        )
+                                                ]
+                                        )
+                                ]
+                        )
+                );
+        }
+}
 
-                                        // Section : Aide & support
-                                        SizedBox(height: 12),
-                                        Text(
-                                                "Help & Support",
-                                                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500)
-                                        ),
-                                        SizedBox(height: 12),
-                                        ListTile(
-                                                leading: Icon(Icons.info_outline_rounded),
-                                                title: Text("About"),
-                                                trailing: Icon(Icons.arrow_forward_ios)
-                                        ),
+/// Widget réutilisable pour les sections avec titre + liste d’enfants
+class SettingsSection extends StatelessWidget {
+        final String title;
+        final List<Widget> children;
+        const SettingsSection({
+                Key? key,
+                required this.title,
+                required this.children
+        }) : super(key: key);
 
-                                        // Section : Confidentialité
-                                        SizedBox(height: 12),
-                                        Text(
-                                                "Privacy",
-                                                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500)
-                                        ),
-                                        SizedBox(height: 12),
-                                        ListTile(
-                                                leading: Icon(Icons.electrical_services_rounded),
-                                                title: Text("Terms of Service"),
-                                                trailing: Icon(Icons.arrow_forward_ios)
-                                        ),
-                                        ListTile(
-                                                leading: Icon(Icons.privacy_tip_rounded),
-                                                title: Text("Privacy Policy"),
-                                                trailing: Icon(Icons.arrow_forward_ios)
-                                        ),
-                                        ListTile(
-                                                leading: Icon(Icons.policy),
-                                                title: Text("Security Policy"),
-                                                trailing: Icon(Icons.arrow_forward_ios)
+        @override
+        Widget build(BuildContext context) {
+                return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                                Text(title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500)),
+                                const SizedBox(height: 12),
+                                ...children
+                        ]
+                );
+        }
+}
+
+/// Ligne “Label : Value”
+class LabelRow extends StatelessWidget {
+        final String label;
+        final String value;
+        const LabelRow({Key? key, required this.label, required this.value}) : super(key: key);
+
+        @override
+        Widget build(BuildContext context) {
+                return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                        Text('$label :', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: Text(value))
+                                ]
+                        )
+                );
+        }
+}
+
+/// Ligne avec un TextButton ouvrant une URL
+class LinkRow extends StatelessWidget {
+        final String label;
+        final String url;
+        final VoidCallback onError;
+        const LinkRow({
+                Key? key,
+                required this.label,
+                required this.url,
+                required this.onError
+        }) : super(key: key);
+
+        @override
+        Widget build(BuildContext context) {
+                return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                                children: [
+                                        Text('$label :', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                        const SizedBox(width: 8),
+                                        TextButton(
+                                                style: TextButton.styleFrom(
+                                                        padding: EdgeInsets.zero,
+                                                        minimumSize: const Size(0, 0),
+                                                        tapTargetSize: MaterialTapTargetSize.shrinkWrap
+                                                ),
+                                                onPressed: () async {
+                                                        final ok = await launchUrlString(url, mode: LaunchMode.externalApplication);
+                                                        if (!ok) onError();
+                                                },
+                                                child: const Text(
+                                                        'URL',
+                                                        style: TextStyle(color: Colors.blueAccent, decoration: TextDecoration.none)
+                                                )
                                         )
                                 ]
                         )

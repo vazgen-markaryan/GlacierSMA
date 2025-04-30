@@ -37,7 +37,7 @@ class DebugScreen extends StatelessWidget {
                                                 DebugLogProcessor(debugLogManager: debugLogManager),
 
                                                 // 2) Espacement entre la section logs et la liste des capteurs
-                                                const SizedBox(height: defaultPadding * 2),
+                                                const SizedBox(height: defaultPadding),
 
                                                 // 3) Affiche un groupe de cartes pour les capteurs inactifs seulement si ils existent
                                                 if (inactiveSensors.isNotEmpty)

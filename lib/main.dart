@@ -4,7 +4,7 @@
 import 'utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/dashboard_screen.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/home_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/connection/connection_screen.dart';
 
 void main() {
@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
 
                                         // Écran d'accueil selon le contexte : émulateur ou appareil réel
                                         home: areWeInDevelopingMode
-                                                ? const DashboardScreen(plugin: null, isConnected: false, connectedDevices: [])
+                                                ? const home_screen(plugin: null, isConnected: false, connectedDevices: [])
                                                 : const ConnectionScreen()
                                 );
                         }

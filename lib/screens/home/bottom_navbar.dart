@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 
-/// Barre de navigation du Dashboard (Accueil / Debug / Paramètres)
+/// Barre de navigation du Dashboard
 class BottomNavBar extends StatelessWidget {
-        /// Index de l'onglet actuellement sélectionné
+        // Index de l'onglet actuellement sélectionné
         final int selectedIndex;
 
-        /// Callback appelé quand l'utilisateur change d'onglet
+        // Callback appelé quand l'utilisateur change d'onglet
         final ValueChanged<int> onItemTapped;
 
         const BottomNavBar({
@@ -29,18 +29,10 @@ class BottomNavBar extends StatelessWidget {
 
                         // Définition des 3 onglets
                         items: const[
-                                BottomNavigationBarItem(
-                                        icon: Icon(Icons.home),
-                                        label: 'Accueil'
-                                ),
-                                BottomNavigationBarItem(
-                                        icon: Icon(Icons.bug_report),
-                                        label: 'Debug'
-                                ),
-                                BottomNavigationBarItem(
-                                        icon: Icon(Icons.settings),
-                                        label: 'Paramètres'
-                                )
+                                BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Accueil'),
+                                BottomNavigationBarItem(icon: Icon(Icons.bug_report), label: 'Debug'),
+                                BottomNavigationBarItem(icon: Icon(Icons.tune), label: 'Config'),
+                                BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Paramètres')
                         ],
 
                         // Gestion de l'état sélectionné
