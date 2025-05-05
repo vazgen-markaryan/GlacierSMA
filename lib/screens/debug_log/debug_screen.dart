@@ -5,7 +5,7 @@ import '../home/sensors/sensors_data.dart';
 import '../home/sensors/sensors_group.dart';
 import 'components/debug_log_updater.dart';
 import 'components/debug_log_processor.dart';
-import '../home/sensors/sensor_popup/sensor_popup.dart';
+import '../home/sensors/sensor_popup.dart';
 
 /// Écran de debug : affiche les logs et les capteurs inactifs piloté par [activeMaskNotifier] pour inclure ceux désactivés.
 class DebugScreen extends StatelessWidget {

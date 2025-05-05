@@ -1,16 +1,17 @@
 import 'bottom_navbar.dart';
 import 'package:flutter/material.dart';
-import '../../utils/message_service.dart';
-import '../settings/settings_screen.dart';
-import '../debug_log/debug_screen.dart';
 import 'dashboard/dashboard_body.dart';
 import 'dashboard/dashboard_header.dart';
-import '../config/sensor_config_screen.dart';
 import 'dashboard/dashboard_controller.dart';
 import '../debug_log/components/debug_log_updater.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import '../connection/components/disconnection_manager.dart';
+import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
+import 'package:rev_glacier_sma_mobile/utils/message_service.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
+import 'package:rev_glacier_sma_mobile/screens/config/config_screen.dart';
+import 'package:rev_glacier_sma_mobile/screens/settings/settings_screen.dart';
+import 'package:rev_glacier_sma_mobile/screens/debug_log/debug_screen.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
 
@@ -33,6 +34,7 @@ class Home_Screen extends StatefulWidget {
 }
 
 class Home_ScreenState extends State<Home_Screen> {
+        final GlobalKey<ConfigScreenState> configKey = GlobalKey<ConfigScreenState>();
         late final DashboardController controller;
         late final MessageService messageService;
         late bool isConnected;
@@ -100,9 +102,14 @@ class Home_ScreenState extends State<Home_Screen> {
                         ),
 
                         // Page Configuration capteurs
-                        SensorConfigScreen(
+                        ConfigScreen(
+                                key: configKey,
                                 activeMaskNotifier: controller.activeMaskNotifier,
-                                messageService: messageService
+                                messageService: messageService,
+                                onCancel: () {
+                                        // Redirige vers l’onglet “Tableau de bord” (index 0)
+                                        setState(() => selectedIndex = 0);
+                                }
                         ),
 
                         // Page Paramètres
@@ -122,7 +129,39 @@ class Home_ScreenState extends State<Home_Screen> {
         }
 
         // Quand un onglet est sélectionné
-        void onItemTapped(int index) {
+        Future<void> onItemTapped(int index) async {
+                // Si on quitte la page Config (index 2) et qu’il y a des modifs non sauvegardées
+                if (selectedIndex == 2 && index != 2) {
+                        final state = configKey.currentState;
+                        if (state != null &&
+                                state.localMaskNotifier.value != state.initialMask) {
+                                final leave = await showDialog<bool>(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (ctx) => CustomPopup(
+                                                title: 'Modifications non sauvegardées',
+                                                content: const Text(
+                                                        'Vous avez des modifications non appliquées. Quitter quand même ?'
+                                                ),
+                                                actions: [
+                                                        TextButton(
+                                                                onPressed: () => Navigator.of(ctx).pop(false),
+                                                                child: const Text('Non')
+                                                        ),
+                                                        TextButton(
+                                                                onPressed: () => Navigator.of(ctx).pop(true),
+                                                                child: const Text('Oui')
+                                                        )
+                                                ]
+                                        )
+                                );
+                                if (leave != true) {
+                                        // On annule le changement d’onglet
+                                        return;
+                                }
+                        }
+                }
+                // Si tout est ok, on change vraiment l’onglet
                 setState(() => selectedIndex = index);
         }
 

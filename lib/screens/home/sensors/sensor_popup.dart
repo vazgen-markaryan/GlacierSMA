@@ -1,0 +1,139 @@
+import 'dart:async';
+import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
+
+class SensorPopup extends StatefulWidget {
+        final SensorsData sensor;
+
+        const SensorPopup({super.key, required this.sensor});
+
+        @override
+        State<SensorPopup> createState() => SensorPopupState();
+}
+
+class SensorPopupState extends State<SensorPopup>
+        with SingleTickerProviderStateMixin {
+        late final AnimationController controller;
+        late final Animation<double> scale;
+        late String timestamp;
+        Timer? timer;
+
+        @override
+        void initState() {
+                super.initState();
+
+                controller = AnimationController(
+                        vsync: this,
+                        duration: const Duration(milliseconds: 250)
+                )..forward();
+                scale = CurvedAnimation(parent: controller, curve: Curves.easeOutBack);
+
+                timestamp = _now();
+                timer = Timer.periodic(
+                        const Duration(seconds: 1),
+                        (_) => setState(() => timestamp = _now())
+                );
+        }
+
+        String _now() => DateFormat("dd-MM-yyyy 'à' HH:mm:ss").format(DateTime.now());
+
+        @override
+        void dispose() {
+                controller.dispose();
+                timer?.cancel();
+                super.dispose();
+        }
+
+        @override
+        Widget build(BuildContext context) {
+                return ScaleTransition(
+                        scale: scale,
+                        child: CustomPopup(
+                                title: (widget.sensor.title ?? 'Détails du capteur'),
+                                content: Padding(
+                                        padding: const EdgeInsets.all(12),
+                                        child: Scrollbar(
+                                                thumbVisibility: true,
+                                                radius: const Radius.circular(8),
+                                                thickness: 6,
+                                                child: Padding(
+                                                        padding: const EdgeInsets.only(right: 12),
+                                                        child: SingleChildScrollView(
+                                                                child: ValueListenableBuilder<Map<DataMap, dynamic>>(
+                                                                        valueListenable: widget.sensor.dataNotifier,
+                                                                        builder: (_, data, __) {
+                                                                                final items = data.entries.toList();
+
+                                                                                return Column(
+                                                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                        children: [
+                                                                                                Text(
+                                                                                                        'Mise à jour : $timestamp',
+                                                                                                        style: const TextStyle(
+                                                                                                                color: Colors.white54,
+                                                                                                                fontSize: 16,
+                                                                                                                fontStyle: FontStyle.italic
+                                                                                                        )
+                                                                                                ),
+                                                                                                const SizedBox(height: 12),
+                                                                                                ...items.map((e) => buildRow(e.key, e.value)).toList()
+                                                                                        ]
+                                                                                );
+                                                                        }
+                                                                )
+                                                        )
+                                                )
+                                        )
+                                ),
+                                actions: const[]
+                        )
+                );
+        }
+
+        Widget buildRow(DataMap key, dynamic value) {
+                return Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                        decoration: BoxDecoration(
+                                color: Colors.white10,
+                                borderRadius: BorderRadius.circular(8)
+                        ),
+                        child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                        Row(
+                                                children: [
+                                                        SvgPicture.asset(
+                                                                key.svgLogo,
+                                                                height: 24,
+                                                                width: 24,
+                                                                colorFilter: const ColorFilter.mode(
+                                                                        Colors.white70, BlendMode.srcIn
+                                                                )
+                                                        ),
+                                                        const SizedBox(width: 8),
+                                                        Text(
+                                                                key.name,
+                                                                style: const TextStyle(color: Colors.white70, fontSize: 15)
+                                                        )
+                                                ]
+                                        ),
+                                        Flexible(
+                                                child: Text(
+                                                        value.toString(),
+                                                        style: const TextStyle(
+                                                                color: Colors.white,
+                                                                fontWeight: FontWeight.bold
+                                                        ),
+                                                        textAlign: TextAlign.right,
+                                                        overflow: TextOverflow.ellipsis
+                                                )
+                                        )
+                                ]
+                        )
+                );
+        }
+}

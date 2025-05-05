@@ -4,7 +4,7 @@ import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_card.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_group.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_popup/sensor_popup.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_popup.dart';
 
 /// Corps du tableau de bord : affiche les capteurs **activés** selon la config
 /// Se met à jour instantanément sur `activeMaskNotifier`.

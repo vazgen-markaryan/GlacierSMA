@@ -1,6 +1,7 @@
 import 'sensors_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:rev_glacier_sma_mobile/utils/chip_utils.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 
 class SensorCard extends StatelessWidget {
@@ -24,15 +25,13 @@ class SensorCard extends StatelessWidget {
         Widget build(BuildContext context) {
                 final (iconColor, borderColor, statusLabel) = getStatusUI(sensor.powerStatus);
 
-                Widget buildChips() {
-                        return Wrap(
-                                spacing: 4, runSpacing: 2,
-                                children: [
-                                        if (sensor.code != null) buildChip(sensor.code!, Colors.blueGrey.shade700),
-                                        if (sensor.bus != null) buildChip(sensor.bus!, Colors.teal.shade700),
-                                        if (sensor.place != null) buildChip(sensor.place!, Colors.grey.shade800)
-                                ]
-                        );
+                Widget buildChipRow() {
+                        final chips = <ChipData>[];
+                        if (sensor.code != null) chips.add(ChipData(sensor.code!, Colors.blueGrey.shade700));
+                        if (sensor.bus != null) chips.add(ChipData(sensor.bus!, Colors.teal.shade700));
+                        if (sensor.place != null) chips.add(ChipData(sensor.place!, Colors.grey.shade800));
+
+                        return buildChips(chips, fontSize: 10);
                 }
 
                 final card = Container(
@@ -71,7 +70,7 @@ class SensorCard extends StatelessWidget {
                                                                         overflow: TextOverflow.ellipsis
                                                                 ),
                                                                 const SizedBox(height: 4),
-                                                                buildChips()
+                                                                buildChipRow()
                                                         ]
                                                 )
                                         ),
@@ -135,15 +134,6 @@ class SensorCard extends StatelessWidget {
                         )
                 );
         }
-
-        Widget buildChip(String text, Color bg) => Chip(
-                label: Text(text, style: const TextStyle(fontSize: 10, color: Colors.white)),
-                backgroundColor: bg,
-                padding: EdgeInsets.zero,
-                labelPadding: const EdgeInsets.symmetric(horizontal: 4),
-                visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap
-        );
 
         (Color, Color, String) getStatusUI(int? status) {
                 switch (status) {

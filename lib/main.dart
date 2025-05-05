@@ -88,9 +88,11 @@ class MyApp extends StatelessWidget {
 
 // TODO's pour les futures améliorations de l'application :
 
+//TODO unifier chips de config screen popup et de sensorcard DRY
 // TODO Support multilingue (EN + FR)
 // TODO Sensor popup graph real time (ou pas popup mais autre page)
 // TODO Créer des réglages pour les limites min/max des capteurs avec notifications
-// TODO reformat settings page
-// TODO 3 popups pour Config (password acces, confirmation de modification, confirmation de modification puis quit sans sauvegarde) + desactiver button sans modification
+// TODO reformat settings page, homepage, config page
+// TODO 3 popups pour Config (password acces, confirmation de modification, confirmation de modification puis quit sans sauvegarde) + desactiver button sans modification (POLISSAGE)
 // TODO Déconnexion automatique en cas d'erreur fatale
+// TODO ajouter la possibilité de renommer la station meme si le code est le meme
