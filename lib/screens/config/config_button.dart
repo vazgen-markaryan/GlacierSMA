@@ -7,22 +7,20 @@ enum ConfigButtonStateEnum {
 /// Un bouton qui gère son propre feedback visuel (chargement, succès, échec)
 /// Empêche le spam pendant l'opération.
 class ConfigButton extends StatefulWidget {
+
         /// Appelé lors du clic. Doit renvoyer `true` ou `false` selon la réussite.
         final Future<bool> Function() onSubmit;
 
-        /// Texte affiché à l'état initial.
         final String idleLabel;
-
-        /// Texte affiché en cas de succès.
+        final String submittingLabel;
         final String successLabel;
-
-        /// Texte affiché en cas d'échec.
         final String failureLabel;
 
         const ConfigButton({
                 Key? key,
                 required this.onSubmit,
                 this.idleLabel = 'Envoyer',
+                this.submittingLabel = 'Patientez...',
                 this.successLabel = 'Succès',
                 this.failureLabel = 'Échec'
         }) : super(key: key);
@@ -46,7 +44,7 @@ class ConfigButtonState extends State<ConfigButton> {
                                 );
                         case ConfigButtonStateEnum.submitting:
                                 return buildButton(
-                                        '…',
+                                        widget.submittingLabel,
                                         Icons.hourglass_top,
                                         Theme.of(context).primaryColor.withAlpha(180),
                                         null
@@ -68,29 +66,26 @@ class ConfigButtonState extends State<ConfigButton> {
                 }
         }
 
-        Widget buildButton(
-                String label,
-                IconData icon,
-                Color color,
-                VoidCallback? onTap
-        ) {
-                return SizedBox(
-                        width: double.infinity,
-                        height: 48,
-                        child: ElevatedButton.icon(
-                                onPressed: onTap,
-                                icon: Icon(icon, color: Colors.white),
-                                label: Text(label, style: const TextStyle(color: Colors.white)),
-                                style: ElevatedButton.styleFrom(backgroundColor: color)
-                        )
-                );
-        }
-
         Future<void> handleTap() async {
                 setState(() => state = ConfigButtonStateEnum.submitting);
                 final ok = await widget.onSubmit();
-                setState(() => state = ok ? ConfigButtonStateEnum.success : ConfigButtonStateEnum.failure);
-                await Future.delayed(const Duration(seconds: 2));
-                if (mounted) setState(() => state = ConfigButtonStateEnum.idle);
+                // Affiche Success/Failure puis réactive immédiatement le bouton
+                setState(() => state = ok
+                                ? ConfigButtonStateEnum.success
+                                : ConfigButtonStateEnum.failure);
+                if (!mounted) return;
+                setState(() => state = ConfigButtonStateEnum.idle);
         }
+
+        Widget buildButton(String label, IconData icon, Color color, VoidCallback? onTap) =>
+        SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton.icon(
+                        onPressed: onTap,
+                        icon: Icon(icon, color: Colors.white),
+                        label: Text(label, style: const TextStyle(color: Colors.white)),
+                        style: ElevatedButton.styleFrom(backgroundColor: color)
+                )
+        );
 }

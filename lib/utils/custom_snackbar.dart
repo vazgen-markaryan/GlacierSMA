@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 
 // Construit un SnackBar stylisé avec un [message] et une icône [iconData].
-SnackBar buildAppSnackBar({
+SnackBar buildCustomSnackBar({
         required String message,
         IconData iconData = Icons.error,
         Color backgroundColor = Colors.white,
@@ -46,7 +46,7 @@ void showCustomSnackBar(
         final messenger = ScaffoldMessenger.of(context);
         messenger.hideCurrentSnackBar();
         messenger.showSnackBar(
-                buildAppSnackBar(
+                buildCustomSnackBar(
                         message: message,
                         iconData: iconData,
                         backgroundColor: backgroundColor,

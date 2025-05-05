@@ -5,7 +5,7 @@ import '../settings/settings_screen.dart';
 import '../debug_log/debug_screen.dart';
 import 'dashboard/dashboard_body.dart';
 import 'dashboard/dashboard_header.dart';
-import '../settings/sensor_config_screen.dart';
+import '../config/sensor_config_screen.dart';
 import 'dashboard/dashboard_controller.dart';
 import '../debug_log/components/debug_log_updater.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';

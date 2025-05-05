@@ -39,7 +39,7 @@ Future<void> showDeviceSelectionDialog(
                 isShowingDeviceSnackbar = true;
 
                 final controller = ScaffoldMessenger.of(context).showSnackBar(
-                        buildAppSnackBar(
+                        buildCustomSnackBar(
                                 message:
                                 "Aucun appareil compatible n'est trouvé:\n1. Flashez le code RevGlacierSMA\n2. Vérifiez le câble\n3. Vérifiez le Debug Switch physique.",
                                 iconData: Icons.error,

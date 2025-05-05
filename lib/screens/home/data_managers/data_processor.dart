@@ -26,41 +26,63 @@ class RawDataParser {
         }
 }
 
-/// Traite un bloc `rawData` :
+/// Traite un bloc `rawData`, et **gère** maintenant aussi `<id>` :
 void processRawData({
         required String rawData,
         required DebugLogUpdater debugLogManager,
         required List<SensorsData> Function(SensorType) getSensors,
         required void Function() onDataReceived,
         required ValueNotifier<double?> batteryVoltage,
+        required void Function(RawData idData) onIdReceived,
         required void Function(int mask) onActiveReceived
 }) {
+        // --- 1) Nouveau : bloc <id> ---
+        if (rawData.startsWith('<id>')) {
+                // On utilise exactement le même parser CSV
+                final idData = RawDataParser.parse(rawData);
+                onIdReceived(idData);
 
-        // Recupération de sensor status
+                // Puis on retire ces 3 lignes avant de continuer
+                final remaining = rawData.split('\n').skip(3).join('\n');
+                // On ré-appelle processRawData sur le reste (status/data)
+                if (remaining.trim().isNotEmpty) {
+                        processRawData(
+                                rawData: remaining,
+                                debugLogManager: debugLogManager,
+                                getSensors: getSensors,
+                                onDataReceived: onDataReceived,
+                                batteryVoltage: batteryVoltage,
+                                onIdReceived: (_) {
+                                },
+                                onActiveReceived: onActiveReceived
+                        );
+                }
+                return;
+        }
+
+        // --- 2) Bloc <active> ---
         if (rawData.contains('<active>')) {
                 final lines = rawData.split('\n');
                 if (lines.length >= 2) {
                         final maskStr = lines[1].trim();
                         try {
-                                // supprime le préfixe « 0x »
                                 final hex = maskStr.startsWith('0x') ? maskStr.substring(2) : maskStr;
                                 final mask = int.parse(hex, radix: 16);
                                 onActiveReceived(mask);
                         }
                         catch (_) {
-                                /* ignore parse errors */
                         }
                 }
                 return;
         }
 
-        // Parsing CSV
+        // --- 3) Parsing CSV standard (status / data) ---
         final parsed = RawDataParser.parse(rawData);
         final headers = parsed.headers;
         final values = parsed.values;
-        final maxHeaderLength = headers.fold<int>(0, (prev, h) => max(prev, h.length));
+        final maxHeaderLength = headers.fold<int>(0, (p, h) => max(p, h.length));
 
-        // Logs STATUS
+        // STATUS
         if (rawData.contains('<status>')) {
                 final statusLog = 'Status:\n' +
                         headers.asMap().entries.map((e) {
@@ -72,15 +94,13 @@ void processRawData({
                 debugLogManager.setLogChunk(1, statusLog);
         }
 
-        // Logs DATA + Batterie
+        // DATA + Batterie
         if (rawData.contains('<data>')) {
-                // Batterie
                 final batIdx = headers.indexWhere((h) => h.toLowerCase() == 'battery_voltage');
                 if (batIdx != -1) {
                         final v = double.tryParse(values[batIdx]);
                         if (v != null) batteryVoltage.value = v;
                 }
-                // Data log
                 final dataLog = '\nValeurs:\n' +
                         headers.asMap().entries.map((e) {
                                         final hdr = e.value.toUpperCase().padRight(maxHeaderLength);
@@ -94,19 +114,16 @@ void processRawData({
                 debugLogManager.setLogChunk(2, dataLog);
         }
 
-        // Publication des logs
         debugLogManager.updateLogs();
 
-        // Mise à jour des capteurs
+        // Mise à jour capteurs
         if (rawData.contains('<data>')) {
                 populateSensorData(
                         rawData,
-                        [
-                                getSensors(SensorType.internal),
-                                getSensors(SensorType.modbus)
-                        ]
+                        [getSensors(SensorType.internal), getSensors(SensorType.modbus)]
                 );
         }
+
         if (rawData.contains('<status>')) {
                 updateSensorsData(
                         rawData,
@@ -115,7 +132,7 @@ void processRawData({
                 );
         }
 
-        // Notification UI si au moins un capteur actif
+        // Notification UI si au moins un capteur est actif
         final hasData = [
                 ...getSensors(SensorType.internal),
                 ...getSensors(SensorType.modbus)

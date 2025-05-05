@@ -1,11 +1,13 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_card.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_group.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_popup/sensor_popup.dart';
 
+/// Corps du tableau de bord : affiche les capteurs **activés** selon la config
+/// Se met à jour instantanément sur `activeMaskNotifier`.
 class DashboardBody extends StatelessWidget {
         final List<SensorsData> Function(SensorType) getSensors;
         final ValueListenable<int?> activeMaskNotifier;
@@ -23,9 +25,9 @@ class DashboardBody extends StatelessWidget {
                         builder: (context, mask, _) {
                                 final effectiveMask = mask ?? 0;
 
-                                // Filtrer : powerStatus non null ET (pas de bitIndex ou bitIndex actif dans le mask)
+                                // Filtre : seuls les capteurs dont le bit est à 1 (ou sans bitIndex) sont affichés
                                 List<SensorsData> filter(List<SensorsData> list) => list
-                                        .where((s) => s.powerStatus != null && (s.bitIndex == null || (effectiveMask & (1 << s.bitIndex!)) != 0))
+                                        .where((s) => s.bitIndex == null || (effectiveMask & (1 << s.bitIndex!)) != 0)
                                         .toList();
 
                                 final internals = filter(getSensors(SensorType.internal));
@@ -45,6 +47,9 @@ class DashboardBody extends StatelessWidget {
                                                                                 : null
                                                                 )
                                                         ),
+
+                                                        const SizedBox(height: defaultPadding),
+
                                                         SensorsGroup(
                                                                 title: 'CAPTEURS MODBUS',
                                                                 sensors: modbus,

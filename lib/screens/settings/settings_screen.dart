@@ -8,7 +8,7 @@ class SettingsScreen extends StatelessWidget {
 
         const SettingsScreen({
                 Key? key,
-                required this.firmwareNotifier,
+                required this.firmwareNotifier
         }) : super(key: key);
 
         @override
@@ -19,7 +19,7 @@ class SettingsScreen extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                         SettingsSection(
-                                                title: 'Help & Support',
+                                                title: 'Random Titre (temporaire)',
                                                 children: [
                                                         // About tile avec ExpansionTile
                                                         ValueListenableBuilder<RawData?>(

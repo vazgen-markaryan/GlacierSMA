@@ -17,14 +17,13 @@ void readMessage({
         required void Function(RawData idData) onIdReceived,
         required void Function(int mask) onActiveReceived
 }) {
-        // Envoit initial
+        // Envoi initial
         sendAndroidMessage(communicationMessageAndroid);
 
         var buffer = '';
         var isCapturing = false;
 
-        messageChannel?.receiveBroadcastStream().listen(
-                (event) {
+        messageChannel?.receiveBroadcastStream().listen((event) {
                         if (event is Uint8List) {
                                 buffer += String.fromCharCodes(event);
 
@@ -34,33 +33,22 @@ void readMessage({
                                         buffer = '';
                                 }
 
-                                // Fin du bloc → traitement
+                                // Fin du bloc → délégation
                                 if (isCapturing && buffer.contains(communicationMessagePhoneEnd)) {
                                         isCapturing = false;
-                                        var rawData = buffer
+                                        final rawData = buffer
                                                 .replaceAll(communicationMessagePhoneStart, '')
                                                 .replaceAll(communicationMessagePhoneEnd, '')
                                                 .trim();
 
-                                        // 1) Extraction éventuelle du bloc <id>
-                                        if (rawData.startsWith('<id>')) {
-                                                final lines = rawData.split('\n');
-                                                if (lines.length >= 3) {
-                                                        final idHeaders = lines[1].split(',').map((h) => h.trim()).toList();
-                                                        final idValues = lines[2].split(',').map((v) => v.trim()).toList();
-                                                        onIdReceived(RawData(idHeaders, idValues));
-                                                        // Supprime ces 3 lignes du flux avant de continuer
-                                                        rawData = lines.skip(3).join('\n');
-                                                }
-                                        }
-
-                                        // 2) Délégation au processeur principal
+                                        // On passe tout à processRawData, qui gère l’ID + le reste
                                         processRawData(
                                                 rawData: rawData,
                                                 debugLogManager: debugLogManager,
                                                 getSensors: getSensors,
                                                 onDataReceived: onDataReceived,
                                                 batteryVoltage: batteryVoltage,
+                                                onIdReceived: onIdReceived,
                                                 onActiveReceived: onActiveReceived
                                         );
 

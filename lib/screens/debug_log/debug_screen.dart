@@ -1,14 +1,13 @@
-import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
-import '../home/sensors/sensors_data.dart';
+import 'package:flutter/material.dart';
 import '../home/sensors/sensor_card.dart';
+import '../home/sensors/sensors_data.dart';
 import '../home/sensors/sensors_group.dart';
-import '../home/sensors/sensor_popup/sensor_popup.dart';
 import 'components/debug_log_updater.dart';
 import 'components/debug_log_processor.dart';
+import '../home/sensors/sensor_popup/sensor_popup.dart';
 
-/// Écran de debug : affiche les logs et les capteurs inactifs
-/// **piloté** par [activeMaskNotifier] pour inclure ceux désactivés.
+/// Écran de debug : affiche les logs et les capteurs inactifs piloté par [activeMaskNotifier] pour inclure ceux désactivés.
 class DebugScreen extends StatelessWidget {
         final DebugLogUpdater debugLogManager;
         final ValueNotifier<int?> activeMaskNotifier;
@@ -61,7 +60,7 @@ class DebugScreen extends StatelessWidget {
                                                                         itemBuilder: (ctx, s) => SensorCard(
                                                                                 sensor: s,
                                                                                 onTap: (s.data.isNotEmpty && s.title != 'SD Card')
-                                                                                        ? () => _showPopup(ctx, s)
+                                                                                        ? () => showPopup(ctx, s)
                                                                                         : null
                                                                         )
                                                                 ),
@@ -73,7 +72,7 @@ class DebugScreen extends StatelessWidget {
                                                                         itemBuilder: (ctx, s) => SensorCard(
                                                                                 sensor: s,
                                                                                 onTap: (s.data.isNotEmpty && s.title != 'SD Card')
-                                                                                        ? () => _showPopup(ctx, s)
+                                                                                        ? () => showPopup(ctx, s)
                                                                                         : null
                                                                         )
                                                                 )
@@ -85,7 +84,7 @@ class DebugScreen extends StatelessWidget {
                 );
         }
 
-        void _showPopup(BuildContext ctx, SensorsData sensor) {
+        void showPopup(BuildContext ctx, SensorsData sensor) {
                 showGeneralDialog(
                         context: ctx,
                         barrierColor: Colors.black54,

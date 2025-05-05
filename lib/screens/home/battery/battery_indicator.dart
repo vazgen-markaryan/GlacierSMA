@@ -3,7 +3,6 @@
 
 import 'battery_utils.dart';
 import 'battery_popup.dart';
-import 'battery_test_mode.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -32,9 +31,6 @@ class BatteryIndicatorState extends State<BatteryIndicator>
         /// Empêche l'ouverture de plusieurs popups simultanément
         bool isPopupVisible = false;
 
-        /// Utilitaire pour simuler des tensions en mode test
-        BatteryTestMode? testMode;
-
         @override
         void initState() {
                 super.initState();
@@ -46,19 +42,11 @@ class BatteryIndicatorState extends State<BatteryIndicator>
                 )..repeat(reverse: true);
 
                 pulse = Tween(begin: 1.0, end: 1.2).animate(controller);
-
-                // Si le mode test est activé, démarre la simulation
-                if (widget.enableTestMode) {
-                        testMode = BatteryTestMode(widget.voltageNotifier)
-                        ..start();
-                }
         }
 
         @override
         void dispose() {
-                // Arrête l’animation et la simulation en mode test
                 controller.dispose();
-                testMode?.stop();
                 super.dispose();
         }
 
