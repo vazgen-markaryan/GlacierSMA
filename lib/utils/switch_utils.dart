@@ -1,22 +1,18 @@
 /// Contient des utilitaires pour :
 ///  Obtenir l’unité à afficher selon l’en-tête de donnée Arduino
 ///  Traduire la direction du vent codée (0–16) en texte
-///  Convertir le code d’état de l’antenne GPS en valeur lisible
 
 // WARNING: NE JAMAIS CHANGER CES CAS S’ILS NE SONT PAS CHANGÉS DANS LE CODE ARDUINO
 String getUnitForHeader(String header) {
         switch (header.toLowerCase()) {
                 case "bme280_temperature":
                 case "mb_bme280_temp":
-                case "steve_bme280_temp":
                         return " °C";
                 case "bme280_pression":
                 case "mb_bme280_press":
-                case "steve_bme280_press":
                         return " kPa";
                 case "bme280_humidity":
                 case "mb_bme280_hum":
-                case "steve_bme280_hum":
                         return " %";
                 case "bme280_altitude":
                         return " m";
@@ -34,7 +30,6 @@ String getUnitForHeader(String header) {
                 case "wind_direction_angle":
                         return " °";
                 case "mb_asl20":
-                case "steve_veml7700":
                         return " lux";
                 default: return "";
         }
@@ -60,17 +55,6 @@ String getWindDirectionFacing(int value) {
                 case 14: return "Nord-ouest";
                 case 15: return "Nord-nord-ouest";
                 case 16: return "Nord";
-                default: return "Inconnu";
-        }
-}
-
-// Traduit le code d’état de l’antenne GPS en valeur lisible.
-String getGPSAntennaRealValue(int value) {
-        switch (value) {
-                case 0: return "Inconnu";
-                case 1: return "Externe";
-                case 2: return "Interne";
-                case 3: return "Court-circuit d’antenne externe";
                 default: return "Inconnu";
         }
 }

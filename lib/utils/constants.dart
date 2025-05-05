@@ -11,7 +11,7 @@ const secondaryColor = Color(0xFF2A2D3E);
 const backgroundColor = Color(0xFF212332);
 
 // Type de capteurs disponibles dans le projet
-enum SensorType { internal, modbus, stevenson, stevensonStatus }
+enum SensorType { internal, modbus }
 
 // Chemins des icônes représentant les capteurs
 const String microchip = "assets/icons/microchip.svg";

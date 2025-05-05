@@ -11,22 +11,10 @@ class DataMap {
                 required this.header,
                 required this.svgLogo
         });
-
-        @override
-        bool operator==(Object other) =>
-        identical(this, other) ||
-                other is DataMap &&
-                        runtimeType == other.runtimeType &&
-                        name == other.name &&
-                        header == other.header &&
-                        svgLogo == other.svgLogo;
-
-        @override
-        int get hashCode => name.hashCode ^ header.hashCode ^ svgLogo.hashCode;
 }
 
 class SensorsData {
-        String? svgIcon, title, header, temp, pres, hum, code;
+        String? svgIcon, title, header, temp, pres, hum, code, bus, place;
         Color? color;
 
         // Bit index (0…15) utilisé par le masque de configuration.
@@ -43,6 +31,7 @@ class SensorsData {
                 this.svgIcon, this.title, this.color,
                 this.header, this.temp, this.pres,
                 this.hum, this.code, this.bitIndex,
+                this.bus, this.place,
                 required Map<DataMap, dynamic> data,
                 int? powerStatus
         }) : dataNotifier = ValueNotifier(data),
@@ -59,25 +48,30 @@ class SensorsData {
 }
 
 // Fonction d’accès à la liste de capteurs selon le type
+// Ajoute en haut, après ton enum SensorType si tu l'as déjà :
+
 List<SensorsData> getSensors(SensorType type) {
         switch (type) {
                 case SensorType.internal:
-                        return internalSensors;
+                        return allSensors
+                                .where((s) => s.place == 'Intérieur')
+                                .toList();
                 case SensorType.modbus:
-                        return modBusSensors;
-                case SensorType.stevenson:
-                        return stevensonSensors;
-                case SensorType.stevensonStatus:
-                        return stevensonStatus;
+                        return allSensors
+                                .where((s) => s.bus == 'ModBus')
+                                .toList();
         }
 }
 
-List<SensorsData> internalSensors = [
+
+List<SensorsData> allSensors = [
         SensorsData(
-                title: "Thermo-Hygro-Baromètre",
+                title: "Thermo-Baromètre",
                 header: "bme280_status",
                 code: "BME280",
                 bitIndex: 0,
+                bus: "I2C",
+                place: "Intérieur",
                 svgIcon: microchip,
                 data: {
                         DataMap(name: "Temperature", header: "bme280_temperature", svgLogo: temperature) : "Placeholder par défaut",
@@ -88,10 +82,12 @@ List<SensorsData> internalSensors = [
         ),
 
         SensorsData(
-                title: "Accéléromètre",
+                title: "Accéléro-Magnétomètre",
                 header: "lsm303_status",
                 code: "LSM303",
                 bitIndex: 2,
+                bus: "I2C",
+                place: "Intérieur",
                 svgIcon: microchip,
                 data: {
                         DataMap(name: "Accélération X", header: "lsm303_accel_x", svgLogo: acceleration) : "Placeholder par défaut",
@@ -107,6 +103,8 @@ List<SensorsData> internalSensors = [
                 title: "GPS",
                 header: "gps_status",
                 bitIndex: 8,
+                bus: "I2C",
+                place: "Intérieur",
                 svgIcon: gps,
                 data: {
                         DataMap(name: "Latitude", header: "gps_latitude", svgLogo: gps) : "Placeholder par défaut",
@@ -119,16 +117,18 @@ List<SensorsData> internalSensors = [
         SensorsData(
                 title: "SD Card",
                 header: "sdcard",
+                place: "Intérieur",
+                bus: "I2C",
                 svgIcon: flashCard,
                 data: {} // Doit être vide
-        )
-];
+        ),
 
-List<SensorsData> modBusSensors = [
         SensorsData(
                 title: "Anémomètre",
                 header: "wind_speed_status",
                 bitIndex: 3,
+                bus: "ModBus",
+                place: "Extérieur",
                 svgIcon: ventilation,
                 data: {
                         DataMap(name: "Vitesse", header: "wind_speed", svgLogo: windSpeed) : "Placeholder par défaut"
@@ -139,6 +139,8 @@ List<SensorsData> modBusSensors = [
                 title: "Girouette",
                 header: "wind_direction_status",
                 bitIndex: 4,
+                bus: "ModBus",
+                place: "Extérieur",
                 svgIcon: ventilation,
                 data: {
                         DataMap(name: "Angle", header: "wind_direction_angle", svgLogo: windAngle) : "Placeholder par défaut",
@@ -151,6 +153,8 @@ List<SensorsData> modBusSensors = [
                 header: "mb_asl20_status",
                 code: "ASL20",
                 bitIndex: 6,
+                bus: "ModBus",
+                place: "Extérieur",
                 svgIcon: luxmetre,
                 data: {
                         DataMap(name: "Luminosité", header: "mb_asl20", svgLogo: luxmetre) : "Placeholder par défaut"
@@ -158,51 +162,17 @@ List<SensorsData> modBusSensors = [
         ),
 
         SensorsData(
-                title: "Thermo-Hygro-Baromètre",
+                title: "Thermo-Baromètre",
                 header: "mb_bme280_status",
                 code: "BME280",
                 bitIndex: 7,
+                bus: "ModBus",
+                place: "Extérieur",
                 svgIcon: microchip,
                 data: {
                         DataMap(name: "Temperature", header: "mb_bme280_temp", svgLogo: temperature) : "Placeholder par défaut",
                         DataMap(name: "Pression", header: "mb_bme280_press", svgLogo: pressure) : "Placeholder par défaut",
                         DataMap(name: "Humidité", header: "mb_bme280_hum", svgLogo: humidity) : "Placeholder par défaut"
                 }
-        )
-];
-
-List<SensorsData> stevensonSensors = [
-        SensorsData(
-                title: "Thermo-Hygro-Baromètre",
-                temp: "steve_bme280_temp_status",
-                pres: "steve_bme280_pres_status",
-                hum: "steve_bme280_hum_status",
-                code: "BME280",
-                svgIcon: microchip,
-                data: {
-                        DataMap(name: "Temperature", header: "steve_bme280_temp", svgLogo: temperature) : "Placeholder par défaut",
-                        DataMap(name: "Pression", header: "steve_bme280_press", svgLogo: pressure) : "Placeholder par défaut",
-                        DataMap(name: "Humidité", header: "steve_bme280_hum", svgLogo: humidity) : "Placeholder par défaut"
-                }
-        ),
-
-        SensorsData(
-                title: "Luxmètre",
-                header: "steve_veml7700_status",
-                code: "VEML7700",
-                svgIcon: luxmetre,
-                data: {
-                        DataMap(name: "Luminosité", header: "steve_veml7700", svgLogo: luxmetre) : "Placeholder par défaut"
-                }
-        )
-];
-
-List<SensorsData> stevensonStatus = [
-        SensorsData(
-                title: "Stevenson",
-                header: "steve_status",
-                bitIndex: 5,
-                svgIcon: microchip,
-                data: {} // Doit être vide
         )
 ];

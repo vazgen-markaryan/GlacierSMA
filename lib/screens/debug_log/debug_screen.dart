@@ -1,51 +1,102 @@
-/// Écran de debug : affiche le flux de logs STATUS/VALEURS et liste les capteurs inactifs.
-
 import 'package:flutter/material.dart';
+import '../../utils/constants.dart';
+import '../home/sensors/sensors_data.dart';
+import '../home/sensors/sensor_card.dart';
+import '../home/sensors/sensors_group.dart';
+import '../home/sensors/sensor_popup/sensor_popup.dart';
 import 'components/debug_log_updater.dart';
 import 'components/debug_log_processor.dart';
-import 'package:rev_glacier_sma_mobile/utils/constants.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_group.dart';
 
+/// Écran de debug : affiche les logs et les capteurs inactifs
+/// **piloté** par [activeMaskNotifier] pour inclure ceux désactivés.
 class DebugScreen extends StatelessWidget {
-        /// Manager responsable de la collecte et de la publication des logs debug
         final DebugLogUpdater debugLogManager;
+        final ValueNotifier<int?> activeMaskNotifier;
 
-        const DebugScreen({Key? key, required this.debugLogManager}) : super(key: key);
+        const DebugScreen({
+                Key? key,
+                required this.debugLogManager,
+                required this.activeMaskNotifier
+        }) : super(key: key);
 
         @override
         Widget build(BuildContext context) {
-                // Récupère tous les capteurs de toutes les catégories
-                final allSensors = [
-                        ...getSensors(SensorType.internal),
-                        ...getSensors(SensorType.modbus),
-                        ...getSensors(SensorType.stevenson),
-                        ...getSensors(SensorType.stevensonStatus)
-                ];
+                return ValueListenableBuilder<int?>(
+                        valueListenable: activeMaskNotifier,
+                        builder: (context, mask, _) {
+                                final m = mask ?? 0;
 
-                // Filtre pour ne garder que ceux dont powerStatus est null (inactifs)
-                final inactiveSensors = allSensors.where((s) => s.powerStatus == null).toList();
+                                // Tous les capteurs internes + ModBus
+                                final all = [
+                                        ...getSensors(SensorType.internal),
+                                        ...getSensors(SensorType.modbus)
+                                ];
 
-                return Scaffold(
-                        backgroundColor: backgroundColor,
-                        body: SingleChildScrollView(
-                                padding: const EdgeInsets.all(defaultPadding),
-                                child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                                // 1) Affiche le tableau de logs debug (STATUS et VALEURS)
-                                                DebugLogProcessor(debugLogManager: debugLogManager),
+                                // Inactifs : powerStatus==null OU bitIndex désactivé
+                                final inactive = all.where((s) {
+                                                final physOff = s.powerStatus == null;
+                                                final cfgOff = s.bitIndex != null && (m & (1 << s.bitIndex!)) == 0;
+                                                return physOff || cfgOff;
+                                        }
+                                ).toList();
 
-                                                // 2) Espacement entre la section logs et la liste des capteurs
-                                                const SizedBox(height: defaultPadding),
+                                // Séparation
+                                final internals = inactive.where((s) => s.bus?.toLowerCase() == 'i2c').toList();
+                                final modbus = inactive.where((s) => s.bus?.toLowerCase() == 'modbus').toList();
 
-                                                // 3) Affiche un groupe de cartes pour les capteurs inactifs seulement si ils existent
-                                                if (inactiveSensors.isNotEmpty)
-                                                SensorsGroup(
-                                                        title: 'Capteurs inactifs',
-                                                        sensors: inactiveSensors
+                                return Scaffold(
+                                        backgroundColor: backgroundColor,
+                                        body: SingleChildScrollView(
+                                                padding: const EdgeInsets.all(defaultPadding),
+                                                child: Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                                DebugLogProcessor(debugLogManager: debugLogManager),
+                                                                const SizedBox(height: defaultPadding * 2),
+
+                                                                SensorsGroup(
+                                                                        title: 'CAPTEURS INTERNES',
+                                                                        sensors: internals,
+                                                                        emptyMessage: 'Aucun capteur interne inactif.',
+                                                                        itemBuilder: (ctx, s) => SensorCard(
+                                                                                sensor: s,
+                                                                                onTap: (s.data.isNotEmpty && s.title != 'SD Card')
+                                                                                        ? () => _showPopup(ctx, s)
+                                                                                        : null
+                                                                        )
+                                                                ),
+
+                                                                SensorsGroup(
+                                                                        title: 'CAPTEURS MODBUS',
+                                                                        sensors: modbus,
+                                                                        emptyMessage: 'Aucun capteur ModBus inactif.',
+                                                                        itemBuilder: (ctx, s) => SensorCard(
+                                                                                sensor: s,
+                                                                                onTap: (s.data.isNotEmpty && s.title != 'SD Card')
+                                                                                        ? () => _showPopup(ctx, s)
+                                                                                        : null
+                                                                        )
+                                                                )
+                                                        ]
                                                 )
-                                        ]
+                                        )
+                                );
+                        }
+                );
+        }
+
+        void _showPopup(BuildContext ctx, SensorsData sensor) {
+                showGeneralDialog(
+                        context: ctx,
+                        barrierColor: Colors.black54,
+                        transitionDuration: const Duration(milliseconds: 300),
+                        pageBuilder: (_, __, ___) => const SizedBox.shrink(),
+                        transitionBuilder: (_, anim, __, ___) => Transform.scale(
+                                scale: anim.value,
+                                alignment: Alignment.center,
+                                child: Opacity(
+                                        opacity: anim.value,
+                                        child: SensorPopup(sensor: sensor)
                                 )
                         )
                 );

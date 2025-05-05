@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
 
                                         // Écran d'accueil selon le contexte : émulateur ou appareil réel
                                         home: areWeInDevelopingMode
-                                                ? const home_screen(plugin: null, isConnected: false, connectedDevices: [])
+                                                ? const Home_Screen(plugin: null, isConnected: false, connectedDevices: [])
                                                 : const ConnectionScreen()
                                 );
                         }
@@ -89,10 +89,8 @@ class MyApp extends StatelessWidget {
 // TODO's pour les futures améliorations de l'application :
 
 // TODO Support multilingue (EN + FR)
-// TODO Activer/désactiver manuellement les capteurs via paramètres
 // TODO Sensor popup graph real time (ou pas popup mais autre page)
 // TODO Créer des réglages pour les limites min/max des capteurs avec notifications
-
-//Capture data
+// TODO reformat settings page
+// TODO 3 popups pour Config (password acces, confirmation de modification, confirmation de modification puis quit sans sauvegarde) + desactiver button sans modification
 // TODO Déconnexion automatique en cas d'erreur fatale
-// TODO afficher la version du commit à l'aide de git hash recu en message

@@ -1,167 +1,67 @@
-/// Affiche un groupe de cartes de capteurs dans une grille responsive
-/// Un notifier pour rafraîchir automatiquement quand les données/status changent.
-
 import 'sensors_data.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'sensor_popup/sensor_popup.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 
-class SensorsGroupNotifier extends ValueNotifier<int> {
-        SensorsGroupNotifier(List<SensorsData> sensors) : super(0) {
-                // Écouter chaque capteur pour déclencher un rebuild du groupe
-                for (var sensor in sensors) {
-                        sensor.dataNotifier.addListener(onChange);
-                        sensor.powerStatusNotifier.addListener(onChange);
-                }
-        }
-        void onChange() => value++;
-}
+typedef SensorItemBuilder = Widget Function(BuildContext context, SensorsData sensor);
 
+/// Affiche :
+///  • un titre centré,
+///  • soit une grille de capteurs via [itemBuilder],
+///  • soit [emptyMessage] si la liste est vide,
+/// le tout avec un spacing cohérent.
 class SensorsGroup extends StatelessWidget {
+        /// Titre à centrer au-dessus de la grille.
         final String title;
+
+        /// Liste des capteurs à afficher.
         final List<SensorsData> sensors;
 
+        /// Comment construire chaque carte.
+        final SensorItemBuilder itemBuilder;
+
+        /// Texte à afficher si [sensors] est vide.
+        final String emptyMessage;
+
         const SensorsGroup({
-                super.key,
+                Key? key,
                 required this.title,
-                required this.sensors
-        });
+                required this.sensors,
+                required this.itemBuilder,
+                this.emptyMessage = 'Aucun capteur actif\nVérifiez votre Configuration'
+        }) : super(key: key);
 
         @override
         Widget build(BuildContext context) {
-                final notifier = SensorsGroupNotifier(sensors);
-
-                return ValueListenableBuilder<int>(
-                        valueListenable: notifier,
-                        builder: (context, _, __) {
-                                // On affiche **tous** les capteurs de la liste fournie :
-                                return Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                                Text(title, style: Theme.of(context).textTheme.titleMedium),
-                                                const SizedBox(height: defaultPadding),
-                                                Wrap(
-                                                        spacing: defaultPadding,
-                                                        runSpacing: defaultPadding,
-                                                        children: sensors
-                                                                .map((sensor) => buildSensorCard(context, sensor))
-                                                                .toList()
-                                                )
-                                        ]
-                                );
-                        }
-                );
-        }
-
-        // Construit une carte pour chaque capteur
-        Widget buildSensorCard(BuildContext context, SensorsData sensor) {
-                final (iconColor, borderColor, statusLabel) = getStatusUI(sensor.powerStatus);
-
-                return SizedBox(
-                        width: double.infinity,
-                        height: 85,
-                        child: GestureDetector(
-                                // N’ouvrir la popup que si le capteur a des données
-                                onTapDown: (sensor.data.isNotEmpty && sensor.title != "SD Card")
-                                        ? (details) {
-                                                final tapPosition = details.globalPosition;
-                                                showSensorPopup(context, sensor, tapPosition);
-                                        }
-                                        : null,
-                                child: Material(
-                                        borderRadius: BorderRadius.circular(10),
-                                        child: Stack(
-                                                clipBehavior: Clip.none,
-                                                children: [
-                                                        // Carte principale
-                                                        Container(
-                                                                padding: const EdgeInsets.all(defaultPadding),
-                                                                decoration: BoxDecoration(
-                                                                        color: secondaryColor,
-                                                                        borderRadius: BorderRadius.circular(10),
-                                                                        border: Border.all(color: borderColor, width: 3)
-                                                                ),
-                                                                child: Row(
-                                                                        children: [
-                                                                                SvgPicture.asset(
-                                                                                        sensor.svgIcon!,
-                                                                                        height: 50,
-                                                                                        width: 50,
-                                                                                        colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn)
-                                                                                ),
-                                                                                const SizedBox(width: defaultPadding),
-                                                                                Expanded(
-                                                                                        child: Text(
-                                                                                                sensor.title ?? "Capteur inconnu",
-                                                                                                style: Theme.of(context).textTheme.bodyLarge
-                                                                                        )
-                                                                                )
-                                                                        ]
-                                                                )
-                                                        ),
-                                                        // Étiquette de statut en coin
-                                                        Positioned(
-                                                                top: -10,
-                                                                right: -10,
-                                                                child: Container(
-                                                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                                                        decoration: BoxDecoration(
-                                                                                color: iconColor,
-                                                                                borderRadius: const BorderRadius.only(
-                                                                                        bottomLeft: Radius.circular(10),
-                                                                                        topRight: Radius.circular(10)
-                                                                                )
-                                                                        ),
-                                                                        child: Text(
-                                                                                statusLabel,
-                                                                                style: TextStyle(
-                                                                                        color: sensor.powerStatus == null ? Colors.white : Colors.black,
-                                                                                        fontSize: 12,
-                                                                                        fontWeight: FontWeight.bold
-                                                                                )
-                                                                        )
-                                                                )
-                                                        )
-                                                ]
+                return Column(
+                        children: [
+                                // Le titre centré
+                                Align(
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                                title,
+                                                style: Theme.of(context).textTheme.titleMedium
                                         )
+                                ),
+
+                                // Soit la grille, soit le message "vide"
+                                if (sensors.isNotEmpty)
+                                Wrap(
+                                        spacing: defaultPadding,
+                                        runSpacing: defaultPadding,
+                                        children: sensors.map((s) => itemBuilder(context, s)).toList()
                                 )
-                        )
-                );
-        }
-
-        // Affiche la popup depuis le point de clic avec animation de zoom
-        void showSensorPopup(BuildContext context, SensorsData sensor, Offset tapPosition) {
-                final screenSize = MediaQuery.of(context).size;
-                final alignmentX = (tapPosition.dx / screenSize.width) * 2 - 1;
-                final alignmentY = (tapPosition.dy / screenSize.height) * 2 - 1;
-
-                showGeneralDialog(
-                        context: context,
-                        barrierColor: Colors.black54,
-                        transitionDuration: const Duration(milliseconds: 300),
-                        pageBuilder: (_, __, ___) => const SizedBox.shrink(),
-                        transitionBuilder: (_, anim, __, ___) {
-                                return Transform.scale(
-                                        scale: anim.value,
-                                        alignment: Alignment(alignmentX, alignmentY),
-                                        child: Opacity(
-                                                opacity: anim.value,
-                                                child: SensorPopup(sensor: sensor)
+                                else
+                                Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: defaultPadding),
+                                        child: Text(
+                                                emptyMessage,
+                                                textAlign: TextAlign.center,
+                                                style: Theme.of(context).textTheme.bodyMedium
                                         )
-                                );
-                        }
-                );
-        }
+                                ),
 
-        // Retourne couleurs et label selon le statut (0–3)
-        (Color, Color, String) getStatusUI(int? status) {
-                switch (status) {
-                        case 0: return (Colors.grey, Colors.grey, "Inconnu");
-                        case 1: return (Colors.green, Colors.green, "Fonctionne");
-                        case 2: return (Colors.yellow, Colors.yellow, "Déconnecté");
-                        case 3: return (Colors.red, Colors.red, "Erreur");
-                        default: return (Colors.black, Colors.black, "Désactivé");
-                }
+                                const SizedBox(height: defaultPadding)
+                        ]
+                );
         }
 }

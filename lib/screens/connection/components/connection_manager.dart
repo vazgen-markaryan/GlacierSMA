@@ -93,7 +93,7 @@ Future<void> showDeviceSelectionDialog(
                                                                                 Navigator.pushReplacement(
                                                                                         context,
                                                                                         MaterialPageRoute(
-                                                                                                builder: (_) => home_screen(
+                                                                                                builder: (_) => Home_Screen(
                                                                                                         plugin: plugin,
                                                                                                         isConnected: true,
                                                                                                         connectedDevices: compatibleDevices

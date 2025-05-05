@@ -31,9 +31,6 @@ void processRawData({
         required String rawData,
         required DebugLogUpdater debugLogManager,
         required List<SensorsData> Function(SensorType) getSensors,
-        required void Function(int) setTemp,
-        required void Function(int) setHum,
-        required void Function(int) setPres,
         required void Function() onDataReceived,
         required ValueNotifier<double?> batteryVoltage,
         required void Function(int mask) onActiveReceived
@@ -106,8 +103,7 @@ void processRawData({
                         rawData,
                         [
                                 getSensors(SensorType.internal),
-                                getSensors(SensorType.modbus),
-                                getSensors(SensorType.stevenson)
+                                getSensors(SensorType.modbus)
                         ]
                 );
         }
@@ -115,19 +111,14 @@ void processRawData({
                 updateSensorsData(
                         rawData,
                         getSensors,
-                        communicationMessageStatus,
-                        setTemp,
-                        setHum,
-                        setPres
+                        communicationMessageStatus
                 );
         }
 
         // Notification UI si au moins un capteur actif
         final hasData = [
                 ...getSensors(SensorType.internal),
-                ...getSensors(SensorType.modbus),
-                ...getSensors(SensorType.stevenson),
-                ...getSensors(SensorType.stevensonStatus)
+                ...getSensors(SensorType.modbus)
         ].any((s) => s.powerStatus != null);
         if (hasData) onDataReceived();
 }

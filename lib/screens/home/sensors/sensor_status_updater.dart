@@ -1,16 +1,12 @@
 /// Analyse le bloc de <status> pour mettre à jour "powerStatus"
 
-import 'dart:math';
 import 'sensors_data.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 
 void updateSensorsData(
         String rawData,
         List<SensorsData> Function(SensorType) getSensors,
-        String communicationMessageStatus,
-        void Function(int) setTemp,
-        void Function(int) setHum,
-        void Function(int) setPres
+        String communicationMessageStatus
 ) {
         // Ne rien faire si pas de balise <status>
         if (!rawData.contains(communicationMessageStatus)) return;
@@ -31,31 +27,7 @@ void updateSensorsData(
                 }
         }
 
-        // Mise à jour des 4 groupes
+        // Mise à jour des groupes de capteurs
         updateSensorStatus(getSensors(SensorType.internal));
         updateSensorStatus(getSensors(SensorType.modbus));
-        updateSensorStatus(getSensors(SensorType.stevenson));
-        updateSensorStatus(getSensors(SensorType.stevensonStatus));
-
-        // Extraire statuts pour Stevenson local (temp/hum/pres)
-        final stevenson = getSensors(SensorType.stevenson).first;
-        int? localTemp, localHum, localPres;
-        final mapping = {
-                stevenson.temp?.toLowerCase():(int s) => localTemp = s,
-                stevenson.hum?.toLowerCase():(int s) => localHum = s,
-                stevenson.pres?.toLowerCase():(int s) => localPres = s
-        };
-
-        for (var i = 0; i < headers.length; i++) {
-                mapping[headers[i]]?.call(values[i]);
-        }
-
-        // Notifier les callbacks externes
-        setTemp(localTemp ?? 0);
-        setHum(localHum ?? 0);
-        setPres(localPres ?? 0);
-
-        // Met à jour le powerStatus global de Stevenson
-        stevenson.powerStatus =
-        max(localTemp ?? 0, max(localHum ?? 0, localPres ?? 0));
 }

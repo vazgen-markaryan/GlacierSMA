@@ -16,12 +16,12 @@ import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
 
 /// Écran principal de l'application (accueil) qui gère l'affichage
 /// Il gère aussi l’état de connexion et l'affichage de la barre de navigation inférieure.
-class home_screen extends StatefulWidget {
+class Home_Screen extends StatefulWidget {
         final FlutterSerialCommunication? plugin;
         final bool isConnected;
         final List<DeviceInfo> connectedDevices;
 
-        const home_screen({
+        const Home_Screen({
                 Key? key,
                 required this.plugin,
                 required this.isConnected,
@@ -29,10 +29,10 @@ class home_screen extends StatefulWidget {
         }) : super(key: key);
 
         @override
-        State<home_screen> createState() => home_screenState();
+        State<Home_Screen> createState() => Home_ScreenState();
 }
 
-class home_screenState extends State<home_screen> {
+class Home_ScreenState extends State<Home_Screen> {
         late final DashboardController controller;
         late final MessageService messageService;
         late bool isConnected;
@@ -87,13 +87,17 @@ class home_screenState extends State<home_screen> {
                                 builder: (ctx, loading, _) {
                                         if (loading) return const Center(child: CircularProgressIndicator());
                                         return DashboardBody(
-                                                debugLogManager: controller.debugLogManager,
-                                                getSensors: getSensors
+                                                getSensors: getSensors,
+                                                activeMaskNotifier: controller.activeMaskNotifier
                                         );
                                 }
                         ),
+
                         // Page Debug
-                        DebugScreen(debugLogManager: controller.debugLogManager),
+                        DebugScreen(
+                                debugLogManager: controller.debugLogManager,
+                                activeMaskNotifier: controller.activeMaskNotifier
+                        ),
 
                         // Page Configuration capteurs
                         SensorConfigScreen(
@@ -168,22 +172,7 @@ class home_screenState extends State<home_screen> {
                                 ),
 
                                 // Corps de la page avec titre dynamique + contenu de la page
-                                body: Column(
-                                        children: [
-                                                Padding(
-                                                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                                                        child: Text(
-                                                                pageTitles[selectedIndex],
-                                                                style: const TextStyle(
-                                                                        fontSize: 18,
-                                                                        fontWeight: FontWeight.bold,
-                                                                        color: Colors.white
-                                                                )
-                                                        )
-                                                ),
-                                                Expanded(child: pages[selectedIndex])
-                                        ]
-                                ),
+                                body: pages[selectedIndex],
 
                                 // Barre de navigation en bas
                                 bottomNavigationBar: BottomNavBar(

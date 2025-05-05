@@ -8,12 +8,9 @@ import 'package:rev_glacier_sma_mobile/screens/debug_log/components/debug_log_up
 /// Retourne le libellé correspondant à un code de statut
 String statusLabel(int status) {
         switch (status) {
-                case 1:
-                        return 'Fonctionne';
-                case 2:
-                        return 'Déconnecté';
-                case 3:
-                        return 'Erreur';
+                case 1: return 'Fonctionne';
+                case 2: return 'Déconnecté';
+                case 3: return 'Erreur';
                 case 0:
                 default:
                 return 'Inconnu';
@@ -114,61 +111,85 @@ class DebugLogProcessor extends StatelessWidget {
                                 // Construire l’UI : titre, tableau STATUS, puis tableau VALEURS
                                 return SingleChildScrollView(
                                         scrollDirection: Axis.vertical,
-                                        child: Card(
-                                                child: Padding(
-                                                        padding: const EdgeInsets.all(12.0),
-                                                        child: Column(
-                                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                                children: [
-                                                                        // Affiche le premier message contenant "message envoyé", le cas échéant
-                                                                        Text(
-                                                                                logs.firstWhere(
-                                                                                        (l) => l.toLowerCase().contains('message envoyé'),
-                                                                                        orElse: () => ''
+                                        child: SizedBox(
+                                                width: double.infinity,
+                                                child: Card(
+                                                        margin: EdgeInsets.zero,
+                                                        child: Padding(
+                                                                padding: const EdgeInsets.all(12.0),
+                                                                child: Column(
+                                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                                        children: [
+                                                                                // Affiche le premier message contenant "message envoyé", le cas échéant
+                                                                                Text(
+                                                                                        logs.firstWhere(
+                                                                                                (l) => l.toLowerCase().contains('message envoyé'),
+                                                                                                orElse: () => ''
+                                                                                        ),
+                                                                                        style: const TextStyle(fontSize: 12)
                                                                                 ),
-                                                                                style: const TextStyle(fontSize: 12)
-                                                                        ),
-                                                                        const SizedBox(height: 16),
+                                                                                const SizedBox(height: 8),
 
-                                                                        // Section STATUS
-                                                                        const Text(
-                                                                                'STATUS',
-                                                                                style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic)
-                                                                        ),
-                                                                        const SizedBox(height: 8),
-                                                                        if (statusRows.isNotEmpty)
-                                                                        Table(
-                                                                                columnWidths: const {
-                                                                                        0: IntrinsicColumnWidth(),
-                                                                                        1: FlexColumnWidth()
-                                                                                },
-                                                                                border: TableBorder.all(color: Colors.grey),
-                                                                                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                                                                                children: statusRows
-                                                                        )
-                                                                        else
-                                                                        const Text('Aucune donnée.', style: TextStyle(fontSize: 12)),
-                                                                        const SizedBox(height: 16),
+                                                                                // Section STATUS
+                                                                                Align(
+                                                                                        alignment: Alignment.center,
+                                                                                        child: Text(
+                                                                                                "STATUS",
+                                                                                                style: Theme.of(context).textTheme.titleMedium
+                                                                                        )
+                                                                                ),
+                                                                                const SizedBox(height: 8),
+                                                                                if (statusRows.isNotEmpty)
+                                                                                Table(
+                                                                                        columnWidths: const {
+                                                                                                0: IntrinsicColumnWidth(),
+                                                                                                1: FlexColumnWidth()
+                                                                                        },
+                                                                                        border: TableBorder.all(color: Colors.grey),
+                                                                                        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                                                                                        children: statusRows
+                                                                                )
+                                                                                else
+                                                                                Align(
+                                                                                        alignment: Alignment.center,
+                                                                                        child: Text(
+                                                                                                "Aucune donnée n'a été reçue.\nVérifiez votre HardWare\nVérifiez votre Code Arduino\nVérifiez la logique de votre application.",
+                                                                                                textAlign: TextAlign.center,
+                                                                                                style: Theme.of(context).textTheme.titleSmall
+                                                                                        )
+                                                                                ),
+                                                                                const SizedBox(height: 16),
 
-                                                                        // Section VALEURS
-                                                                        const Text(
-                                                                                'VALEURS',
-                                                                                style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic)
-                                                                        ),
-                                                                        const SizedBox(height: 8),
-                                                                        if (valeurRows.isNotEmpty)
-                                                                        Table(
-                                                                                columnWidths: const {
-                                                                                        0: IntrinsicColumnWidth(),
-                                                                                        1: FlexColumnWidth()
-                                                                                },
-                                                                                border: TableBorder.all(color: Colors.grey),
-                                                                                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                                                                                children: valeurRows
-                                                                        )
-                                                                        else
-                                                                        const Text('Aucune donnée.', style: TextStyle(fontSize: 12))
-                                                                ]
+                                                                                // Section VALEURS
+                                                                                Align(
+                                                                                        alignment: Alignment.center,
+                                                                                        child: Text(
+                                                                                                "VALEURS",
+                                                                                                style: Theme.of(context).textTheme.titleMedium
+                                                                                        )
+                                                                                ),
+                                                                                const SizedBox(height: 8),
+                                                                                if (valeurRows.isNotEmpty)
+                                                                                Table(
+                                                                                        columnWidths: const {
+                                                                                                0: IntrinsicColumnWidth(),
+                                                                                                1: FlexColumnWidth()
+                                                                                        },
+                                                                                        border: TableBorder.all(color: Colors.grey),
+                                                                                        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                                                                                        children: valeurRows
+                                                                                )
+                                                                                else
+                                                                                Align(
+                                                                                        alignment: Alignment.center,
+                                                                                        child: Text(
+                                                                                                "Aucune donnée n'a été reçue.\nVérifiez votre HardWare\nVérifiez votre Code Arduino\nVérifiez la logique de votre application.",
+                                                                                                textAlign: TextAlign.center,
+                                                                                                style: Theme.of(context).textTheme.titleSmall
+                                                                                        )
+                                                                                )
+                                                                        ]
+                                                                )
                                                         )
                                                 )
                                         )

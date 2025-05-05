@@ -36,10 +36,6 @@ void populateSensorData(String rawData, List<List<SensorsData>> sensorGroups) {
                                         final dir = int.tryParse(values[index]) ?? -1;
                                         newValue = getWindDirectionFacing(dir);
                                 }
-                                else if (key.header == "gps_antenna_status") {
-                                        final ant = int.tryParse(values[index]) ?? -1;
-                                        newValue = getGPSAntennaRealValue(ant);
-                                }
 
                                 // Valeur numérique générique avec unité
                                 else {

@@ -28,7 +28,6 @@ class DashboardController {
         EventChannel? messageChannel;
         bool isEmulator = false;
         late final Stopwatch connectionStopwatch;
-        int stevensonTemp = 0, stevensonHum = 0, stevensonPress = 0;
 
         DashboardController({
                 required this.plugin,
@@ -64,15 +63,10 @@ class DashboardController {
                         sendAndroidMessage: messageService.sendHeartbeat,
                         debugLogManager: debugLogManager,
                         getSensors: getSensors,
-                        setTemp: (v) => stevensonTemp = v,
-                        setHum: (v) => stevensonHum = v,
-                        setPres: (v) => stevensonPress = v,
                         onDataReceived: () {
                                 final hasData = [
                                         ...getSensors(SensorType.internal),
-                                        ...getSensors(SensorType.modbus),
-                                        ...getSensors(SensorType.stevenson),
-                                        ...getSensors(SensorType.stevensonStatus)
+                                        ...getSensors(SensorType.modbus)
                                 ].any((s) => s.powerStatus != null);
                                 if (hasData) isInitialLoading.value = false;
                                 onDataReceived();
