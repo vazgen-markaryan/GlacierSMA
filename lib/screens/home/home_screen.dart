@@ -1,12 +1,7 @@
 import 'bottom_navbar.dart';
 import 'package:flutter/material.dart';
-import 'dashboard/dashboard_body.dart';
-import 'dashboard/dashboard_header.dart';
-import 'dashboard/dashboard_controller.dart';
-import '../debug_log/components/debug_log_updater.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import '../connection/components/disconnection_manager.dart';
-import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 import 'package:rev_glacier_sma_mobile/utils/message_service.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
 import 'package:rev_glacier_sma_mobile/screens/config/config_screen.dart';
@@ -14,12 +9,18 @@ import 'package:rev_glacier_sma_mobile/screens/settings/settings_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/debug_log/debug_screen.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/dashboard/dashboard_body.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/dashboard/dashboard_header.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/dashboard/dashboard_controller.dart';
+import 'package:rev_glacier_sma_mobile/screens/debug_log/components/debug_log_updater.dart';
 
-/// Écran principal de l'application (accueil) qui gère l'affichage
-/// Il gère aussi l’état de connexion et l'affichage de la barre de navigation inférieure.
+/// Écran principal qui gère l'affichage des onglets et la navigation
 class Home_Screen extends StatefulWidget {
+        /// Plugin de communication série
         final FlutterSerialCommunication? plugin;
+        /// État initial de la connexion
         final bool isConnected;
+        /// Liste des appareils connectés
         final List<DeviceInfo> connectedDevices;
 
         const Home_Screen({
@@ -34,41 +35,34 @@ class Home_Screen extends StatefulWidget {
 }
 
 class Home_ScreenState extends State<Home_Screen> {
-        final GlobalKey<ConfigScreenState> configKey = GlobalKey<ConfigScreenState>();
+        /// Clé pour accéder à l'état de l'écran de configuration
+        final configKey = GlobalKey<ConfigScreenState>();
+        /// Contrôleur du dashboard (gestion des données, notifications, etc.)
         late final DashboardController controller;
+        /// Service de messagerie pour envoyer les configurations
         late final MessageService messageService;
+        /// Indique si l'application est connectée
         late bool isConnected;
-
-        // Onglet actuellement sélectionné
+        /// Index de l'onglet sélectionné
         int selectedIndex = 0;
-
-        // Pages affichées selon le BottomNavigationBar
-        late final List<Widget> pages;
-
-        // Titres affichés au-dessus de chaque section
-        final List<String> pageTitles = [
-                'Tableau de bord',
-                'Debug Logs',
-                'Configuration',
-                'Paramètres'
-        ];
 
         @override
         void initState() {
                 super.initState();
+                // Initialisation du controller et du service de messages
+                initController();
+                // Conservation de l'état de connexion initial
+                isConnected = widget.isConnected;
+        }
 
+        /// Initialise le DashboardController et le MessageService
+        void initController() {
                 final debugManager = DebugLogUpdater();
-
-                // Initialise le service de messages
                 messageService = MessageService(
                         plugin: widget.plugin,
                         debugLogManager: debugManager,
                         isEmulator: false
                 );
-
-                isConnected = widget.isConnected;
-
-                // Initialise le contrôleur principal du Dashboard
                 controller = DashboardController(
                         plugin: widget.plugin,
                         connectedDevices: widget.connectedDevices,
@@ -76,48 +70,13 @@ class Home_ScreenState extends State<Home_Screen> {
                         messageService: messageService,
                         onConnectionLost: handleConnectionLost
                 );
-
+                // Lancement de l'initialisation (chargement des capteurs, logs, etc.)
                 controller.init(() => setState(() {
                                 }
                         ));
-
-                // Définition des pages par onglet
-                pages = [
-                        // Page Accueil
-                        ValueListenableBuilder<bool>(
-                                valueListenable: controller.isInitialLoading,
-                                builder: (ctx, loading, _) {
-                                        if (loading) return const Center(child: CircularProgressIndicator());
-                                        return DashboardBody(
-                                                getSensors: getSensors,
-                                                activeMaskNotifier: controller.activeMaskNotifier
-                                        );
-                                }
-                        ),
-
-                        // Page Debug
-                        DebugScreen(
-                                debugLogManager: controller.debugLogManager,
-                                activeMaskNotifier: controller.activeMaskNotifier
-                        ),
-
-                        // Page Configuration capteurs
-                        ConfigScreen(
-                                key: configKey,
-                                activeMaskNotifier: controller.activeMaskNotifier,
-                                messageService: messageService,
-                                onCancel: () {
-                                        // Redirige vers l’onglet “Tableau de bord” (index 0)
-                                        setState(() => selectedIndex = 0);
-                                }
-                        ),
-
-                        // Page Paramètres
-                        SettingsScreen(firmwareNotifier: controller.firmwareNotifier)
-                ];
         }
 
-        // Appelé si la connexion est perdue
+        /// Gestion de la perte de connexion : affiche une popup et met à jour l'état
         Future<void> handleConnectionLost(Duration elapsed) async {
                 if (!mounted) return;
                 setState(() => isConnected = false);
@@ -128,97 +87,107 @@ class Home_ScreenState extends State<Home_Screen> {
                 );
         }
 
-        // Quand un onglet est sélectionné
-        Future<void> onItemTapped(int index) async {
-                // Si on quitte la page Config (index 2) et qu’il y a des modifs non sauvegardées
+        /// Lorsque l'utilisateur clique sur un onglet de la barre de navigation
+        Future<void> onNavItemTapped(int index) async {
+                // Si on quitte l’onglet Config…
                 if (selectedIndex == 2 && index != 2) {
-                        final state = configKey.currentState;
-                        if (state != null &&
-                                state.localMaskNotifier.value != state.initialMask) {
-                                final leave = await showDialog<bool>(
-                                        context: context,
-                                        barrierDismissible: false,
-                                        builder: (ctx) => CustomPopup(
-                                                title: 'Modifications non sauvegardées',
-                                                content: const Text(
-                                                        'Vous avez des modifications non appliquées. Quitter quand même ?'
-                                                ),
-                                                actions: [
-                                                        TextButton(
-                                                                onPressed: () => Navigator.of(ctx).pop(false),
-                                                                child: const Text('Non')
-                                                        ),
-                                                        TextButton(
-                                                                onPressed: () => Navigator.of(ctx).pop(true),
-                                                                child: const Text('Oui')
-                                                        )
-                                                ]
-                                        )
-                                );
-                                if (leave != true) {
-                                        // On annule le changement d’onglet
-                                        return;
-                                }
+                        final configState = configKey.currentState;
+                        if (configState != null) {
+                                // On délègue à ConfigScreenState.confirmDiscard()
+                                final canLeave = await configState.confirmDiscard();
+                                if (!canLeave) return;
                         }
                 }
-                // Si tout est ok, on change vraiment l’onglet
                 setState(() => selectedIndex = index);
+        }
+
+        /// Gestion de la touche retour système (Android)
+        Future<void> handleSystemPop(bool didPop) async {
+                if (!didPop) {
+                        final leave = await showDisconnectPopup(
+                                context: context,
+                                plugin: widget.plugin,
+                                requireConfirmation: true
+                        );
+                        if (leave) Navigator.of(context).pop();
+                }
+        }
+
+        /// Construit l'AppBar commune à toutes les pages
+        PreferredSizeWidget buildAppBar() {
+                return AppBar(
+                        automaticallyImplyLeading: false,
+                        backgroundColor: secondaryColor,
+                        title: DashboardHeader(
+                                isConnected: isConnected,
+                                connectedDevices: widget.connectedDevices,
+                                batteryVoltageNotifier: controller.batteryVoltage
+                        ),
+                        actions: [
+                                IconButton(
+                                        icon: const Icon(Icons.logout),
+                                        tooltip: 'Déconnexion',
+                                        onPressed: () => showDisconnectPopup(
+                                                context: context,
+                                                plugin: widget.plugin,
+                                                requireConfirmation: true
+                                        )
+                                )
+                        ]
+                );
+        }
+
+        /// Liste des pages correspondant à chaque onglet
+        List<Widget> get pages => [
+                // Onglet Dashboard
+                ValueListenableBuilder<bool>(
+                        valueListenable: controller.isInitialLoading,
+                        builder: (_, loading, __) {
+                                if (loading) {
+                                        return const Center(child: CircularProgressIndicator());
+                                }
+                                return DashboardBody(
+                                        getSensors: getSensors,
+                                        activeMaskNotifier: controller.activeMaskNotifier
+                                );
+                        }
+                ),
+                // Onglet Debug Logs
+                DebugScreen(
+                        debugLogManager: controller.debugLogManager,
+                        activeMaskNotifier: controller.activeMaskNotifier
+                ),
+                // Onglet Configuration
+                ConfigScreen(
+                        key: configKey,
+                        activeMaskNotifier: controller.activeMaskNotifier,
+                        messageService: messageService,
+                        onCancel: () => setState(() => selectedIndex = 0)
+                ),
+                // Onglet Paramètres
+                SettingsScreen(firmwareNotifier: controller.firmwareNotifier)
+        ];
+
+        @override
+        Widget build(BuildContext context) {
+                return PopScope(
+                        canPop: false,
+                        onPopInvoked: handleSystemPop,
+                        child: Scaffold(
+                                backgroundColor: backgroundColor,
+                                appBar: buildAppBar(),
+                                body: pages[selectedIndex],
+                                bottomNavigationBar: BottomNavBar(
+                                        selectedIndex: selectedIndex,
+                                        onItemTapped: onNavItemTapped
+                                )
+                        )
+                );
         }
 
         @override
         void dispose() {
                 controller.dispose();
                 super.dispose();
-        }
-
-        @override
-        Widget build(BuildContext context) {
-                return PopScope(
-                        canPop: false,
-                        onPopInvoked: (didPop) async {
-                                if (!didPop) {
-                                        final leave = await showDisconnectPopup(
-                                                context: context,
-                                                plugin: widget.plugin,
-                                                requireConfirmation: true
-                                        );
-                                        if (leave) Navigator.of(context).pop();
-                                }
-                        },
-                        child: Scaffold(
-                                backgroundColor: backgroundColor,
-
-                                // AppBar commune à toutes les pages avec statut connexion + bouton déconnexion
-                                appBar: AppBar(
-                                        automaticallyImplyLeading: false,
-                                        backgroundColor: secondaryColor,
-                                        title: DashboardHeader(
-                                                isConnected: isConnected,
-                                                connectedDevices: widget.connectedDevices,
-                                                batteryVoltageNotifier: controller.batteryVoltage
-                                        ),
-                                        actions: [
-                                                IconButton(
-                                                        icon: const Icon(Icons.logout),
-                                                        tooltip: 'Déconnexion',
-                                                        onPressed: () => showDisconnectPopup(
-                                                                context: context,
-                                                                plugin: widget.plugin,
-                                                                requireConfirmation: true
-                                                        )
-                                                )
-                                        ]
-                                ),
-
-                                // Corps de la page avec titre dynamique + contenu de la page
-                                body: pages[selectedIndex],
-
-                                // Barre de navigation en bas
-                                bottomNavigationBar: BottomNavBar(
-                                        selectedIndex: selectedIndex,
-                                        onItemTapped: onItemTapped
-                                )
-                        )
-                );
         }
 }

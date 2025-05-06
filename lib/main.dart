@@ -91,8 +91,8 @@ class MyApp extends StatelessWidget {
 // TODO Support multilingue (EN + FR)
 // TODO Sensor popup graph real time (ou pas popup mais autre page)
 // TODO Créer des réglages pour les limites min/max des capteurs avec notifications
-// TODO reformat settings page, homepage, config page
 // TODO ajouter la possibilité de renommer la station meme si le code est le meme
+// TODO reformat settings page, homepage, config page
 
 //TODO capture aussi <fatal> et <config>
 // TODO Déconnexion automatique en cas d'erreur fatale

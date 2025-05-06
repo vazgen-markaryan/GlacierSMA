@@ -131,7 +131,7 @@ class ConfigScreen extends StatefulWidget {
 
 class ConfigScreenState extends State<ConfigScreen> {
         bool authenticated = false;
-        final String motDePasse = 'LME2025';
+        final String motDePasse = '';
         late int initialMask;
         late final ValueNotifier<int> localMaskNotifier;
         bool isProcessing = false;
@@ -364,7 +364,7 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                                                                                 );
 
                                                                                                                 if (confirm != true) {
-                                                                                                                  throw CancelledException();
+                                                                                                                        throw CancelledException();
                                                                                                                 }
 
                                                                                                                 // 2) Démarre l’overlay
@@ -413,5 +413,24 @@ class ConfigScreenState extends State<ConfigScreen> {
                                 )
                         ]
                 );
+        }
+
+        /// Affiche le dialogue “quitter sans sauvegarder ?”
+        /// Renvoie `true` si on peut quitter, `false` si on reste.
+        Future<bool> confirmDiscard() async {
+                if (localMaskNotifier.value == initialMask) return true;
+                final leave = await showDialog<bool>(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (_) => CustomPopup(
+                                title: 'Modifications non sauvegardées',
+                                content: const Text('Vous avez des changements non appliqués. Quitter quand même ?'),
+                                actions: [
+                                        TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Non')),
+                                        TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Oui'))
+                                ]
+                        )
+                );
+                return leave == true;
         }
 }
