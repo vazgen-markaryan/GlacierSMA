@@ -1,27 +1,29 @@
 import 'package:flutter/material.dart';
 
-/// États internes du bouton
+/// Exception levée quand l’utilisateur annule la confirmation
+class CancelledException implements Exception {
+}
+
+/// État interne du bouton
 enum ConfigButtonStateEnum {
-        idle, submitting, success, failure }
+        idle, success, failure }
 
-/// Un bouton qui gère son propre feedback visuel (chargement, succès, échec)
-/// Empêche le spam pendant l'opération.
+/// Bouton qui gère son propre feedback (succès/échec) après exécution.
+/// Ne passe plus en “chargement” — le chargement est géré par un overlay global.
 class ConfigButton extends StatefulWidget {
-
-        /// Appelé lors du clic. Doit renvoyer `true` ou `false` selon la réussite.
+        /// Doit renvoyer `true` si la config a été appliquée, `false` sinon.
+        /// Peut lancer [CancelledException] pour annuler proprement sans afficher d’erreur.
         final Future<bool> Function() onSubmit;
 
         final String idleLabel;
-        final String submittingLabel;
         final String successLabel;
         final String failureLabel;
 
         const ConfigButton({
                 Key? key,
                 required this.onSubmit,
-                this.idleLabel = 'Envoyer',
-                this.submittingLabel = 'Patientez...',
-                this.successLabel = 'Succès',
+                this.idleLabel = 'Appliquer la configuration',
+                this.successLabel = 'Enregistré',
                 this.failureLabel = 'Échec'
         }) : super(key: key);
 
@@ -42,13 +44,6 @@ class ConfigButtonState extends State<ConfigButton> {
                                         Theme.of(context).primaryColor,
                                         handleTap
                                 );
-                        case ConfigButtonStateEnum.submitting:
-                                return buildButton(
-                                        widget.submittingLabel,
-                                        Icons.hourglass_top,
-                                        Theme.of(context).primaryColor.withAlpha(180),
-                                        null
-                                );
                         case ConfigButtonStateEnum.success:
                                 return buildButton(
                                         widget.successLabel,
@@ -67,25 +62,39 @@ class ConfigButtonState extends State<ConfigButton> {
         }
 
         Future<void> handleTap() async {
-                setState(() => state = ConfigButtonStateEnum.submitting);
-                final ok = await widget.onSubmit();
-                // Affiche Success/Failure puis réactive immédiatement le bouton
-                setState(() => state = ok
-                                ? ConfigButtonStateEnum.success
-                                : ConfigButtonStateEnum.failure);
+                try {
+                        final ok = await widget.onSubmit();
+                        // Affiche succès ou échec
+                        setState(() => state = ok
+                                        ? ConfigButtonStateEnum.success
+                                        : ConfigButtonStateEnum.failure);
+                }
+                on CancelledException {
+                        // Annulation : on ne passe ni en échec, ni en chargement
+                        return;
+                }
+
+                // Après 1s, on revient en idle
+                await Future.delayed(const Duration(seconds: 1));
                 if (!mounted) return;
                 setState(() => state = ConfigButtonStateEnum.idle);
         }
 
-        Widget buildButton(String label, IconData icon, Color color, VoidCallback? onTap) =>
-        SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton.icon(
-                        onPressed: onTap,
-                        icon: Icon(icon, color: Colors.white),
-                        label: Text(label, style: const TextStyle(color: Colors.white)),
-                        style: ElevatedButton.styleFrom(backgroundColor: color)
-                )
-        );
+        Widget buildButton(
+                String label,
+                IconData icon,
+                Color color,
+                VoidCallback? onTap
+        ) {
+                return SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton.icon(
+                                onPressed: onTap,
+                                icon: Icon(icon, color: Colors.white),
+                                label: Text(label, style: const TextStyle(color: Colors.white)),
+                                style: ElevatedButton.styleFrom(backgroundColor: color)
+                        )
+                );
+        }
 }

@@ -132,8 +132,9 @@ class ConfigScreen extends StatefulWidget {
 class ConfigScreenState extends State<ConfigScreen> {
         bool authenticated = false;
         final String motDePasse = 'LME2025';
-        late final int initialMask;
+        late int initialMask;
         late final ValueNotifier<int> localMaskNotifier;
+        bool isProcessing = false;
 
         @override
         void initState() {
@@ -143,21 +144,24 @@ class ConfigScreenState extends State<ConfigScreen> {
                 WidgetsBinding.instance.addPostFrameCallback((_) => _requestPassword());
         }
 
+        @override
+        void dispose() {
+                localMaskNotifier.dispose();
+                super.dispose();
+        }
+
         Future<void> _requestPassword() async {
                 final controller = TextEditingController();
                 String? errorText;
-
                 while (!authenticated) {
                         final result = await showDialog<bool>(
                                 context: context,
                                 barrierDismissible: false,
                                 builder: (ctx) {
-                                        return StatefulBuilder(builder: (ctx, setState) {
+                                        return StatefulBuilder(
+                                                builder: (ctx, setState) {
                                                         return AnimatedPadding(
-                                                                // simple “shake” visuel : on bouge horizontalement sur erreur
-                                                                padding: EdgeInsets.symmetric(
-                                                                        horizontal: errorText == null ? 0 : 8
-                                                                ),
+                                                                padding: EdgeInsets.symmetric(horizontal: errorText == null ? 0 : 8),
                                                                 duration: const Duration(milliseconds: 50),
                                                                 child: CustomPopup(
                                                                         title: 'Mot de passe requis',
@@ -189,7 +193,6 @@ class ConfigScreenState extends State<ConfigScreen> {
                                         );
                                 }
                         );
-
                         if (result != true) {
                                 widget.onCancel();
                                 return;
@@ -198,198 +201,217 @@ class ConfigScreenState extends State<ConfigScreen> {
                                 setState(() => authenticated = true);
                         }
                         else {
-                                // on vide et on affiche l’erreur inline (et la padding fera un mini shake)
                                 errorText = 'Mot de passe incorrect';
                                 controller.clear();
                         }
                 }
         }
 
+        Future<bool> _onWillPop() async {
+                if (localMaskNotifier.value != initialMask) {
+                        final leave = await showDialog<bool>(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (ctx) => CustomPopup(
+                                        title: 'Quitter sans enregistrer ?',
+                                        content: const Text('Vous avez des modifications non enregistrées. Quitter quand même ?'),
+                                        actions: [
+                                                TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Non')),
+                                                TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Oui'))
+                                        ]
+                                )
+                        );
+                        return leave == true;
+                }
+                return true;
+        }
+
         @override
         Widget build(BuildContext context) {
                 if (!authenticated) return const SizedBox.shrink();
 
-                return WillPopScope(
-                        onWillPop: () async {
-                                if (localMaskNotifier.value != initialMask) {
-                                        final leave = await showDialog<bool>(
-                                                context: context,
-                                                barrierDismissible: false,
-                                                builder: (ctx) => CustomPopup(
-                                                        title: 'Quitter sans enregistrer ?',
-                                                        content: const Text('Vous avez des modifications non enregistrées. Quitter quand même ?'),
-                                                        actions: [
-                                                                TextButton(
-                                                                        onPressed: () => Navigator.of(ctx).pop(false),
-                                                                        child: const Text('Non')
-                                                                ),
-                                                                TextButton(
-                                                                        onPressed: () => Navigator.of(ctx).pop(true),
-                                                                        child: const Text('Oui')
-                                                                )
-                                                        ]
-                                                )
-                                        );
-                                        return leave == true;
-                                }
-                                return true;
-                        },
-                        child: ValueListenableBuilder<int>(
-                                valueListenable: localMaskNotifier,
-                                builder: (ctx, m, _) {
-                                        final cfgSensors = allSensors
-                                                .where((s) => s.bitIndex != null)
-                                                .toList()
-                                        ..sort((a, b) => a.bitIndex!.compareTo(b.bitIndex!));
+                return Stack(
+                        children: [
+                                // Reconstruit tout le contenu quand localMaskNotifier.value change
+                                ValueListenableBuilder<int>(
+                                        valueListenable: localMaskNotifier,
+                                        builder: (ctx, m, _) {
+                                                final hasChanged = m != initialMask;
 
-                                        final internals = cfgSensors.where((s) => s.bus?.toLowerCase() == 'i2c').toList();
-                                        final modbus = cfgSensors.where((s) => s.bus?.toLowerCase() == 'modbus').toList();
+                                                // Prépare la liste des capteurs
+                                                final cfgSensors = allSensors
+                                                        .where((s) => s.bitIndex != null)
+                                                        .toList()
+                                                ..sort((a, b) => a.bitIndex!.compareTo(b.bitIndex!));
+                                                final internals = cfgSensors
+                                                        .where((s) => s.bus?.toLowerCase() == 'i2c')
+                                                        .toList();
+                                                final modbus = cfgSensors
+                                                        .where((s) => s.bus?.toLowerCase() == 'modbus')
+                                                        .toList();
 
-                                        final hasChanged = m != initialMask;
-
-                                        return SingleChildScrollView(
-                                                padding: const EdgeInsets.all(defaultPadding),
-                                                child: Column(
-                                                        children: [
-                                                                SensorsGroup(
-                                                                        title: 'CAPTEURS INTERNES',
-                                                                        sensors: internals,
-                                                                        emptyMessage: 'Aucun capteur interne à configurer.',
-                                                                        itemBuilder: (ctx, s) {
-                                                                                final bit = s.bitIndex!;
-                                                                                return SensorCard(
-                                                                                        sensor: s,
-                                                                                        configMode: true,
-                                                                                        isOn: (m & (1 << bit)) != 0,
-                                                                                        onToggle: (v) {
-                                                                                                final newMask = v ? (m | (1 << bit)) : (m & ~(1 << bit));
-                                                                                                localMaskNotifier.value = newMask;
+                                                return WillPopScope(
+                                                        onWillPop: _onWillPop,
+                                                        child: SingleChildScrollView(
+                                                                padding: const EdgeInsets.all(defaultPadding),
+                                                                child: Column(
+                                                                        children: [
+                                                                                // --- Internals ---
+                                                                                SensorsGroup(
+                                                                                        title: 'CAPTEURS INTERNES',
+                                                                                        sensors: internals,
+                                                                                        emptyMessage: 'Aucun capteur interne à configurer.',
+                                                                                        itemBuilder: (ctx, s) {
+                                                                                                final bit = s.bitIndex!;
+                                                                                                final on = (m & (1 << bit)) != 0;
+                                                                                                return SensorCard(
+                                                                                                        sensor: s,
+                                                                                                        configMode: true,
+                                                                                                        isOn: on,
+                                                                                                        onToggle: (v) {
+                                                                                                                localMaskNotifier.value = v
+                                                                                                                        ? (m | (1 << bit))
+                                                                                                                        : (m & ~(1 << bit));
+                                                                                                        }
+                                                                                                );
                                                                                         }
-                                                                                );
-                                                                        }
-                                                                ),
-                                                                const SizedBox(height: defaultPadding * 2),
-                                                                SensorsGroup(
-                                                                        title: 'CAPTEURS MODBUS',
-                                                                        sensors: modbus,
-                                                                        emptyMessage: 'Aucun capteur ModBus à configurer.',
-                                                                        itemBuilder: (ctx, s) {
-                                                                                final bit = s.bitIndex!;
-                                                                                return SensorCard(
-                                                                                        sensor: s,
-                                                                                        configMode: true,
-                                                                                        isOn: (m & (1 << bit)) != 0,
-                                                                                        onToggle: (v) {
-                                                                                                final newMask = v ? (m | (1 << bit)) : (m & ~(1 << bit));
-                                                                                                localMaskNotifier.value = newMask;
-                                                                                        }
-                                                                                );
-                                                                        }
-                                                                ),
-                                                                const SizedBox(height: defaultPadding * 2),
+                                                                                ),
 
-                                                                Opacity(
-                                                                        opacity: hasChanged ? 1 : 0.5,
-                                                                        child: AbsorbPointer(
-                                                                                absorbing: !hasChanged,
-                                                                                child: Padding(
-                                                                                        padding:
-                                                                                        const EdgeInsets.symmetric(horizontal: defaultPadding),
-                                                                                        child: ConfigButton(
-                                                                                                idleLabel: 'Appliquer la configuration',
-                                                                                                successLabel: 'Enregistré',
-                                                                                                failureLabel: 'Erreur',
-                                                                                                onSubmit: () async {
-                                                                                                        // 1) Calcul des diffs avec objets complets
-                                                                                                        final diffWidgets = <Widget>[];
-                                                                                                        for (final s in allSensors.where((s) => s.bitIndex != null)) {
-                                                                                                                final bit = s.bitIndex!;
-                                                                                                                final oldOn = (initialMask & (1 << bit)) != 0;
-                                                                                                                final newOn = (localMaskNotifier.value & (1 << bit)) != 0;
-                                                                                                                if (oldOn != newOn) {
-                                                                                                                        diffWidgets.add(DiffRow(
-                                                                                                                                        svgIcon: s.svgIcon!,
-                                                                                                                                        title: s.title!,
-                                                                                                                                        bus: s.bus,
-                                                                                                                                        code: s.code,
-                                                                                                                                        place: s.place,
-                                                                                                                                        oldOn: oldOn,
-                                                                                                                                        newOn: newOn
-                                                                                                                                ));
+                                                                                const SizedBox(height: defaultPadding * 2),
+
+                                                                                // --- ModBus ---
+                                                                                SensorsGroup(
+                                                                                        title: 'CAPTEURS MODBUS',
+                                                                                        sensors: modbus,
+                                                                                        emptyMessage: 'Aucun capteur ModBus à configurer.',
+                                                                                        itemBuilder: (ctx, s) {
+                                                                                                final bit = s.bitIndex!;
+                                                                                                final on = (m & (1 << bit)) != 0;
+                                                                                                return SensorCard(
+                                                                                                        sensor: s,
+                                                                                                        configMode: true,
+                                                                                                        isOn: on,
+                                                                                                        onToggle: (v) {
+                                                                                                                localMaskNotifier.value = v
+                                                                                                                        ? (m | (1 << bit))
+                                                                                                                        : (m & ~(1 << bit));
+                                                                                                        }
+                                                                                                );
+                                                                                        }
+                                                                                ),
+
+                                                                                const SizedBox(height: defaultPadding * 2),
+
+                                                                                // --- Bouton Appliquer ---
+                                                                                Opacity(
+                                                                                        opacity: hasChanged ? 1 : 0.5,
+                                                                                        child: AbsorbPointer(
+                                                                                                absorbing: !hasChanged,
+                                                                                                child: ConfigButton(
+                                                                                                        idleLabel: 'Appliquer la configuration',
+                                                                                                        successLabel: 'Enregistré',
+                                                                                                        failureLabel: 'Échec',
+                                                                                                        onSubmit: () async {
+                                                                                                                // 1) Confirmation BIOS‐style…
+                                                                                                                final diffWidgets = <Widget>[];
+                                                                                                                for (final s in cfgSensors) {
+                                                                                                                        final bit = s.bitIndex!;
+                                                                                                                        final oldOn = (initialMask & (1 << bit)) != 0;
+                                                                                                                        final newOn = (m & (1 << bit)) != 0;
+                                                                                                                        if (oldOn != newOn) {
+                                                                                                                                diffWidgets.add(DiffRow(
+                                                                                                                                                svgIcon: s.svgIcon!,
+                                                                                                                                                title: s.title!,
+                                                                                                                                                bus: s.bus,
+                                                                                                                                                code: s.code,
+                                                                                                                                                place: s.place,
+                                                                                                                                                oldOn: oldOn,
+                                                                                                                                                newOn: newOn
+                                                                                                                                        ));
+                                                                                                                        }
                                                                                                                 }
 
-                                                                                                        }
-
-                                                                                                        // 2) Popup de confirmation BIOS-style
-                                                                                                        // Après avoir collecté diffWidgets (avec DiffRow au lieu d’un String)
-                                                                                                        final confirm = await showDialog<bool>(
-                                                                                                                context: context,
-                                                                                                                barrierDismissible: false,
-                                                                                                                builder: (ctx) => CustomPopup(
-                                                                                                                        title: 'Confirmer l’application',
-                                                                                                                        content: Column(
-                                                                                                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                                                                children: [
-                                                                                                                                        const Text(
-                                                                                                                                                'Les capteurs modifiés :',
-                                                                                                                                                style: TextStyle(color: Colors.white70, fontSize: 16)
-                                                                                                                                        ),
-                                                                                                                                        const SizedBox(height: 12),
-                                                                                                                                        // Ici on affiche chaque DiffRow
-                                                                                                                                        ...diffWidgets
-                                                                                                                                ]
-                                                                                                                        ),
-                                                                                                                        actions: [
-                                                                                                                                TextButton(
-                                                                                                                                        onPressed: () => Navigator.of(ctx).pop(false),
-                                                                                                                                        child: const Text('Annuler')
+                                                                                                                final confirm = await showDialog<bool>(
+                                                                                                                        context: context,
+                                                                                                                        barrierDismissible: false,
+                                                                                                                        builder: (ctx) => CustomPopup(
+                                                                                                                                title: 'Confirmer l’application',
+                                                                                                                                content: Column(
+                                                                                                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                                                                        children: [
+                                                                                                                                                const Text(
+                                                                                                                                                        'Les capteurs modifiés :',
+                                                                                                                                                        style: TextStyle(
+                                                                                                                                                                color: Colors.white70,
+                                                                                                                                                                fontSize: 16
+                                                                                                                                                        )
+                                                                                                                                                ),
+                                                                                                                                                const SizedBox(height: 12),
+                                                                                                                                                ...diffWidgets
+                                                                                                                                        ]
                                                                                                                                 ),
-                                                                                                                                TextButton(
-                                                                                                                                        onPressed: () => Navigator.of(ctx).pop(true),
-                                                                                                                                        child: const Text('Valider')
-                                                                                                                                )
-                                                                                                                        ]
-                                                                                                                )
-                                                                                                        );
+                                                                                                                                actions: [
+                                                                                                                                        TextButton(
+                                                                                                                                                onPressed: () => Navigator.of(ctx).pop(false),
+                                                                                                                                                child: const Text('Annuler')
+                                                                                                                                        ),
+                                                                                                                                        TextButton(
+                                                                                                                                                onPressed: () => Navigator.of(ctx).pop(true),
+                                                                                                                                                child: const Text('Valider')
+                                                                                                                                        )
+                                                                                                                                ]
+                                                                                                                        )
+                                                                                                                );
 
-                                                                                                        if (confirm != true) return false;
+                                                                                                                if (confirm != true) {
+                                                                                                                  throw CancelledException();
+                                                                                                                }
 
-                                                                                                        // 3) Popup de progression et envoi
-                                                                                                        showDialog(
-                                                                                                                context: context,
-                                                                                                                barrierDismissible: false,
-                                                                                                                builder: (_) => const CustomPopup(
-                                                                                                                        title: 'Application en cours',
-                                                                                                                        content: Padding(
-                                                                                                                                padding: EdgeInsets.symmetric(vertical: 20),
-                                                                                                                                child: CircularProgressIndicator()
-                                                                                                                        ),
-                                                                                                                        actions: []
-                                                                                                                )
-                                                                                                        );
+                                                                                                                // 2) Démarre l’overlay
+                                                                                                                setState(() => isProcessing = true);
 
-                                                                                                        final ok = await widget.messageService.sendSensorConfig(
-                                                                                                                List<bool>.generate(
-                                                                                                                        16,
-                                                                                                                        (i) => (localMaskNotifier.value & (1 << i)) != 0
-                                                                                                                )
-                                                                                                        );
-                                                                                                        if (ok) {
-                                                                                                                widget.activeMaskNotifier.value = localMaskNotifier.value;
+                                                                                                                // 3) Envoi de la config
+                                                                                                                final ok = await widget.messageService.sendSensorConfig(
+                                                                                                                        List<bool>.generate(
+                                                                                                                                16,
+                                                                                                                                (i) => (m & (1 << i)) != 0
+                                                                                                                        )
+                                                                                                                );
+
+                                                                                                                if (ok) {
+                                                                                                                        widget.activeMaskNotifier.value = m;
+                                                                                                                        setState(() => initialMask = m);
+                                                                                                                }
+
+                                                                                                                // 4) Stop l’overlay
+                                                                                                                setState(() => isProcessing = false);
+
+                                                                                                                return ok;
                                                                                                         }
-
-                                                                                                        Navigator.of(context, rootNavigator: true).pop();
-                                                                                                        return ok;
-                                                                                                }
+                                                                                                )
                                                                                         )
                                                                                 )
-                                                                        )
+                                                                        ]
                                                                 )
-                                                        ]
+                                                        )
+                                                );
+                                        }
+                                ),
+
+                                // --- Overlay de chargement bloquant ---
+                                if (isProcessing)
+                                Positioned.fill(
+                                        child: AbsorbPointer(
+                                                absorbing: true,
+                                                child: Container(
+                                                        color: Colors.black45,
+                                                        child: const Center(
+                                                                child: CircularProgressIndicator()
+                                                        )
                                                 )
-                                        );
-                                }
-                        )
+                                        )
+                                )
+                        ]
                 );
         }
 }
