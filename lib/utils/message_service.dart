@@ -61,4 +61,18 @@ class MessageService {
                         return false;
                 }
         }
+
+        /// Envoie un nouveau nom de station (déjà paddé à 20 bytes) au firmware.
+        /// Le protocole Arduino doit reconnaître le préfixe `<name>` .
+        Future<bool> sendStationName(String paddedName) async {
+                // Préfixe et retour à la ligne
+                const prefix = '<name>';
+                final full = '$prefix$paddedName';
+                try {
+                        final data = Uint8List.fromList(full.codeUnits);
+                        return await plugin?.write(data) ?? false;
+                } catch (e) {
+                        return false;
+                }
+        }
 }
