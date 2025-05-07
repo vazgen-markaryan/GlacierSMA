@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rev_glacier_sma_mobile/utils/custom_snackbar.dart';
 import 'package:rev_glacier_sma_mobile/screens/settings/settings_section.dart';
 import 'package:rev_glacier_sma_mobile/screens/settings/settings_widgets.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_processor.dart';
@@ -44,11 +45,16 @@ class AboutSection extends StatelessWidget {
                                                         children: [
                                                                 LabelRow(label: 'Micrologiciel', value: name),
                                                                 LinkRow(
-                                                                        label: 'Repository Git',
+                                                                        label: 'GitHub (Privé)',
                                                                         url: repoUrl,
                                                                         onError: () {
-                                                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                                                        const SnackBar(content: Text("Impossible d'ouvrir le lien"))
+                                                                                showCustomSnackBar(
+                                                                                        context,
+                                                                                        message: "Impossible d'ouvrir le lien",
+                                                                                        iconData: Icons.error,
+                                                                                        backgroundColor: Colors.red,
+                                                                                        textColor: Colors.white,
+                                                                                        iconColor: Colors.white
                                                                                 );
                                                                         }
                                                                 ),

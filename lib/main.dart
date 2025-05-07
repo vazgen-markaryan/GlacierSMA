@@ -91,8 +91,9 @@ class MyApp extends StatelessWidget {
 // TODO Support multilingue (EN + FR)
 // TODO Sensor popup graph real time (ou pas popup mais autre page)
 // TODO Créer des réglages pour les limites min/max des capteurs avec notifications
-// TODO ajouter la possibilité de renommer la station meme si le code est le meme
-// TODO reformat settings page, homepage, config page
 
-//TODO capture aussi <fatal> et <config>
+//TODO capture aussi <fatal> et <config> (pas affichage à date)
 // TODO Déconnexion automatique en cas d'erreur fatale
+//TODO capture new line NAME in ID
+//TODO changement de nom, 20 caractères max, obligatoirement 20 bytes. regex on EN + FR + chiffres. ASCII Windows-1252 preferablement. Si 3 caractères, les 17 qui restent \0
+//TODO new internal sensor IRIDIUM
