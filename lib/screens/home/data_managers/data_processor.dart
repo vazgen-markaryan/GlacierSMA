@@ -16,14 +16,12 @@ class RawData {
         RawData(this.headers, this.values);
 
         /// Accès aux valeurs par nom de colonne (en minuscules).
-        Map<String, String> get asMap =>
-        Map.fromIterables(headers, values);
+        Map<String, String> get asMap => Map.fromIterables(headers.map((headers) => headers.toLowerCase()), values);
 }
 
 /// Utility pour parser le CSV d’un bloc de données brut.
 class RawDataParser {
         /// Prend rawData (>=3 lignes) et renvoie [RawData] propre.
-        /// Utilise '\u0007' comme séparateur **uniquement** si c'est un bloc <id>.
         static RawData parse(String rawData) {
                 final lines = rawData.split('\n');
                 if (lines.length < 3) return RawData([], []);
@@ -35,14 +33,14 @@ class RawDataParser {
 
                 final values = lines[2]
                         .split(',')
-                        .map((v) => v.trim())
-                        .map((v) => v.replaceAll('\u0007', ',')) // Remplace les BELLs par une chaîne vide
+                        .map((v) => v.trim().replaceAll('\u0007', ','))
                         .toList();
 
                 return RawData(headers, values);
         }
 }
 
+/// Traite un bloc `rawData`, gère `<id>`, `<fatal>` et `<active>`.
 void processRawData({
         required String rawData,
         required DebugLogUpdater debugLogManager,
@@ -50,14 +48,14 @@ void processRawData({
         required void Function() onDataReceived,
         required ValueNotifier<double?> batteryVoltage,
         required void Function(RawData idData) onIdReceived,
-        required void Function(int mask) onActiveReceived
+        required void Function(int mask) onActiveReceived,
+        required void Function(String reason) onFatalReceived
 }) {
         // Bloc <id>
         if (rawData.startsWith('<id>')) {
                 final idData = RawDataParser.parse(rawData);
                 onIdReceived(idData);
 
-                // Traiter le reste après les 3 lignes de <id>
                 final remaining = rawData.split('\n').skip(3).join('\n');
                 if (remaining.trim().isNotEmpty) {
                         processRawData(
@@ -68,9 +66,18 @@ void processRawData({
                                 batteryVoltage: batteryVoltage,
                                 onIdReceived: (_) {
                                 },
-                                onActiveReceived: onActiveReceived
+                                onActiveReceived: onActiveReceived,
+                                onFatalReceived: onFatalReceived
                         );
                 }
+                return;
+        }
+
+        // Bloc <fatal>
+        if (rawData.contains('<fatal>')) {
+                final lines = rawData.split('\n');
+                final reason = lines.length >= 2 ? lines[1].trim() : 'GENERIC';
+                onFatalReceived(reason);
                 return;
         }
 
@@ -80,7 +87,9 @@ void processRawData({
                 if (lines.length >= 2) {
                         final maskString = lines[1].trim();
                         try {
-                                final hex = maskString.startsWith('0x') ? maskString.substring(2) : maskString;
+                                final hex = maskString.startsWith('0x')
+                                        ? maskString.substring(2)
+                                        : maskString;
                                 final mask = int.parse(hex, radix: 16);
                                 onActiveReceived(mask);
                         }
@@ -101,8 +110,8 @@ void processRawData({
                 final statusLog = 'Status:\n' +
                         headers.asMap().entries.map((e) {
                                         final header = e.value.toUpperCase().padRight(maxHeaderLength);
-                                        final val = values[e.key];
-                                        return '$header : $val';
+                                        final value = values[e.key];
+                                        return '$header : $value';
                                 }
                         ).join('\n');
                 debugLogManager.setLogChunk(1, statusLog);
@@ -115,12 +124,14 @@ void processRawData({
                         final voltage = double.tryParse(values[batteryIndex]);
                         if (voltage != null) batteryVoltage.value = voltage;
                 }
+
                 final dataLog = '\nValeurs:\n' +
                         headers.asMap().entries.map((e) {
                                         final header = e.value.toUpperCase().padRight(maxHeaderLength);
                                         final raw = values[e.key];
                                         final formatted = double.tryParse(raw) != null
-                                                ? '${double.parse(raw).toStringAsFixed(2)}${getUnitForHeader(e.value.toLowerCase())}'
+                                                ? '${double.parse(raw).toStringAsFixed(2)}'
+                                                '${getUnitForHeader(e.value.toLowerCase())}'
                                                 : raw;
                                         return '$header : $formatted';
                                 }
@@ -130,7 +141,7 @@ void processRawData({
 
         debugLogManager.updateLogs();
 
-        // Mise à jour capteurs
+        // Mise à jour des capteurs
         if (rawData.contains('<data>')) {
                 populateSensorData(
                         rawData,
@@ -145,7 +156,7 @@ void processRawData({
                 );
         }
 
-        // Notification UI si au moins un capteur actif
+        // Notification UI
         final hasData = [
                 ...getSensors(SensorType.internal),
                 ...getSensors(SensorType.modbus)

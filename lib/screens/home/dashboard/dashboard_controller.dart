@@ -20,6 +20,7 @@ class DashboardController {
         final DebugLogUpdater debugLogManager;
         final MessageService messageService;
         final void Function(Duration elapsed) onConnectionLost;
+        final void Function(String reason) onFatalReceived;
         late final ValueNotifier<bool> isInitialLoading;
         final ValueNotifier<double?> batteryVoltage = ValueNotifier(null);
         final ValueNotifier<RawData?> firmwareNotifier = ValueNotifier(null);
@@ -34,7 +35,8 @@ class DashboardController {
                 required this.connectedDevices,
                 required this.debugLogManager,
                 required this.messageService,
-                required this.onConnectionLost
+                required this.onConnectionLost,
+                required this.onFatalReceived
         }) {
                 isInitialLoading = ValueNotifier(true);
         }
@@ -72,8 +74,9 @@ class DashboardController {
                                 onDataReceived();
                         },
                         batteryVoltage: batteryVoltage,
-                        onIdReceived: (idData) {firmwareNotifier.value = idData;},
-                        onActiveReceived: (mask) => activeMaskNotifier.value = mask
+                        onIdReceived: (id) => firmwareNotifier.value = id,
+                        onActiveReceived: (mask) => activeMaskNotifier.value = mask,
+                        onFatalReceived: (reason) => onFatalReceived(reason)
                 );
 
                 // Ping toutes les 2s pour détecter la perte de connexion

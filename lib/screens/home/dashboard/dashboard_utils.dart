@@ -40,7 +40,8 @@ mixin DashboardUtils on State<Home_Screen> {
                         connectedDevices: widget.connectedDevices,
                         debugLogManager: debugManager,
                         messageService: messageService,
-                        onConnectionLost: handleConnectionLost
+                        onConnectionLost: handleConnectionLost,
+                        onFatalReceived: handleFatalError
                 );
 
                 controller.init(() => setState(() {
@@ -56,6 +57,69 @@ mixin DashboardUtils on State<Home_Screen> {
                         context: context,
                         plugin: widget.plugin,
                         elapsedTime: elapsed
+                );
+        }
+
+        /// Mapping des raisons fatales en message utilisateur
+        static const fatalMessages = {
+                'GENERIC': 'Réinitialisation de l’appareil.',
+                'DC_FLAG_NOT_FOUND': 'Drapeau de conteneur de données invalide.',
+                'HARDFAULT': 'HardFault sur le Microcontrôleur.',
+                'WATCHDOG': 'WatchDog timer est expirée.'
+        };
+
+        /// Callback quand on reçoit `<fatal>`
+        Future<void> handleFatalError(String reason) async {
+                // Arrête le stopwatch
+                controller.connectionStopwatch.stop();
+
+                // Arrête le pingTimer et autres notifiers pour ne pas retomber sur onConnectionLost
+                controller.dispose();
+
+                // Traduction humaine du code
+                final human = fatalMessages[reason] ?? 'Erreur fatale inconnue : $reason';
+
+                // Récupère la durée écoulée et formate-la HH:MM:SS
+                final elapsed = controller.connectionStopwatch.elapsed;
+                final hours = elapsed.inHours.toString().padLeft(2, '0');
+                final minutes = (elapsed.inMinutes % 60).toString().padLeft(2, '0');
+                final seconds = (elapsed.inSeconds % 60).toString().padLeft(2, '0');
+                final formattedDuration = '$hours:$minutes:$seconds';
+
+                await showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (ctx) =>
+                        CustomPopup(
+                                title: 'Erreur fatale',
+                                content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                                Text(
+                                                        human,
+                                                        textAlign: TextAlign.center,
+                                                        style: const TextStyle(color: Colors.white, fontSize: 16)
+                                                ),
+                                                const SizedBox(height: 12),
+                                                Text(
+                                                        'Durée de connexion : $formattedDuration',
+                                                        textAlign: TextAlign.center,
+                                                        style: const TextStyle(color: Colors.white70)
+                                                )
+                                        ]
+                                ),
+                                actions: [
+                                        TextButton(
+                                                onPressed: () {
+                                                        Navigator.of(ctx).pop();
+                                                        widget.plugin?.disconnect();
+                                                        Navigator.of(context).pop();
+                                                },
+                                                child: const Text('OK')
+                                        )
+                                ]
+                        )
                 );
         }
 
@@ -140,7 +204,6 @@ mixin DashboardUtils on State<Home_Screen> {
                 }
 
                 final ok = await messageService.sendStationName(name);
-
                 showCustomSnackBar(
                         context,
                         message: ok ? 'Nom de station mis à jour' : 'Erreur lors de l’envoi du nom',
