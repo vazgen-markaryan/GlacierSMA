@@ -60,7 +60,7 @@ class LinkRow extends StatelessWidget {
                                                         'URL',
                                                         style: TextStyle(
                                                                 color: Colors.blueAccent,
-                                                                decoration: TextDecoration.underline
+                                                                decoration: TextDecoration.none
                                                         )
                                                 )
                                         )

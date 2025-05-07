@@ -95,4 +95,4 @@ class MyApp extends StatelessWidget {
 //TODO capture aussi <fatal> et <config> (pas affichage à date)
 // TODO Déconnexion automatique en cas d'erreur fatale
 //TODO capture new line NAME in ID
-//TODO changement de nom, 20 caractères max, obligatoirement 20 bytes. regex on EN + FR + chiffres. ASCII Windows-1252 preferablement. Si 3 caractères, les 17 qui restent \0
+//TODO changement de nom, 20 caractères max, obligatoirement 20 bytes. ASCII Windows-1252 preferablement. Si 3 caractères, les 17 qui restent \0

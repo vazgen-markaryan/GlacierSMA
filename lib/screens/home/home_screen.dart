@@ -121,7 +121,8 @@ class Home_ScreenState extends State<Home_Screen> {
                         title: DashboardHeader(
                                 isConnected: isConnected,
                                 connectedDevices: widget.connectedDevices,
-                                batteryVoltageNotifier: controller.batteryVoltage
+                                batteryVoltageNotifier: controller.batteryVoltage,
+                                firmwareNotifier: controller.firmwareNotifier
                         ),
                         actions: [
                                 IconButton(
