@@ -96,4 +96,3 @@ class MyApp extends StatelessWidget {
 // TODO Déconnexion automatique en cas d'erreur fatale
 //TODO capture new line NAME in ID
 //TODO changement de nom, 20 caractères max, obligatoirement 20 bytes. regex on EN + FR + chiffres. ASCII Windows-1252 preferablement. Si 3 caractères, les 17 qui restent \0
-//TODO new internal sensor IRIDIUM

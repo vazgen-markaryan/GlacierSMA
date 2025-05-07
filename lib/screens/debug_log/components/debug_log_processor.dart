@@ -1,9 +1,6 @@
-/// Affiche les logs de STATUS et VALEURS dans un tableau stylisé
-/// - Formate les codes de statut en labels lisibles (e.g. “1 (Fonctionne)”)
-/// - Met à jour automatiquement lorsque DebugLogManager diffuse de nouvelles lignes
-
 import 'package:flutter/material.dart';
 import 'package:rev_glacier_sma_mobile/screens/debug_log/components/debug_log_updater.dart';
+import 'package:rev_glacier_sma_mobile/utils/switch_utils.dart';
 
 /// Retourne le libellé correspondant à un code de statut
 String statusLabel(int status) {
@@ -28,20 +25,18 @@ class DebugLogProcessor extends StatelessWidget {
         @override
         Widget build(BuildContext context) {
                 return ValueListenableBuilder<List<String>>(
-                        // Écoute le notifier qui contient la liste de toutes les lignes de log
+                        // Écoute le notifier des logs
                         valueListenable: debugLogManager.debugLogsNotifier,
                         builder: (context, logs, _) {
-                                // Prépare deux listes de TableRow pour STATUS et VALEURS
-                                final List<TableRow> statusRows = [];
-                                final List<TableRow> valeurRows = [];
-                                bool isInStatus = false;
-                                bool isInValeurs = false;
+                                final statusRows = <TableRow>[];
+                                final valeurRows = <TableRow>[];
+                                bool isInStatus = false, isInValeurs = false;
 
                                 for (var line in logs) {
-                                        final trimmedLine = line.trim();
-                                        final lower = trimmedLine.toLowerCase();
+                                        final trimmed = line.trim();
+                                        final lower = trimmed.toLowerCase();
 
-                                        // Basculer entre section STATUS et VALEURS
+                                        // Repère les switches de section
                                         if (lower == 'status') {
                                                 isInStatus = true;
                                                 isInValeurs = false;
@@ -53,11 +48,8 @@ class DebugLogProcessor extends StatelessWidget {
                                                 continue;
                                         }
 
-                                        // Ignorer les lignes vides ou n'ayant pas de séparateur ':'
-                                        if (trimmedLine.isEmpty || !trimmedLine.contains(':')) continue;
-
-                                        // Séparer en clé et valeur
-                                        final parts = trimmedLine.split(':');
+                                        if (trimmed.isEmpty || !trimmed.contains(':')) continue;
+                                        final parts = trimmed.split(':');
                                         if (parts.length < 2) continue;
                                         final key = parts[0].trim();
                                         final rawValue = parts.sublist(1).join(':').trim();
@@ -65,50 +57,45 @@ class DebugLogProcessor extends StatelessWidget {
                                         // Ne pas recréer une ligne pour les titres de section
                                         if (isSectionTitle(key)) continue;
 
-                                        // Choisir l’affichage selon la section
+                                        // Construit le widget de valeur
                                         Widget valueWidget;
                                         if (isInStatus) {
-                                                // Pour STATUS : convertir code en label
+                                                // STATUS → "2 (Déconnecté)"
                                                 final code = int.tryParse(rawValue) ?? -1;
                                                 final label = statusLabel(code);
-                                                valueWidget = Text(
-                                                        '$code ($label)',
-                                                        style: const TextStyle(fontSize: 12)
-                                                );
+                                                valueWidget = Text('$code ($label)', style: const TextStyle(fontSize: 12));
                                         }
                                         else {
-                                                // Pour VALEURS : afficher la valeur brute
-                                                valueWidget = Text(
-                                                        rawValue,
-                                                        style: const TextStyle(fontSize: 12)
-                                                );
+                                                // VALEURS → override Iridium ou brut
+                                                if (key.toLowerCase() == 'iridium_signal_quality') {
+
+                                                        // Transforme le code en String
+                                                        final quality = int.tryParse(rawValue) ?? -1;
+                                                        final map = getIridiumSvgLogoAndColor(quality);
+                                                        final qualLbl = map['value'] as String;
+                                                        valueWidget = Text('$quality ($qualLbl)', style: const TextStyle(fontSize: 12));
+                                                }
+                                                else {
+                                                        valueWidget = Text(rawValue, style: const TextStyle(fontSize: 12));
+                                                }
                                         }
 
-                                        // Créer une ligne de tableau avec clé à gauche et valeur alignée à droite
-                                        final row = TableRow(children: [
+                                        final row = TableRow(
+                                                children: [
                                                         Padding(
                                                                 padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
                                                                 child: Text(key, style: const TextStyle(fontSize: 12))
                                                         ),
                                                         Padding(
                                                                 padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                                                                child: Align(
-                                                                        alignment: Alignment.centerRight,
-                                                                        child: valueWidget
-                                                                )
+                                                                child: Align(alignment: Alignment.centerRight, child: valueWidget)
                                                         )
                                                 ]);
 
-                                        // Ajouter la ligne à la section appropriée
-                                        if (isInStatus) {
-                                                statusRows.add(row);
-                                        }
-                                        else if (isInValeurs) {
-                                                valeurRows.add(row);
-                                        }
+                                        if (isInStatus) statusRows.add(row);
+                                        if (isInValeurs) valeurRows.add(row);
                                 }
 
-                                // Construire l’UI : titre, tableau STATUS, puis tableau VALEURS
                                 return SingleChildScrollView(
                                         scrollDirection: Axis.vertical,
                                         child: SizedBox(
@@ -120,7 +107,7 @@ class DebugLogProcessor extends StatelessWidget {
                                                                 child: Column(
                                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                                         children: [
-                                                                                // Affiche le premier message contenant "message envoyé", le cas échéant
+                                                                                // Affiche le premier message "message envoyé", s'il y en a un
                                                                                 Text(
                                                                                         logs.firstWhere(
                                                                                                 (l) => l.toLowerCase().contains('message envoyé'),
@@ -133,10 +120,7 @@ class DebugLogProcessor extends StatelessWidget {
                                                                                 // Section STATUS
                                                                                 Align(
                                                                                         alignment: Alignment.center,
-                                                                                        child: Text(
-                                                                                                "STATUS",
-                                                                                                style: Theme.of(context).textTheme.titleMedium
-                                                                                        )
+                                                                                        child: Text("STATUS", style: Theme.of(context).textTheme.titleMedium)
                                                                                 ),
                                                                                 const SizedBox(height: 8),
                                                                                 if (statusRows.isNotEmpty)
@@ -150,23 +134,14 @@ class DebugLogProcessor extends StatelessWidget {
                                                                                         children: statusRows
                                                                                 )
                                                                                 else
-                                                                                Align(
-                                                                                        alignment: Alignment.center,
-                                                                                        child: Text(
-                                                                                                "Aucune donnée n'a été reçue.\nVérifiez votre HardWare\nVérifiez votre Code Arduino\nVérifiez la logique de votre application.",
-                                                                                                textAlign: TextAlign.center,
-                                                                                                style: Theme.of(context).textTheme.titleSmall
-                                                                                        )
-                                                                                ),
+                                                                                buildEmptyMessage(context),
+
                                                                                 const SizedBox(height: 16),
 
                                                                                 // Section VALEURS
                                                                                 Align(
                                                                                         alignment: Alignment.center,
-                                                                                        child: Text(
-                                                                                                "VALEURS",
-                                                                                                style: Theme.of(context).textTheme.titleMedium
-                                                                                        )
+                                                                                        child: Text("VALEURS", style: Theme.of(context).textTheme.titleMedium)
                                                                                 ),
                                                                                 const SizedBox(height: 8),
                                                                                 if (valeurRows.isNotEmpty)
@@ -180,14 +155,7 @@ class DebugLogProcessor extends StatelessWidget {
                                                                                         children: valeurRows
                                                                                 )
                                                                                 else
-                                                                                Align(
-                                                                                        alignment: Alignment.center,
-                                                                                        child: Text(
-                                                                                                "Aucune donnée n'a été reçue.\nVérifiez votre HardWare\nVérifiez votre Code Arduino\nVérifiez la logique de votre application.",
-                                                                                                textAlign: TextAlign.center,
-                                                                                                style: Theme.of(context).textTheme.titleSmall
-                                                                                        )
-                                                                                )
+                                                                                buildEmptyMessage(context)
                                                                         ]
                                                                 )
                                                         )
@@ -198,9 +166,20 @@ class DebugLogProcessor extends StatelessWidget {
                 );
         }
 
-        /// Retourne vrai si [key] correspond à un titre de section ("status" ou "valeurs")
+        /// Titre de section à ignorer
         bool isSectionTitle(String key) {
                 final low = key.toLowerCase();
                 return low == 'status' || low == 'valeurs';
         }
+
+        /// Widget affiché quand aucune ligne n’existe
+        Widget buildEmptyMessage(BuildContext context) => Align(
+                alignment: Alignment.center,
+                child: Text(
+                        "Aucune donnée n'a été reçue.\n"
+                        "Vérifiez votre Hardware, votre code Arduino, la logique de l'application.",
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleSmall
+                )
+        );
 }

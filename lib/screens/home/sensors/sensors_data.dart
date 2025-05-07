@@ -1,8 +1,7 @@
-/// Définit le modèle "DataMap" et "SensorsData", ainsi que la liste par défaut de tous les capteurs et la fonction d’accès.
-
 import 'package:flutter/material.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 
+/// Définit le modèle "DataMap" et "SensorsData", ainsi que la liste par défaut de tous les capteurs et la fonction d’accès.
 class DataMap {
         final String name, header, svgLogo;
 
@@ -74,10 +73,10 @@ List<SensorsData> allSensors = [
                 place: "Intérieur",
                 svgIcon: microchip,
                 data: {
-                        DataMap(name: "Temperature", header: "bme280_temperature", svgLogo: temperature) : "Placeholder par défaut",
-                        DataMap(name: "Pression", header: "bme280_pression", svgLogo: pressure) : "Placeholder par défaut",
-                        DataMap(name: "Altitude", header: "bme280_altitude", svgLogo: altitude) : "Placeholder par défaut",
-                        DataMap(name: "Humidité", header: "bme280_humidity", svgLogo: humidity) : "Placeholder par défaut"
+                        DataMap(name: "Temperature", header: "bme280_temperature", svgLogo: temperature) : "---",
+                        DataMap(name: "Pression", header: "bme280_pression", svgLogo: pressure) : "---",
+                        DataMap(name: "Altitude", header: "bme280_altitude", svgLogo: altitude) : "---",
+                        DataMap(name: "Humidité", header: "bme280_humidity", svgLogo: humidity) : "---"
                 }
         ),
 
@@ -90,12 +89,12 @@ List<SensorsData> allSensors = [
                 place: "Intérieur",
                 svgIcon: microchip,
                 data: {
-                        DataMap(name: "Accélération X", header: "lsm303_accel_x", svgLogo: acceleration) : "Placeholder par défaut",
-                        DataMap(name: "Accélération Y", header: "lsm303_accel_y", svgLogo: acceleration) : "Placeholder par défaut",
-                        DataMap(name: "Accélération Z", header: "lsm303_accel_z", svgLogo: acceleration) : "Placeholder par défaut",
-                        DataMap(name: "Roll", header: "lsm303_roll", svgLogo: pitchAndRoll) : "Placeholder par défaut",
-                        DataMap(name: "Pitch", header: "lsm303_pitch", svgLogo: pitchAndRoll) : "Placeholder par défaut",
-                        DataMap(name: "Accélération Range", header: "lsm303_accel_range", svgLogo: range) : "Placeholder par défaut"
+                        DataMap(name: "Accélération X", header: "lsm303_accel_x", svgLogo: acceleration) : "---",
+                        DataMap(name: "Accélération Y", header: "lsm303_accel_y", svgLogo: acceleration) : "---",
+                        DataMap(name: "Accélération Z", header: "lsm303_accel_z", svgLogo: acceleration) : "---",
+                        DataMap(name: "Roll", header: "lsm303_roll", svgLogo: pitchAndRoll) : "---",
+                        DataMap(name: "Pitch", header: "lsm303_pitch", svgLogo: pitchAndRoll) : "---",
+                        DataMap(name: "Accélération Range", header: "lsm303_accel_range", svgLogo: range) : "---"
                 }
         ),
 
@@ -107,10 +106,10 @@ List<SensorsData> allSensors = [
                 place: "Intérieur",
                 svgIcon: gps,
                 data: {
-                        DataMap(name: "Latitude", header: "gps_latitude", svgLogo: gps) : "Placeholder par défaut",
-                        DataMap(name: "Longitude", header: "gps_longitude", svgLogo: gps) : "Placeholder par défaut",
-                        DataMap(name: "Satelites", header: "gps_satelites", svgLogo: gps) : "Placeholder par défaut",
-                        DataMap(name: "HDOP", header: "gps_hdop", svgLogo: gps) : "Placeholder par défaut"
+                        DataMap(name: "Latitude", header: "gps_latitude", svgLogo: gps) : "---",
+                        DataMap(name: "Longitude", header: "gps_longitude", svgLogo: gps) : "---",
+                        DataMap(name: "Satelites", header: "gps_satelites", svgLogo: gps) : "---",
+                        DataMap(name: "HDOP", header: "gps_hdop", svgLogo: gps) : "---"
                 }
         ),
 
@@ -124,6 +123,16 @@ List<SensorsData> allSensors = [
         ),
 
         SensorsData(
+                title: "Iriduim",
+                header: "iridium_status",
+                place: "Intérieur",
+                svgIcon: satellite,
+                data: {
+                        DataMap(name: "Qualité du signal", header: "iridium_signal_quality", svgLogo: satellite) : "---",
+                }
+        ),
+
+        SensorsData(
                 title: "Anémomètre",
                 header: "wind_speed_status",
                 bitIndex: 2,
@@ -131,7 +140,7 @@ List<SensorsData> allSensors = [
                 place: "Extérieur",
                 svgIcon: ventilation,
                 data: {
-                        DataMap(name: "Vitesse", header: "wind_speed", svgLogo: windSpeed) : "Placeholder par défaut"
+                        DataMap(name: "Vitesse", header: "wind_speed", svgLogo: windSpeed) : "---"
                 }
         ),
 
@@ -143,8 +152,8 @@ List<SensorsData> allSensors = [
                 place: "Extérieur",
                 svgIcon: ventilation,
                 data: {
-                        DataMap(name: "Angle", header: "wind_direction_angle", svgLogo: windAngle) : "Placeholder par défaut",
-                        DataMap(name: "Orientation", header: "wind_direction_facing", svgLogo: windDirection) : "Placeholder par défaut"
+                        DataMap(name: "Angle", header: "wind_direction_angle", svgLogo: windAngle) : "---",
+                        DataMap(name: "Orientation", header: "wind_direction_facing", svgLogo: windDirection) : "---"
                 }
         ),
 
@@ -157,7 +166,7 @@ List<SensorsData> allSensors = [
                 place: "Extérieur",
                 svgIcon: luxmetre,
                 data: {
-                        DataMap(name: "Luminosité", header: "mb_asl20", svgLogo: luxmetre) : "Placeholder par défaut"
+                        DataMap(name: "Luminosité", header: "mb_asl20", svgLogo: luxmetre) : "---"
                 }
         ),
 
@@ -170,9 +179,9 @@ List<SensorsData> allSensors = [
                 place: "Extérieur",
                 svgIcon: microchip,
                 data: {
-                        DataMap(name: "Temperature", header: "mb_bme280_temp", svgLogo: temperature) : "Placeholder par défaut",
-                        DataMap(name: "Pression", header: "mb_bme280_press", svgLogo: pressure) : "Placeholder par défaut",
-                        DataMap(name: "Humidité", header: "mb_bme280_hum", svgLogo: humidity) : "Placeholder par défaut"
+                        DataMap(name: "Temperature", header: "mb_bme280_temp", svgLogo: temperature) : "---",
+                        DataMap(name: "Pression", header: "mb_bme280_press", svgLogo: pressure) : "---",
+                        DataMap(name: "Humidité", header: "mb_bme280_hum", svgLogo: humidity) : "---"
                 }
         )
 ];

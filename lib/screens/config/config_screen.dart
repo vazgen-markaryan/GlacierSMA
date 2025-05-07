@@ -136,7 +136,7 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                         }
                                                 ),
 
-                                                const SizedBox(height: defaultPadding * 2),
+                                                const SizedBox(height: defaultPadding),
 
                                                 // Bouton Appliquer
                                                 ConfigButton(
@@ -152,9 +152,7 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                                         }
                                                                 );
                                                         }
-                                                ),
-
-                                                const SizedBox(height: defaultPadding * 2)
+                                                )
                                         ]
                                 )
                         )

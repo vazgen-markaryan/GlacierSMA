@@ -1,11 +1,10 @@
-/// Analyse une chaîne de données brutes au format texte (3 lignes : entête, en-têtes CSV, valeurs CSV)
-/// Met à jour chaque capteur de la liste "sensorGroups" si ses données ont changé.
-/// Parcourt chaque groupe de capteurs et met à jour leurs "dataNotifier".
-/// si une nouvelle valeur est détectée dans >rawData".
-
 import 'package:rev_glacier_sma_mobile/utils/switch_utils.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
 
+/// Analyse une chaîne de données brutes au format texte (3 lignes : entête, en-têtes CSV, valeurs CSV)
+/// Met à jour chaque capteur de la liste "sensorGroups" si ses données ont changé.
+/// Parcourt chaque groupe de capteurs et met à jour leurs "dataNotifier".
+/// Si une nouvelle valeur est détectée dans >rawData".
 void populateSensorData(String rawData, List<List<SensorsData>> sensorGroups) {
         // Sépare la chaîne reçue en lignes
         final lines = rawData.split('\n');
@@ -33,8 +32,14 @@ void populateSensorData(String rawData, List<List<SensorsData>> sensorGroups) {
 
                                 // Gestion des cas spéciaux
                                 if (key.header == "wind_direction_facing") {
-                                        final dir = int.tryParse(values[index]) ?? -1;
-                                        newValue = getWindDirectionFacing(dir);
+                                        final direction = int.tryParse(values[index]) ?? -1;
+                                        newValue = getWindDirectionFacing(direction);
+                                }
+
+                                else if (key.header.toLowerCase() == 'iridium_signal_quality') {
+                                        final quality = int.tryParse(values[index]) ?? -1;
+                                        final stringQuality = getIridiumSvgLogoAndColor(quality);
+                                        newValue = stringQuality['value'] as String;
                                 }
 
                                 // Valeur numérique générique avec unité

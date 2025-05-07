@@ -33,6 +33,7 @@ const String range = "assets/icons/range.svg";
 const String windDirection = "assets/icons/wind_direction.svg";
 const String windSpeed = "assets/icons/wind_speed.svg";
 const String windAngle = "assets/icons/wind_angle.svg";
+const String satellite = "assets/icons/satellite.svg";
 
 // Messages utilisés pour communiquer avec Arduino
 // WARNING: Ces messages doivent rester identiques à ceux utilisés dans le firmware Arduino

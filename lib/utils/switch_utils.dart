@@ -1,6 +1,9 @@
+import 'dart:ui';
+
 /// Contient des utilitaires pour :
 ///  Obtenir l’unité à afficher selon l’en-tête de donnée Arduino
 ///  Traduire la direction du vent codée (0–16) en texte
+///  • Choisir l’icône SVG Iridium selon la qualité du signal
 
 // WARNING: NE JAMAIS CHANGER CES CAS S’ILS NE SONT PAS CHANGÉS DANS LE CODE ARDUINO
 String getUnitForHeader(String header) {
@@ -56,5 +59,44 @@ String getWindDirectionFacing(int value) {
                 case 15: return "Nord-nord-ouest";
                 case 16: return "Nord";
                 default: return "Inconnu";
+        }
+}
+
+/// Retourne le chemin du fichier SVG à utiliser pour Iridium en fonction de la qualité du signal (0 = mauvais → mauvais icône),
+/// Retourne aussi la couleur à appliquer au SVG et la valeur à afficher.
+Map<String, dynamic> getIridiumSvgLogoAndColor(int quality) {
+        switch (quality) {
+                case 5:
+                case 4:
+                        return {
+                                'icon':  'assets/icons/satellite_excellent.svg',
+                                'color': const Color(0xFF00FF00), // Vert,
+                                'value': 'Excellent'
+                        };
+                case 3:
+                        return {
+                                'icon':  'assets/icons/satellite_very_good.svg',
+                                'color': const Color(0xFF7FFF00), // Vert clair
+                                'value': 'Très bon'
+                        };
+                case 2:
+                        return {
+                                'icon':  'assets/icons/satellite_ok.svg',
+                                'color': const Color(0xFFFFA500), // Orange
+                                'value': 'OK'
+                        };
+                case 1:
+                case 0:
+                        return {
+                                'icon': 'assets/icons/satellite_bad.svg',
+                                'color': const Color(0xFFFF0000), // Rouge
+                                'value': 'Mauvais'
+                        };
+                default:
+                return {
+                        'icon':  'assets/icons/satellite_error.svg',
+                        'color': const Color(0xFF808080), // Gris
+                        'value': 'Erreur'
+                };
         }
 }
