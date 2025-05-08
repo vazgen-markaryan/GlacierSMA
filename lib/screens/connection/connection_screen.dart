@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'components/connection_manager.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
@@ -27,7 +28,7 @@ class ConnectionScreenState extends State<ConnectionScreen> {
                 return Scaffold(
                         appBar: AppBar(
                                 automaticallyImplyLeading: false,
-                                title: const Center(child: Text("Glacier SMA Connexion"))
+                                title: Center(child: Text(tr("appTitle")))
                         ),
                         body: LayoutBuilder(
                                 builder: (context, constraints) {
@@ -73,7 +74,8 @@ class ConnectionScreenState extends State<ConnectionScreen> {
                                                                         buildArrowInstruction(),
                                                                         const SizedBox(height: defaultPadding * 0.75),
                                                                         Expanded(
-                                                                                child: buildCableSection(context, () async {
+                                                                                child: buildCableSection(
+                                                                                        context, () async {
                                                                                                 await getAllCableConnectedDevices(
                                                                                                         flutterSerialCommunicationPlugin,
                                                                                                         (devices) => setState(() => connectedDevices = devices)

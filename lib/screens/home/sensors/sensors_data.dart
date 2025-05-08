@@ -116,6 +116,7 @@ List<SensorsData> allSensors = [
         SensorsData(
                 title: "SD Card",
                 header: "sdcard",
+                bitIndex: 8,
                 place: "Intérieur",
                 bus: "SPI",
                 svgIcon: flashCard,
@@ -125,6 +126,7 @@ List<SensorsData> allSensors = [
         SensorsData(
                 title: "Iriduim",
                 header: "iridium_status",
+                bitIndex: 9,
                 code: "RockBLOCK",
                 place: "Intérieur",
                 svgIcon: satellite,

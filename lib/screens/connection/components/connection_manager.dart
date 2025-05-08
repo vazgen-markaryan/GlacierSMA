@@ -3,6 +3,7 @@
 /// Si aucun n'est compatible, affiche un SnackBar d'information.
 
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_snackbar.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
@@ -40,8 +41,7 @@ Future<void> showDeviceSelectionDialog(
 
                 final controller = ScaffoldMessenger.of(context).showSnackBar(
                         buildCustomSnackBar(
-                                message:
-                                "Aucun appareil compatible n'est trouvé:\n1. Flashez le code RevGlacierSMA\n2. Vérifiez le câble\n3. Vérifiez le Debug Switch physique.",
+                                message: tr("no_device_found"),
                                 iconData: Icons.error,
                                 backgroundColor: Colors.white,
                                 textColor: Colors.black,
@@ -59,8 +59,7 @@ Future<void> showDeviceSelectionDialog(
                 builder: (_) => AlertDialog(
                         backgroundColor: secondaryColor,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        title: Text(
-                                "Appareils détectés",
+                        title: Text(tr("devices_found"),
                                 style: TextStyle(
                                         color: primaryColor,
                                         fontSize: 18,
@@ -106,8 +105,7 @@ Future<void> showDeviceSelectionDialog(
                                                                                 Navigator.pop(context);
                                                                                 showCustomSnackBar(
                                                                                         context,
-                                                                                        message:
-                                                                                        "Échec de la connexion. Vérifiez le câble ou les permissions."
+                                                                                        message: tr("failed_to_connect")
                                                                                 );
                                                                         }
                                                                 }

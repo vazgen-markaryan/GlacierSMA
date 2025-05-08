@@ -1,0 +1,17 @@
+{
+	"appTitle": "Conexión Glacier SMA",
+	"language": "Idioma",
+
+	"-----CONNECTION SCREEN-----": "",
+	"devices_found": "Dispositivos detectados",
+	"no_device_found": "No se encontró ningún dispositivo compatible:\n1. Utilice el código RevGlacierSMA\n2. Verifique el cable\n3. Verifique el interruptor físico de depuración.\n",
+	"failed_to_connect": "Falló la conexión. Verifique el cable o los permisos.",
+	"bluetooth_connection": "Conexión Bluetooth",
+	"arrow_instruction": "Seleccione un método de conexión",
+	"cable_connection": "Conexión por cable",
+	"disconnect": "Desconectar",
+	"disconnect_confirmation": "Realmente desea desconectarse?",
+	"no" : "No",
+	"yes" : "Sí",
+	"lost_connection": "Conexión perdida después de: {0}\nVerifique el cable o el interruptor de depuración de hardware."
+}

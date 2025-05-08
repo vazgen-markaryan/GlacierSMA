@@ -1,6 +1,7 @@
 /// Gère les popups de déconnexion utilisateur et de perte de connexion automatique.
 /// Utilise CustomPopup pour un style uniforme, puis déconnecte et retourne à l’écran de connexion.
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
@@ -20,21 +21,20 @@ Future<bool> showDisconnectPopup({
                 final result = await showDialog<bool>(
                         context: context,
                         builder: (_) => CustomPopup(
-                                title: 'Déconnexion',
-                                content: const Text(
-                                        'Voulez-vous vraiment vous déconnecter ?',
+                                title: tr("disconnect"),
+                                content: Text(tr("disconnect_confirmation"),
                                         style: TextStyle(color: Colors.white)
                                 ),
                                 actions: [
                                         TextButton(
                                                 // Action "Non" : renvoie false
                                                 onPressed: () => Navigator.of(context).pop(false),
-                                                child: const Text('Non', style: TextStyle(color: primaryColor))
+                                                child: Text(tr("no"), style: TextStyle(color: primaryColor))
                                         ),
                                         TextButton(
                                                 // Action "Oui" : renvoie true
                                                 onPressed: () => Navigator.of(context).pop(true),
-                                                child: const Text('Oui', style: TextStyle(color: primaryColor))
+                                                child: Text(tr("yes"), style: TextStyle(color: primaryColor))
                                         )
                                 ]
                         )
@@ -70,17 +70,15 @@ Future<void> showLostConnectionPopup({
         required Duration elapsedTime
 }) async {
         // Formate la durée écoulée en h m s
-        final formatted =
-                "${elapsedTime.inHours}h ${elapsedTime.inMinutes.remainder(60)}m ${elapsedTime.inSeconds.remainder(60)}s";
+        final formatted = "${elapsedTime.inHours}h ${elapsedTime.inMinutes.remainder(60)}m ${elapsedTime.inSeconds.remainder(60)}s";
 
         // Affiche le CustomPopup avec le message d’erreur
         await showDialog(
                 context: context,
                 builder: (_) => CustomPopup(
-                        title: 'Déconnexion',
+                        title: tr("disconnect"),
                         content: Text(
-                                "Connexion perdue après :\n$formatted\n\n"
-                                "Vérifiez le câble ou la switch hardware du Debug Mod.",
+                                tr("lost_connection", args: [formatted]),
                                 style: const TextStyle(color: Colors.white70)
                         ),
                         actions: [
