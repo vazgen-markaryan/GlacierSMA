@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rev_glacier_sma_mobile/screens/debug_log/components/debug_log_updater.dart';
 import 'package:rev_glacier_sma_mobile/utils/switch_utils.dart';
+import 'package:rev_glacier_sma_mobile/screens/debug_log/components/debug_log_updater.dart';
 
 /// Retourne le libellé correspondant à un code de statut
 String statusLabel(int status) {
@@ -63,20 +63,30 @@ class DebugLogProcessor extends StatelessWidget {
                                                 // STATUS → "2 (Déconnecté)"
                                                 final code = int.tryParse(rawValue) ?? -1;
                                                 final label = statusLabel(code);
-                                                valueWidget = Text('$code ($label)', style: const TextStyle(fontSize: 12));
+                                                valueWidget = Text(
+                                                        '$code ($label)',
+                                                        style: const TextStyle(fontSize: 12)
+                                                );
                                         }
                                         else {
                                                 // VALEURS → override Iridium ou brut
                                                 if (key.toLowerCase() == 'iridium_signal_quality') {
-
-                                                        // Transforme le code en String
-                                                        final quality = int.tryParse(rawValue) ?? -1;
+                                                        final valeur = double.tryParse(rawValue);
+                                                        final quality = valeur != null
+                                                                ? valeur.round()
+                                                                : int.tryParse(rawValue) ?? -1;
                                                         final map = getIridiumSvgLogoAndColor(quality);
-                                                        final qualLbl = map['value'] as String;
-                                                        valueWidget = Text('$quality ($qualLbl)', style: const TextStyle(fontSize: 12));
+                                                        final label = map['value'] as String;
+                                                        valueWidget = Text(
+                                                                '$quality ($label)',
+                                                                style: const TextStyle(fontSize: 12)
+                                                        );
                                                 }
                                                 else {
-                                                        valueWidget = Text(rawValue, style: const TextStyle(fontSize: 12));
+                                                        valueWidget = Text(
+                                                                rawValue,
+                                                                style: const TextStyle(fontSize: 12)
+                                                        );
                                                 }
                                         }
 
@@ -88,9 +98,13 @@ class DebugLogProcessor extends StatelessWidget {
                                                         ),
                                                         Padding(
                                                                 padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                                                                child: Align(alignment: Alignment.centerRight, child: valueWidget)
+                                                                child: Align(
+                                                                        alignment: Alignment.centerRight,
+                                                                        child: valueWidget
+                                                                )
                                                         )
-                                                ]);
+                                                ]
+                                        );
 
                                         if (isInStatus) statusRows.add(row);
                                         if (isInValeurs) valeurRows.add(row);
@@ -110,8 +124,7 @@ class DebugLogProcessor extends StatelessWidget {
                                                                                 // Affiche le premier message "message envoyé", s'il y en a un
                                                                                 Text(
                                                                                         logs.firstWhere(
-                                                                                                (l) => l.toLowerCase().contains('message envoyé'),
-                                                                                                orElse: () => ''
+                                                                                                (l) => l.toLowerCase().contains('message envoyé'), orElse: () => ''
                                                                                         ),
                                                                                         style: const TextStyle(fontSize: 12)
                                                                                 ),
@@ -166,13 +179,11 @@ class DebugLogProcessor extends StatelessWidget {
                 );
         }
 
-        /// Titre de section à ignorer
         bool isSectionTitle(String key) {
                 final low = key.toLowerCase();
                 return low == 'status' || low == 'valeurs';
         }
 
-        /// Widget affiché quand aucune ligne n’existe
         Widget buildEmptyMessage(BuildContext context) => Align(
                 alignment: Alignment.center,
                 child: Text(

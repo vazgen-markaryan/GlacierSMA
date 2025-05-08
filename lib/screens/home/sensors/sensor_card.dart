@@ -36,19 +36,16 @@ class SensorCard extends StatelessWidget {
                         ? (isOn! ? Colors.green : Colors.red)
                         : iconColor;
 
-                // Si c’est le capteur Iridium, override selon la qualité du signal
+                // Si c’est le capteur Iridium, override le SVG en fonction de la qualité brute
                 if (sensor.header?.toLowerCase() == 'iridium_status') {
-                        // Recherche de l’entrée “iridium_signal_quality”
-                        final qualityEntry = sensor.data.entries.firstWhere(
+                        final entry = sensor.data.entries.firstWhere(
                                 (e) => e.key.header.toLowerCase() == 'iridium_signal_quality',
                                 orElse: () => MapEntry(
                                         DataMap(name: '', header: '', svgLogo: sensor.svgIcon!),
                                         '0'
                                 )
                         );
-
-                        // Parse et récupère l’icône + couleur depuis l’utilitaire
-                        final quality = int.tryParse(qualityEntry.value.toString()) ?? -1;
+                        final quality = int.tryParse(entry.value.toString()) ?? 0;
                         final config = getIridiumSvgLogoAndColor(quality);
                         assetPath = config['icon']  as String;
                         svgTint = config['color'] as Color;

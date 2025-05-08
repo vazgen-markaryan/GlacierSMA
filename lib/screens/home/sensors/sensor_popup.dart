@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:rev_glacier_sma_mobile/utils/switch_utils.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
 
@@ -24,7 +25,6 @@ class SensorPopupState extends State<SensorPopup>
         @override
         void initState() {
                 super.initState();
-
                 controller = AnimationController(
                         vsync: this,
                         duration: const Duration(milliseconds: 250)
@@ -66,7 +66,6 @@ class SensorPopupState extends State<SensorPopup>
                                                                         valueListenable: widget.sensor.dataNotifier,
                                                                         builder: (_, data, __) {
                                                                                 final items = data.entries.toList();
-
                                                                                 return Column(
                                                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                                                         children: [
@@ -94,6 +93,14 @@ class SensorPopupState extends State<SensorPopup>
         }
 
         Widget buildRow(DataMap key, dynamic value) {
+                // Affiche la valeur brute +, si Iridium, ajoute la traduction (0–5 → Mauvais, OK…)
+                String display = value.toString();
+                if (key.header.toLowerCase() == 'iridium_signal_quality') {
+                        final q = int.tryParse(display) ?? -1;
+                        final txt = getIridiumSvgLogoAndColor(q)['value'] as String;
+                        display = '$display ($txt)';
+                }
+
                 return Container(
                         margin: const EdgeInsets.only(bottom: 10),
                         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
@@ -123,7 +130,7 @@ class SensorPopupState extends State<SensorPopup>
                                         ),
                                         Flexible(
                                                 child: Text(
-                                                        value.toString(),
+                                                        display,
                                                         style: const TextStyle(
                                                                 color: Colors.white,
                                                                 fontWeight: FontWeight.bold

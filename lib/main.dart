@@ -92,5 +92,4 @@ class MyApp extends StatelessWidget {
 // TODO Sensor popup graph real time (ou pas popup mais autre page)
 // TODO Créer des réglages pour les limites min/max des capteurs avec notifications
 
-//TODO capture aussi <fatal> et <config> (pas affichage à date)
-// TODO Déconnexion automatique en cas d'erreur fatale
+//TODO capture <config> (pas affichage à date)

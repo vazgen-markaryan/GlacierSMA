@@ -3,7 +3,7 @@ import 'dart:ui';
 /// Contient des utilitaires pour :
 ///  Obtenir l’unité à afficher selon l’en-tête de donnée Arduino
 ///  Traduire la direction du vent codée (0–16) en texte
-///  • Choisir l’icône SVG Iridium selon la qualité du signal
+///  Choisir l’icône SVG Iridium selon la qualité du signal
 
 // WARNING: NE JAMAIS CHANGER CES CAS S’ILS NE SONT PAS CHANGÉS DANS LE CODE ARDUINO
 String getUnitForHeader(String header) {
@@ -67,18 +67,18 @@ String getWindDirectionFacing(int value) {
 Map<String, dynamic> getIridiumSvgLogoAndColor(int quality) {
         switch (quality) {
                 case 5:
-                case 4:
                         return {
                                 'icon':  'assets/icons/satellite_excellent.svg',
                                 'color': const Color(0xFF00FF00), // Vert,
                                 'value': 'Excellent'
                         };
-                case 3:
+                case 4:
                         return {
                                 'icon':  'assets/icons/satellite_very_good.svg',
                                 'color': const Color(0xFF7FFF00), // Vert clair
                                 'value': 'Très bon'
                         };
+                case 3:
                 case 2:
                         return {
                                 'icon':  'assets/icons/satellite_ok.svg',
