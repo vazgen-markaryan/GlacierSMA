@@ -1,6 +1,8 @@
-/// Gère le tampon temporaire de logs et publie la liste formatée (avec les sections “STATUS” et “VALEURS”) via un ValueNotifier.
-
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
+
+/// Gère un tampon temporaire de segments de journal
+/// Publie la liste entièrement formatée (avec les en-têtes «STATUT» et «VALEURS») via un ValueNotifier.
 
 class DebugLogUpdater {
         // Array en 3 parties : message, status, valeurs
@@ -13,9 +15,9 @@ class DebugLogUpdater {
         void updateLogs() {
                 debugLogsNotifier.value = [
                         tempLogBuffer[0],
-                        "STATUS",
+                        tr('section_status'),
                         ...tempLogBuffer[1].split('\n').where((line) => line.trim().isNotEmpty),
-                        "VALEURS",
+                        tr('section_values'),
                         ...tempLogBuffer[2].split('\n').where((line) => line.trim().isNotEmpty)
                 ];
         }

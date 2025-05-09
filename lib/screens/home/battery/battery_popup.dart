@@ -1,6 +1,8 @@
 /// Affiche un popup animé contenant l’état de la batterie (voltage et pourcentage).
 /// Aligné dynamiquement sous l’icône SVG de la batterie avec une petite flèche.
 
+import 'package:easy_localization/easy_localization.dart';
+
 import 'battery_utils.dart';
 import 'package:flutter/material.dart';
 
@@ -108,15 +110,21 @@ class BatteryPopupState extends State<BatteryPopup> with SingleTickerProviderSta
                                                                                                 children: [
                                                                                                         Text(
                                                                                                                 voltage != null
-                                                                                                                        ? "Voltage : ${voltage.toStringAsFixed(2)} V"
-                                                                                                                        : "Voltage : Inconnu",
+                                                                                                                        ? tr(
+                                                                                                                                'battery_voltage',
+                                                                                                                                namedArgs: {'value': voltage.toStringAsFixed(2)}
+                                                                                                                        )
+                                                                                                                        : tr('battery_voltage_unknown'),
                                                                                                                 style: TextStyle(
                                                                                                                         color: widget.color,
                                                                                                                         fontWeight: FontWeight.bold
                                                                                                                 )
                                                                                                         ),
                                                                                                         Text(
-                                                                                                                "État : ${(percent * 100).round()}%",
+                                                                                                                tr(
+                                                                                                                        'battery_state',
+                                                                                                                        namedArgs: {'percent': (percent * 100).round().toString()}
+                                                                                                                ),
                                                                                                                 style: TextStyle(
                                                                                                                         color: widget.color,
                                                                                                                         fontWeight: FontWeight.bold

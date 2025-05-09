@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/switch_utils.dart';
 import 'package:rev_glacier_sma_mobile/screens/debug_log/components/debug_log_updater.dart';
 
-/// Retourne le libellé correspondant à un code de statut
+/// Retourne le libellé traduit correspondant à un code de statut
 String statusLabel(int status) {
         switch (status) {
-                case 1: return 'Fonctionne';
-                case 2: return 'Déconnecté';
-                case 3: return 'Erreur';
+                case 1: return tr('status_operational');
+                case 2: return tr('status_disconnected');
+                case 3: return tr('status_error');
                 case 0:
                 default:
-                return 'Inconnu';
+                return tr('status_unknown');
         }
 }
 
@@ -36,13 +37,13 @@ class DebugLogProcessor extends StatelessWidget {
                                         final trimmed = line.trim();
                                         final lower = trimmed.toLowerCase();
 
-                                        // Repère les switches de section
-                                        if (lower == 'status') {
+                                        // Repère les switches de section (dans la langue d’origine)
+                                        if (lower == 'status' || lower == tr('section_status').toLowerCase()) {
                                                 isInStatus = true;
                                                 isInValeurs = false;
                                                 continue;
                                         }
-                                        if (lower == 'valeurs') {
+                                        if (lower == 'valeurs' || lower == tr('section_values').toLowerCase()) {
                                                 isInStatus = false;
                                                 isInValeurs = true;
                                                 continue;
@@ -71,10 +72,7 @@ class DebugLogProcessor extends StatelessWidget {
                                         else {
                                                 // VALEURS → override Iridium ou brut
                                                 if (key.toLowerCase() == 'iridium_signal_quality') {
-                                                        final valeur = double.tryParse(rawValue);
-                                                        final quality = valeur != null
-                                                                ? valeur.round()
-                                                                : int.tryParse(rawValue) ?? -1;
+                                                        final quality = int.tryParse(rawValue) ?? -1;
                                                         final map = getIridiumSvgLogoAndColor(quality);
                                                         final label = map['value'] as String;
                                                         valueWidget = Text(
@@ -98,10 +96,7 @@ class DebugLogProcessor extends StatelessWidget {
                                                         ),
                                                         Padding(
                                                                 padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                                                                child: Align(
-                                                                        alignment: Alignment.centerRight,
-                                                                        child: valueWidget
-                                                                )
+                                                                child: Align(alignment: Alignment.centerRight, child: valueWidget)
                                                         )
                                                 ]
                                         );
@@ -124,7 +119,8 @@ class DebugLogProcessor extends StatelessWidget {
                                                                                 // Affiche le premier message "message envoyé", s'il y en a un
                                                                                 Text(
                                                                                         logs.firstWhere(
-                                                                                                (l) => l.toLowerCase().contains('message envoyé'), orElse: () => ''
+                                                                                                (l) => l.toLowerCase().contains('message envoyé'),
+                                                                                                orElse: () => ''
                                                                                         ),
                                                                                         style: const TextStyle(fontSize: 12)
                                                                                 ),
@@ -133,7 +129,10 @@ class DebugLogProcessor extends StatelessWidget {
                                                                                 // Section STATUS
                                                                                 Align(
                                                                                         alignment: Alignment.center,
-                                                                                        child: Text("STATUS", style: Theme.of(context).textTheme.titleMedium)
+                                                                                        child: Text(
+                                                                                                tr('section_status'),
+                                                                                                style: Theme.of(context).textTheme.titleMedium
+                                                                                        )
                                                                                 ),
                                                                                 const SizedBox(height: 8),
                                                                                 if (statusRows.isNotEmpty)
@@ -154,7 +153,10 @@ class DebugLogProcessor extends StatelessWidget {
                                                                                 // Section VALEURS
                                                                                 Align(
                                                                                         alignment: Alignment.center,
-                                                                                        child: Text("VALEURS", style: Theme.of(context).textTheme.titleMedium)
+                                                                                        child: Text(
+                                                                                                tr('section_values'),
+                                                                                                style: Theme.of(context).textTheme.titleMedium
+                                                                                        )
                                                                                 ),
                                                                                 const SizedBox(height: 8),
                                                                                 if (valeurRows.isNotEmpty)
@@ -179,16 +181,17 @@ class DebugLogProcessor extends StatelessWidget {
                 );
         }
 
+        /// Titre de section à ignorer
         bool isSectionTitle(String key) {
                 final low = key.toLowerCase();
-                return low == 'status' || low == 'valeurs';
+                return low == 'status' || low == tr('section_status').toLowerCase() || low == 'valeurs' || low == tr('section_values').toLowerCase();
         }
 
+        /// Widget affiché quand aucune ligne n’existe
         Widget buildEmptyMessage(BuildContext context) => Align(
                 alignment: Alignment.center,
                 child: Text(
-                        "Aucune donnée n'a été reçue.\n"
-                        "Vérifiez votre Hardware, votre code Arduino, la logique de l'application.",
+                        tr('no_data_received'),
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.titleSmall
                 )

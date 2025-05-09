@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:flutter/material.dart';
 import 'package:rev_glacier_sma_mobile/utils/chip_utils.dart';
 
 /// Widget représentant un capteur et son changement ON→OFF ou OFF→ON

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/battery/battery_indicator.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_processor.dart';
@@ -26,7 +27,7 @@ class DashboardHeader extends StatelessWidget {
                 return ValueListenableBuilder<RawData?>(
                         valueListenable: firmwareNotifier,
                         builder: (_, idData, __) {
-                                // Choix du nom : priorité au "name" venant du bloc <id>, sinon productName USB, sinon “Non connecté”
+                                // Choix du nom : priorité au "name" venant du bloc <id>, sinon productName USB, sinon “Appareil inconnu”
                                 String name;
                                 if (isConnected) {
                                         if (idData != null && (idData.asMap['name']?.isNotEmpty ?? false)) {
@@ -36,11 +37,11 @@ class DashboardHeader extends StatelessWidget {
                                                 name = connectedDevices.first.productName;
                                         }
                                         else {
-                                                name = 'Appareil inconnu';
+                                                name = tr('unknown_device');
                                         }
                                 }
                                 else {
-                                        name = 'Non connecté';
+                                        name = tr('not_connected');
                                 }
 
                                 return Row(

@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/switch_utils.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
@@ -52,7 +52,7 @@ class SensorPopupState extends State<SensorPopup>
                 return ScaleTransition(
                         scale: scale,
                         child: CustomPopup(
-                                title: (widget.sensor.title ?? 'Détails du capteur'),
+                                title: (widget.sensor.title ?? tr('sensor_details')),
                                 content: Padding(
                                         padding: const EdgeInsets.all(12),
                                         child: Scrollbar(
@@ -70,7 +70,7 @@ class SensorPopupState extends State<SensorPopup>
                                                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                                                         children: [
                                                                                                 Text(
-                                                                                                        'Mise à jour : $timestamp',
+                                                                                                        tr('updated_at', args: [timestamp]),
                                                                                                         style: const TextStyle(
                                                                                                                 color: Colors.white54,
                                                                                                                 fontSize: 16,

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 
 /// Barre de navigation du Dashboard
 class BottomNavBar extends StatelessWidget {
         // Index de l'onglet actuellement sélectionné
         final int selectedIndex;
-
         // Callback appelé quand l'utilisateur change d'onglet
         final ValueChanged<int> onItemTapped;
 
@@ -27,15 +27,25 @@ class BottomNavBar extends StatelessWidget {
                         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
                         unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
 
-                        // Définition des 3 onglets
-                        items: const[
-                                BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Accueil'),
-                                BottomNavigationBarItem(icon: Icon(Icons.bug_report), label: 'Debug'),
-                                BottomNavigationBarItem(icon: Icon(Icons.tune), label: 'Config'),
-                                BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Paramètres')
+                        items: [
+                                BottomNavigationBarItem(
+                                        icon: const Icon(Icons.home),
+                                        label: tr('nav_home')
+                                ),
+                                BottomNavigationBarItem(
+                                        icon: const Icon(Icons.bug_report),
+                                        label: tr('nav_debug')
+                                ),
+                                BottomNavigationBarItem(
+                                        icon: const Icon(Icons.tune),
+                                        label: tr('nav_config')
+                                ),
+                                BottomNavigationBarItem(
+                                        icon: const Icon(Icons.settings),
+                                        label: tr('nav_settings')
+                                )
                         ],
 
-                        // Gestion de l'état sélectionné
                         currentIndex: selectedIndex,
                         onTap: onItemTapped
                 );

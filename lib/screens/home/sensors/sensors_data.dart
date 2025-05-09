@@ -63,7 +63,6 @@ List<SensorsData> getSensors(SensorType type) {
         }
 }
 
-
 List<SensorsData> allSensors = [
         SensorsData(
                 title: "Thermo-Baromètre",

@@ -1,5 +1,6 @@
 import 'config_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/message_service.dart';
 
 enum ConfigButtonStateEnum { idle, success, failure }
@@ -48,10 +49,10 @@ class ConfigButtonState extends State<ConfigButton> {
                                 ),
                                 label: Text(
                                         state == ConfigButtonStateEnum.idle
-                                                ? 'Appliquer la configuration'
+                                                ? tr('config_apply')
                                                 : state == ConfigButtonStateEnum.success
-                                                        ? 'Enregistré'
-                                                        : 'Échec',
+                                                        ? tr('config_saved')
+                                                        : tr('config_failed'),
                                         style: const TextStyle(color: Colors.white)
                                 ),
                                 style: ElevatedButton.styleFrom(

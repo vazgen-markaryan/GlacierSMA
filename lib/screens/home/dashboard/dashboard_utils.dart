@@ -1,5 +1,6 @@
 import 'dashboard_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 import 'package:rev_glacier_sma_mobile/utils/message_service.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_snackbar.dart';
@@ -62,24 +63,24 @@ mixin DashboardUtils on State<Home_Screen> {
 
         /// Mapping des raisons fatales en message utilisateur
         static const fatalMessages = {
-                'GENERIC': 'Réinitialisation de l’appareil.',
-                'DC_FLAG_NOT_FOUND': 'Drapeau de conteneur de données invalide.',
-                'HARDFAULT': 'HardFault sur le Microcontrôleur.',
-                'WATCHDOG': 'WatchDog timer est expirée.'
+                'GENERIC': 'fatal_generic',
+                'DC_FLAG_NOT_FOUND': 'fatal_dcflag',
+                'HARDFAULT': 'fatal_hardfault',
+                'WATCHDOG': 'fatal_watchdog'
         };
 
         /// Callback quand on reçoit `<fatal>`
         Future<void> handleFatalError(String reason) async {
                 // Arrête le stopwatch
                 controller.connectionStopwatch.stop();
-
-                // Arrête le pingTimer et autres notifiers pour ne pas retomber sur onConnectionLost
+                // Arrête le pingTimer et autres notifiers
                 controller.dispose();
 
-                // Traduction humaine du code
-                final human = fatalMessages[reason] ?? 'Erreur fatale inconnue : $reason';
+                // Message humain des erreurs fatales du BackEnd
+                final key = fatalMessages[reason] ?? 'fatal_unknown';
+                final human = tr(key, args: [reason]);
 
-                // Récupère la durée écoulée et formate-la HH:MM:SS
+                // Durée formatée HH:MM:SS
                 final elapsed = controller.connectionStopwatch.elapsed;
                 final hours = elapsed.inHours.toString().padLeft(2, '0');
                 final minutes = (elapsed.inMinutes % 60).toString().padLeft(2, '0');
@@ -89,9 +90,8 @@ mixin DashboardUtils on State<Home_Screen> {
                 await showDialog(
                         context: context,
                         barrierDismissible: false,
-                        builder: (ctx) =>
-                        CustomPopup(
-                                title: 'Erreur fatale',
+                        builder: (ctx) => CustomPopup(
+                                title: tr('fatal_title'),
                                 content: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -103,7 +103,7 @@ mixin DashboardUtils on State<Home_Screen> {
                                                 ),
                                                 const SizedBox(height: 12),
                                                 Text(
-                                                        'Durée de connexion : $formattedDuration',
+                                                        tr('fatal_duration', args: [formattedDuration]),
                                                         textAlign: TextAlign.center,
                                                         style: const TextStyle(color: Colors.white70)
                                                 )
@@ -116,7 +116,7 @@ mixin DashboardUtils on State<Home_Screen> {
                                                         widget.plugin?.disconnect();
                                                         Navigator.of(context).pop();
                                                 },
-                                                child: const Text('OK')
+                                                child: Text(tr('ok_button'))
                                         )
                                 ]
                         )
@@ -125,7 +125,6 @@ mixin DashboardUtils on State<Home_Screen> {
 
         /// Gère la sélection d’un onglet
         Future<void> onNavItemTapped(int index) async {
-                // Si on quitte l’onglet Config
                 if (selectedIndex == 2 && index != 2) {
                         final config = configKey.currentState;
                         if (config != null && !await config.confirmDiscard()) return;
@@ -147,13 +146,10 @@ mixin DashboardUtils on State<Home_Screen> {
 
         /// Ouvre la popup de renommage et envoie au firmware
         Future<void> showRenameDialog() async {
-                // Valeur initiale depuis <id> ou productName
                 final raw = controller.firmwareNotifier.value;
                 final initial = raw != null
                         ? (raw.asMap['name'] ?? '')
-                        : (widget.connectedDevices.isNotEmpty
-                                ? widget.connectedDevices.first.productName
-                                : '');
+                        : (widget.connectedDevices.isNotEmpty ? widget.connectedDevices.first.productName : '');
 
                 final textController = TextEditingController(text: initial);
                 String? errorText;
@@ -162,35 +158,36 @@ mixin DashboardUtils on State<Home_Screen> {
                 final confirmed = await showDialog<bool>(
                         context: context,
                         barrierDismissible: false,
-                        builder: (context) => StatefulBuilder(builder: 
-                                (context, setState) {
+                        builder: (context) => StatefulBuilder(
+                                builder: (context, setState) {
                                         return CustomPopup(
-                                                title: 'Modifier le nom de la station',
+                                                title: tr('rename_title'),
                                                 content: TextField(
                                                         controller: textController,
                                                         maxLength: 20,
                                                         decoration: InputDecoration(
-                                                                labelText: 'Nom',
+                                                                labelText: tr('rename_label'),
                                                                 errorText: errorText
                                                         ),
                                                         onChanged: (v) {
                                                                 setState(() {
-                                                                                errorText = regex.hasMatch(v) ? null : 'Caractère non valide détecté !';
+                                                                                errorText = regex.hasMatch(v) ? null : tr('rename_error');
                                                                         }
                                                                 );
                                                         }
                                                 ),
                                                 actions: [
-                                                        TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Annuler')),
+                                                        TextButton(onPressed: () => Navigator.pop(context, false), child: Text(tr('cancel_button'))),
                                                         TextButton(
                                                                 onPressed: errorText == null ? () => Navigator.pop(context, true) : null,
-                                                                child: const Text('Valider')
+                                                                child: Text(tr('confirm_button'))
                                                         )
                                                 ]
                                         );
                                 }
                         )
                 );
+
                 if (confirmed != true) return;
 
                 // Trunc à 20 bytes
@@ -206,14 +203,13 @@ mixin DashboardUtils on State<Home_Screen> {
                 final ok = await messageService.sendStationName(name);
                 showCustomSnackBar(
                         context,
-                        message: ok ? 'Nom de station mis à jour' : 'Erreur lors de l’envoi du nom',
+                        message: ok ? tr('snack_rename_success') : tr('snack_rename_error'),
                         iconData: ok ? Icons.check_circle : Icons.error,
                         backgroundColor: ok ? Colors.green : Colors.red,
                         textColor: Colors.white,
                         iconColor: Colors.white
                 );
                 if (ok) {
-                        // Mise à jour locale pour rafraîchir l’en-tête
                         final u = controller.firmwareNotifier.value!;
                         final idx = u.headers.indexOf('name');
                         u.values[idx] = textController.text;

@@ -1,8 +1,9 @@
 import 'sensors_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:rev_glacier_sma_mobile/utils/chip_utils.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
+import 'package:rev_glacier_sma_mobile/utils/chip_utils.dart';
 import 'package:rev_glacier_sma_mobile/utils/switch_utils.dart';
 
 /// Widget représentant une carte de capteur, avec deux modes :
@@ -30,7 +31,7 @@ class SensorCard extends StatelessWidget {
                 // Couleur de l’icône, couleur de bordure et libellé du statut (non-config mode)
                 final (iconColor, borderColor, statusLabel) = getStatusUI(sensor.powerStatus);
 
-                // Détermination du chemin et de la teinte du SVG
+                // Détermination du SVG + teinte
                 String assetPath = sensor.svgIcon!;
                 Color svgTint = configMode
                         ? (isOn! ? Colors.green : Colors.red)
@@ -60,7 +61,6 @@ class SensorCard extends StatelessWidget {
                         return buildChips(chips, fontSize: 10);
                 }
 
-                // Contenu principal de la carte
                 final card = Container(
                         decoration: BoxDecoration(
                                 color: secondaryColor,
@@ -92,7 +92,7 @@ class SensorCard extends StatelessWidget {
                                                         mainAxisAlignment: MainAxisAlignment.center,
                                                         children: [
                                                                 Text(
-                                                                        sensor.title ?? 'Capteur Inconnu',
+                                                                        sensor.title ?? tr('sensor_unknown'),
                                                                         style: Theme.of(context).textTheme.bodyLarge,
                                                                         overflow: TextOverflow.ellipsis
                                                                 ),
@@ -102,7 +102,7 @@ class SensorCard extends StatelessWidget {
                                                 )
                                         ),
 
-                                        // Switch en mode configuration
+                                        // Switch en mode config
                                         if (configMode)
                                         Switch(
                                                 value: isOn!,
@@ -115,14 +115,12 @@ class SensorCard extends StatelessWidget {
                         )
                 );
 
-                // Retourne la carte, avec le petit badge de statut en coin
                 return SizedBox(
                         width: double.infinity,
                         child: Stack(
                                 clipBehavior: Clip.none,
                                 children: [
-
-                                        // Zone cliquable en mode normal
+                                        // Cliquable si mode normal
                                         if (!configMode)
                                         InkWell(
                                                 borderRadius: BorderRadius.circular(10),
@@ -131,7 +129,8 @@ class SensorCard extends StatelessWidget {
                                                         : null,
                                                 child: card
                                         )
-                                        else card,
+                                        else
+                                        card,
 
                                         // Badge positionné en haut-droite
                                         Positioned(
@@ -149,7 +148,7 @@ class SensorCard extends StatelessWidget {
                                                         ),
                                                         child: Text(
                                                                 configMode
-                                                                        ? (isOn! ? 'Activé' : 'Désactivé')
+                                                                        ? (isOn! ? tr('activated') : tr('deactivated'))
                                                                         : statusLabel,
                                                                 style: TextStyle(
                                                                         color: configMode
@@ -171,11 +170,11 @@ class SensorCard extends StatelessWidget {
         /// Retourne (couleurIcône, couleurBordure, libelléStatut)
         (Color, Color, String) getStatusUI(int? status) {
                 switch (status) {
-                        case 1:  return (Colors.green,  Colors.green,  'Fonctionne');
-                        case 2:  return (Colors.yellow, Colors.yellow, 'Déconnecté');
-                        case 3:  return (Colors.red,    Colors.red,    'Erreur');
-                        case 0:  return (Colors.grey,   Colors.grey,   'Inconnu');
-                        default: return (Colors.black,  Colors.black,  'Désactivé');
+                        case 1: return (Colors.green,  Colors.green,  tr('status_operational'));
+                        case 2: return (Colors.yellow, Colors.yellow, tr('status_disconnected'));
+                        case 3: return (Colors.red,    Colors.red,    tr('status_error'));
+                        case 0: return (Colors.grey,   Colors.grey,   tr('status_unknown'));
+                        default:return (Colors.black,  Colors.black,  tr('status_disabled'));
                 }
         }
 }

@@ -1,6 +1,3 @@
-/// Point d'entrée de l'application Flutter Glacier SMA.
-/// Configure l'apparence de l'app et détermine l'écran initial selon l'environnement (émulateur ou appareil physique).
-
 import 'utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -8,6 +5,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/home_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/connection/connection_screen.dart';
 
+/// Point d'entrée de l'application Flutter Glacier SMA.
+/// Configure l'apparence de l'app et détermine l'écran initial selon l'environnement (émulateur ou appareil physique).
 Future<void> main() async {
         WidgetsFlutterBinding.ensureInitialized();
         await EasyLocalization.ensureInitialized();
@@ -98,3 +97,9 @@ class MyApp extends StatelessWidget {
 // TODO Sensor popup graph real time (ou pas popup mais autre page)
 // TODO Créer des réglages pour les limites min/max des capteurs avec notifications
 // TODO capture <config> (afficher dans config)
+
+//TODO check parametres de traduction dans diconnect popup et battery popup
+//TODO dashboard header ET bottom navbar s'update pas si je change settings
+//TODO check fatal erreurs traduction avec ARGS
+//TODO traduire sensordata, settings utils
+//TODO refactor JSON traduction pour nesting

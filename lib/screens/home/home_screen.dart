@@ -51,7 +51,6 @@ class Home_ScreenState extends State<Home_Screen> with DashboardUtils {
                                         actions: [
                                                 IconButton(
                                                         icon: const Icon(Icons.logout),
-                                                        tooltip: 'Déconnexion',
                                                         onPressed: () => showDisconnectPopup(
                                                                 context: context,
                                                                 plugin: widget.plugin,

@@ -1,5 +1,6 @@
 import 'sensors_data.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 
 typedef SensorItemBuilder = Widget Function(BuildContext context, SensorsData sensor);
@@ -10,16 +11,10 @@ typedef SensorItemBuilder = Widget Function(BuildContext context, SensorsData se
 ///  • soit [emptyMessage] si la liste est vide,
 /// le tout avec un spacing cohérent.
 class SensorsGroup extends StatelessWidget {
-        /// Titre à centrer au-dessus de la grille.
+
         final String title;
-
-        /// Liste des capteurs à afficher.
         final List<SensorsData> sensors;
-
-        /// Comment construire chaque carte.
         final SensorItemBuilder itemBuilder;
-
-        /// Texte à afficher si [sensors] est vide.
         final String emptyMessage;
 
         const SensorsGroup({
@@ -27,18 +22,17 @@ class SensorsGroup extends StatelessWidget {
                 required this.title,
                 required this.sensors,
                 required this.itemBuilder,
-                this.emptyMessage = 'Aucun capteur actif\nVérifiez votre Configuration'
+                this.emptyMessage = 'sensors_empty_active'
         }) : super(key: key);
 
         @override
         Widget build(BuildContext context) {
                 return Column(
                         children: [
-                                // Le titre centré
                                 Align(
                                         alignment: Alignment.center,
                                         child: Text(
-                                                title,
+                                                tr(title),
                                                 style: Theme.of(context).textTheme.titleMedium
                                         )
                                 ),
@@ -54,7 +48,7 @@ class SensorsGroup extends StatelessWidget {
                                 Padding(
                                         padding: const EdgeInsets.symmetric(vertical: defaultPadding),
                                         child: Text(
-                                                emptyMessage,
+                                                tr(emptyMessage),
                                                 textAlign: TextAlign.center,
                                                 style: Theme.of(context).textTheme.bodyMedium
                                         )

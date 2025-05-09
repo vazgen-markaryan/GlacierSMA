@@ -78,7 +78,7 @@ Future<void> showLostConnectionPopup({
                 builder: (_) => CustomPopup(
                         title: tr("disconnect"),
                         content: Text(
-                                tr("lost_connection", args: [formatted]),
+                                tr('lost_connection', namedArgs: {'time': formatted}),
                                 style: const TextStyle(color: Colors.white70)
                         ),
                         actions: [
