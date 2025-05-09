@@ -45,7 +45,7 @@ class SensorCard extends StatelessWidget {
                                         '0'
                                 )
                         );
-                        final quality = int.tryParse(entry.value.toString()) ?? 0;
+                        final quality = int.tryParse(entry.value.toString()) ?? -1;
                         final config = getIridiumSvgLogoAndColor(quality);
                         assetPath = config['icon']  as String;
                         svgTint = config['color'] as Color;
@@ -54,9 +54,9 @@ class SensorCard extends StatelessWidget {
                 // Construction de la ligne de “chips” (code, bus, place)
                 Widget buildChipRow() {
                         final chips = <ChipData>[];
-                        if (sensor.code != null) chips.add(ChipData(sensor.code!, Colors.blueGrey.shade700));
+                        if (sensor.codeName != null) chips.add(ChipData(sensor.codeName!, Colors.blueGrey.shade700));
                         if (sensor.bus != null) chips.add(ChipData(sensor.bus!, Colors.teal.shade700));
-                        if (sensor.place != null) chips.add(ChipData(sensor.place!, Colors.grey.shade800));
+                        if (sensor.placement != null) chips.add(ChipData(sensor.placement!, Colors.grey.shade800));
                         return buildChips(chips, fontSize: 10);
                 }
 

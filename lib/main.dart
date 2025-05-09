@@ -98,8 +98,3 @@ class MyApp extends StatelessWidget {
 // TODO Sensor popup graph real time (ou pas popup mais autre page)
 // TODO Créer des réglages pour les limites min/max des capteurs avec notifications
 // TODO capture <config> (afficher dans config)
-
-//TODO iridium ne disparait pas d'ACCUEIL si desactive. RAISON PAS DE BUS DANS SENSORS_DATA
-//TODO SD CARD internal apparait pas dans debug screen si desactive RAISON PAS DE BUS DANS SENSORS_DATA
-
-// les transofrmer en autre type de capteurs (ils sont pas de capteurs)

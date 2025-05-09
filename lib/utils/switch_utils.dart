@@ -95,7 +95,7 @@ Map<String, dynamic> getIridiumSvgLogoAndColor(int quality) {
                 default:
                 return {
                         'icon':  'assets/icons/satellite_error.svg',
-                        'color': const Color(0xFF808080), // Gris
+                        'color': const Color(0xFF000000), // Noir
                         'value': 'Erreur'
                 };
         }

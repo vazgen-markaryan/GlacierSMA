@@ -91,8 +91,8 @@ Future<bool> submitConfiguration({
                                         svgIcon: s.svgIcon!,
                                         title: s.title!,
                                         bus: s.bus,
-                                        code: s.code,
-                                        place: s.place,
+                                        code: s.codeName,
+                                        place: s.placement,
                                         oldStatus: oldOn,
                                         newStatus: newOn
                                 )

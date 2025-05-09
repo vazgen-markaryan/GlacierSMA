@@ -1,8 +1,8 @@
 /// Gère les popups de déconnexion utilisateur et de perte de connexion automatique.
 /// Utilise CustomPopup pour un style uniforme, puis déconnecte et retourne à l’écran de connexion.
 
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';

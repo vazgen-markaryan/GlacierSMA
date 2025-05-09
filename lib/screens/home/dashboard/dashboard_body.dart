@@ -1,10 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_card.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_group.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_popup.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_group_factory.dart';
 
 /// Corps du tableau de bord : affiche les capteurs **activés** selon la config
 /// Se met à jour instantanément sur `activeMaskNotifier`.
@@ -23,42 +22,16 @@ class DashboardBody extends StatelessWidget {
                 return ValueListenableBuilder<int?>(
                         valueListenable: activeMaskNotifier,
                         builder: (context, mask, _) {
-                                final effectiveMask = mask ?? 0;
-
-                                // Filtre : seuls les capteurs dont le bit est à 1 (ou sans bitIndex) sont affichés
-                                List<SensorsData> filter(List<SensorsData> list) => list
-                                        .where((s) => s.bitIndex == null || (effectiveMask & (1 << s.bitIndex!)) != 0)
-                                        .toList();
-
-                                final internals = filter(getSensors(SensorType.internal));
-                                final modbus = filter(getSensors(SensorType.modbus));
-
                                 return SingleChildScrollView(
                                         padding: const EdgeInsets.all(defaultPadding),
                                         child: Column(
                                                 children: [
-                                                        SensorsGroup(
-                                                                title: 'CAPTEURS INTERNES',
-                                                                sensors: internals,
-                                                                itemBuilder: (ctx, s) => SensorCard(
-                                                                        sensor: s,
-                                                                        onTap: (s.data.isNotEmpty && s.title != 'SD Card')
-                                                                                ? () => showPopup(ctx, s)
-                                                                                : null
-                                                                )
-                                                        ),
-
-                                                        const SizedBox(height: defaultPadding),
-
-                                                        SensorsGroup(
-                                                                title: 'CAPTEURS MODBUS',
-                                                                sensors: modbus,
-                                                                itemBuilder: (ctx, s) => SensorCard(
-                                                                        sensor: s,
-                                                                        onTap: (s.data.isNotEmpty && s.title != 'SD Card')
-                                                                                ? () => showPopup(ctx, s)
-                                                                                : null
-                                                                )
+                                                        ...createAllSensorGroups(
+                                                                maskNotifier: activeMaskNotifier,
+                                                                getSensors: getSensors,
+                                                                onTap: (ctx, s) => showPopup(ctx, s),
+                                                                configMode: false,
+                                                                showInactive: false
                                                         )
                                                 ]
                                         )

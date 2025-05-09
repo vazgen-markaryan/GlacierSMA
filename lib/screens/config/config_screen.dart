@@ -3,9 +3,8 @@ import 'config_button.dart';
 import 'package:flutter/material.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:rev_glacier_sma_mobile/utils/message_service.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_group.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_card.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_group_factory.dart';
 
 /// Écran principal de configuration :
 /// Gère l’authentification,
@@ -74,18 +73,8 @@ class ConfigScreenState extends State<ConfigScreen> {
                         return const SizedBox.shrink();
                 }
 
-                // Récupère la valeur courante du mask
-                final m = localMaskNotifier.value;
-
-                // Liste triée des capteurs configurables
-                final cfgSensors = allSensors.where((s) => s.bitIndex != null).toList()..sort((a, b) => a.bitIndex!.compareTo(b.bitIndex!));
-
-                // Séparation I2C vs ModBus
-                final internals = cfgSensors.where((s) => s.bus?.toLowerCase() == 'i2c').toList();
-                final modbus = cfgSensors.where((s) => s.bus?.toLowerCase() == 'modbus').toList();
-
                 // Détecte si le mask local a changé
-                final hasChanged = m != initialMask;
+                final hasChanged = localMaskNotifier.value != initialMask;
 
                 return WillPopScope(
                         onWillPop: confirmDiscard,
@@ -93,47 +82,12 @@ class ConfigScreenState extends State<ConfigScreen> {
                                 padding: const EdgeInsets.all(defaultPadding),
                                 child: Column(
                                         children: [
-                                                SensorsGroup(
-                                                        title: 'CAPTEURS INTERNES',
-                                                        sensors: internals,
-                                                        emptyMessage: 'Aucun capteur interne à configurer.',
-                                                        itemBuilder: (ctx, s) {
-                                                                final bit = s.bitIndex!;
-                                                                final on = (m & (1 << bit)) != 0;
-                                                                return SensorCard(
-                                                                        sensor: s,
-                                                                        configMode: true,
-                                                                        isOn: on,
-                                                                        onToggle: (v) {
-                                                                                // Met à jour la copie locale du mask
-                                                                                localMaskNotifier.value = v
-                                                                                        ? (m | (1 << bit))
-                                                                                        : (m & ~(1 << bit));
-                                                                        }
-                                                                );
-                                                        }
-                                                ),
-
-                                                const SizedBox(height: defaultPadding * 2),
-
-                                                SensorsGroup(
-                                                        title: 'CAPTEURS MODBUS',
-                                                        sensors: modbus,
-                                                        emptyMessage: 'Aucun capteur ModBus à configurer.',
-                                                        itemBuilder: (ctx, s) {
-                                                                final bit = s.bitIndex!;
-                                                                final on = (m & (1 << bit)) != 0;
-                                                                return SensorCard(
-                                                                        sensor: s,
-                                                                        configMode: true,
-                                                                        isOn: on,
-                                                                        onToggle: (v) {
-                                                                                localMaskNotifier.value = v
-                                                                                        ? (m | (1 << bit))
-                                                                                        : (m & ~(1 << bit));
-                                                                        }
-                                                                );
-                                                        }
+                                                ...createAllSensorGroups(
+                                                        maskNotifier: localMaskNotifier,
+                                                        getSensors: getSensors,
+                                                        onTap: (_, __) {},  // Pas utilisé en configMode
+                                                        configMode: true,
+                                                        localMask: localMaskNotifier
                                                 ),
 
                                                 const SizedBox(height: defaultPadding),

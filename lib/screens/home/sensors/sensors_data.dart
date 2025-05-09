@@ -13,11 +13,11 @@ class DataMap {
 }
 
 class SensorsData {
-        String? svgIcon, title, header, temp, pres, hum, code, bus, place;
+        String? svgIcon, title, header, temp, pres, hum, codeName, bus, placement, dataProcessor;
         Color? color;
 
         // Bit index (0…15) utilisé par le masque de configuration.
-        final int? bitIndex;
+        final int? bitIndex, maskValue;
 
         // Notifiers pour valeurs et statut (powerStatus)
         final ValueNotifier<Map<DataMap, dynamic>> dataNotifier;
@@ -29,12 +29,13 @@ class SensorsData {
         SensorsData({
                 this.svgIcon, this.title, this.color,
                 this.header, this.temp, this.pres,
-                this.hum, this.code, this.bitIndex,
-                this.bus, this.place,
+                this.hum, this.codeName, this.bitIndex,
+                this.bus, this.placement,  this.dataProcessor,
                 required Map<DataMap, dynamic> data,
                 int? powerStatus
         }) : dataNotifier = ValueNotifier(data),
-                powerStatusNotifier = ValueNotifier(powerStatus);
+              powerStatusNotifier = ValueNotifier(powerStatus),
+              maskValue = bitIndex != null ? (1 << bitIndex) : null;
 
         Map<DataMap, dynamic> get data => dataNotifier.value;
 
@@ -53,7 +54,7 @@ List<SensorsData> getSensors(SensorType type) {
         switch (type) {
                 case SensorType.internal:
                         return allSensors
-                                .where((s) => s.place == 'Intérieur')
+                                .where((s) => s.placement == 'Intérieur')
                                 .toList();
                 case SensorType.modbus:
                         return allSensors
@@ -67,10 +68,10 @@ List<SensorsData> allSensors = [
         SensorsData(
                 title: "Thermo-Baromètre",
                 header: "bme280_status",
-                code: "BME280",
+                codeName: "BME280",
                 bitIndex: 0,
                 bus: "I2C",
-                place: "Intérieur",
+                placement: "Intérieur",
                 svgIcon: microchip,
                 data: {
                         DataMap(name: "Temperature", header: "bme280_temperature", svgLogo: temperature) : "---",
@@ -83,10 +84,10 @@ List<SensorsData> allSensors = [
         SensorsData(
                 title: "Accéléro-Magnétomètre",
                 header: "lsm303_status",
-                code: "LSM303",
+                codeName: "LSM303",
                 bitIndex: 1,
                 bus: "I2C",
-                place: "Intérieur",
+                placement: "Intérieur",
                 svgIcon: microchip,
                 data: {
                         DataMap(name: "Accélération X", header: "lsm303_accel_x", svgLogo: acceleration) : "---",
@@ -103,7 +104,7 @@ List<SensorsData> allSensors = [
                 header: "gps_status",
                 bitIndex: 6,
                 bus: "I2C",
-                place: "Intérieur",
+                placement: "Intérieur",
                 svgIcon: gps,
                 data: {
                         DataMap(name: "Latitude", header: "gps_latitude", svgLogo: gps) : "---",
@@ -117,8 +118,9 @@ List<SensorsData> allSensors = [
                 title: "SD Card",
                 header: "sdcard",
                 bitIndex: 8,
-                place: "Intérieur",
+                placement: "Intérieur",
                 bus: "SPI",
+                dataProcessor: "true",
                 svgIcon: flashCard,
                 data: {} // Doit être vide
         ),
@@ -127,11 +129,12 @@ List<SensorsData> allSensors = [
                 title: "Iriduim",
                 header: "iridium_status",
                 bitIndex: 9,
-                code: "RockBLOCK",
-                place: "Intérieur",
+                codeName: "RockBLOCK",
+                placement: "Intérieur",
+                dataProcessor: "true",
                 svgIcon: satellite,
                 data: {
-                        DataMap(name: "Qualité du signal", header: "iridium_signal_quality", svgLogo: satellite) : "---",
+                        DataMap(name: "Qualité du signal", header: "iridium_signal_quality", svgLogo: satellite) : "---"
                 }
         ),
 
@@ -140,7 +143,7 @@ List<SensorsData> allSensors = [
                 header: "wind_speed_status",
                 bitIndex: 2,
                 bus: "ModBus",
-                place: "Extérieur",
+                placement: "Extérieur",
                 svgIcon: ventilation,
                 data: {
                         DataMap(name: "Vitesse", header: "wind_speed", svgLogo: windSpeed) : "---"
@@ -152,7 +155,7 @@ List<SensorsData> allSensors = [
                 header: "wind_direction_status",
                 bitIndex: 3,
                 bus: "ModBus",
-                place: "Extérieur",
+                placement: "Extérieur",
                 svgIcon: ventilation,
                 data: {
                         DataMap(name: "Angle", header: "wind_direction_angle", svgLogo: windAngle) : "---",
@@ -163,10 +166,10 @@ List<SensorsData> allSensors = [
         SensorsData(
                 title: "Luxmètre",
                 header: "mb_asl20_status",
-                code: "ASL20",
+                codeName: "ASL20",
                 bitIndex: 4,
                 bus: "ModBus",
-                place: "Extérieur",
+                placement: "Extérieur",
                 svgIcon: luxmetre,
                 data: {
                         DataMap(name: "Luminosité", header: "mb_asl20", svgLogo: luxmetre) : "---"
@@ -176,10 +179,10 @@ List<SensorsData> allSensors = [
         SensorsData(
                 title: "Thermo-Baromètre",
                 header: "mb_bme280_status",
-                code: "BME280",
+                codeName: "BME280",
                 bitIndex: 5,
                 bus: "ModBus",
-                place: "Extérieur",
+                placement: "Extérieur",
                 svgIcon: microchip,
                 data: {
                         DataMap(name: "Temperature", header: "mb_bme280_temp", svgLogo: temperature) : "---",

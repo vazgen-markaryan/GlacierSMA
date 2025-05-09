@@ -1,11 +1,10 @@
-import '../../utils/constants.dart';
 import 'package:flutter/material.dart';
-import '../home/sensors/sensor_card.dart';
-import '../home/sensors/sensors_data.dart';
-import '../home/sensors/sensors_group.dart';
 import 'components/debug_log_updater.dart';
 import 'components/debug_log_processor.dart';
-import '../home/sensors/sensor_popup.dart';
+import 'package:rev_glacier_sma_mobile/utils/constants.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_popup.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_group_factory.dart';
 
 /// Écran de debug : affiche les logs et les capteurs inactifs piloté par [activeMaskNotifier] pour inclure ceux désactivés.
 class DebugScreen extends StatelessWidget {
@@ -23,26 +22,6 @@ class DebugScreen extends StatelessWidget {
                 return ValueListenableBuilder<int?>(
                         valueListenable: activeMaskNotifier,
                         builder: (context, mask, _) {
-                                final m = mask ?? 0;
-
-                                // Tous les capteurs internes + ModBus
-                                final all = [
-                                        ...getSensors(SensorType.internal),
-                                        ...getSensors(SensorType.modbus)
-                                ];
-
-                                // Inactifs : powerStatus==null OU bitIndex désactivé
-                                final inactive = all.where((s) {
-                                                final physOff = s.powerStatus == null;
-                                                final cfgOff = s.bitIndex != null && (m & (1 << s.bitIndex!)) == 0;
-                                                return physOff || cfgOff;
-                                        }
-                                ).toList();
-
-                                // Séparation
-                                final internals = inactive.where((s) => s.bus?.toLowerCase() == 'i2c').toList();
-                                final modbus = inactive.where((s) => s.bus?.toLowerCase() == 'modbus').toList();
-
                                 return Scaffold(
                                         backgroundColor: backgroundColor,
                                         body: SingleChildScrollView(
@@ -51,30 +30,15 @@ class DebugScreen extends StatelessWidget {
                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                         children: [
                                                                 DebugLogProcessor(debugLogManager: debugLogManager),
+
                                                                 const SizedBox(height: defaultPadding * 2),
 
-                                                                SensorsGroup(
-                                                                        title: 'CAPTEURS INTERNES',
-                                                                        sensors: internals,
-                                                                        emptyMessage: 'Aucun capteur interne inactif.',
-                                                                        itemBuilder: (ctx, s) => SensorCard(
-                                                                                sensor: s,
-                                                                                onTap: (s.data.isNotEmpty && s.title != 'SD Card')
-                                                                                        ? () => showPopup(ctx, s)
-                                                                                        : null
-                                                                        )
-                                                                ),
-
-                                                                SensorsGroup(
-                                                                        title: 'CAPTEURS MODBUS',
-                                                                        sensors: modbus,
-                                                                        emptyMessage: 'Aucun capteur ModBus inactif.',
-                                                                        itemBuilder: (ctx, s) => SensorCard(
-                                                                                sensor: s,
-                                                                                onTap: (s.data.isNotEmpty && s.title != 'SD Card')
-                                                                                        ? () => showPopup(ctx, s)
-                                                                                        : null
-                                                                        )
+                                                                ...createAllSensorGroups(
+                                                                        maskNotifier: activeMaskNotifier,
+                                                                        getSensors: getSensors,
+                                                                        onTap: (ctx, s) => showPopup(ctx, s),
+                                                                        configMode: false,
+                                                                        showInactive: true
                                                                 )
                                                         ]
                                                 )
