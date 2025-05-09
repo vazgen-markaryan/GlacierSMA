@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:rev_glacier_sma_mobile/screens/settings/settings_section.dart';
 
-/// Section « Langue » stylée comme une ExpansionTile, avec drapeaux + labels colorés.
-class LanguageSection extends StatelessWidget {
+/// Section « Langue » dans les paramètres, stylisée comme une ExpansionTile.
+/// Affiche les drapeaux et labels des langues prises en charge, avec l’option de sélectionner la locale active.
+
+class LanguageSection extends StatefulWidget {
         const LanguageSection({Key? key}) : super(key: key);
 
-        String localeLabel(Locale locale) {
+        @override
+        LanguageSectionState createState() => LanguageSectionState();
+}
+
+class LanguageSectionState extends State<LanguageSection> {
+        bool expanded = false;
+
+        String labelFor(Locale locale) {
                 switch (locale.languageCode) {
-                        case 'en':
-                                return 'English';
-                        case 'fr':
-                                return 'Français';
-                        case 'es':
-                                return 'Español';
+                        case 'en': return 'English';
+                        case 'fr': return 'Français';
+                        case 'es': return 'Español';
                         default:
                         return locale.toLanguageTag();
                 }
@@ -23,45 +30,50 @@ class LanguageSection extends StatelessWidget {
         Widget build(BuildContext context) {
                 final current = context.locale;
 
-                return ExpansionTile(
-                        // même padding horizontal que dans AboutSection
-                        tilePadding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        // même padding pour le contenu déroulant
-                        childrenPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-
-                        leading: const Icon(Icons.language),
-                        title: Text(tr('language')),
-
+                return SettingsSection(
+                        title: tr('language'),
                         children: [
-                                Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                        children: context.supportedLocales.map((locale) {
-                                                        final isSelected = locale == current;
-                                                        return GestureDetector(
-                                                                onTap: () => context.setLocale(locale),
-                                                                child: Column(
-                                                                        children: [
-                                                                                SvgPicture.asset(
-                                                                                        'assets/icons/${locale.languageCode}.svg',
-                                                                                        width: 48,
-                                                                                        height: 48
-                                                                                ),
-                                                                                const SizedBox(height: 4),
-                                                                                Text(
-                                                                                        localeLabel(locale),
-                                                                                        style: TextStyle(
-                                                                                                color: isSelected ? Colors.green : Colors.red,
-                                                                                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                                                                                fontSize: 14
-                                                                                        )
+                                ExpansionTile(
+                                        leading: const Icon(Icons.language),
+                                        title: Text(tr('language')),
+                                        childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                        controlAffinity: ListTileControlAffinity.trailing,
+                                        onExpansionChanged: (open) => setState(() => expanded = open),
+                                        children: [
+                                                Row(
+                                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                        children: context.supportedLocales.map((locale) {
+                                                                        final isSel = locale == current;
+                                                                        return GestureDetector(
+                                                                                onTap: () => context.setLocale(locale),
+                                                                                child: Column(
+                                                                                        mainAxisSize: MainAxisSize.min,
+                                                                                        children: [
+                                                                                                // Affiche le drapeau correspondant
+                                                                                                SvgPicture.asset(
+                                                                                                        'assets/icons/${locale.languageCode}.svg',
+                                                                                                        width: 48,
+                                                                                                        height: 48
+                                                                                                ),
+                                                                                                const SizedBox(height: 4),
+                                                                                                // Label texte coloré selon la sélection
+                                                                                                Text(
+                                                                                                        labelFor(locale),
+                                                                                                        style: TextStyle(
+                                                                                                                color: isSel ? Colors.green : Colors.red,
+                                                                                                                fontSize: 14,
+                                                                                                                fontWeight: isSel ? FontWeight.bold : FontWeight.normal
+                                                                                                        )
+                                                                                                )
+                                                                                        ]
                                                                                 )
-                                                                        ]
-                                                                )
-                                                        );
-                                                }
-                                        ).toList()
-                                ),
-                                const SizedBox(height: 8.0)
+                                                                        );
+                                                                }
+                                                        ).toList()
+                                                ),
+                                                const SizedBox(height: 8)
+                                        ]
+                                )
                         ]
                 );
         }

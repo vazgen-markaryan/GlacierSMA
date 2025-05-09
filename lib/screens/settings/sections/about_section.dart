@@ -1,12 +1,14 @@
-import 'language_section.dart';
 import 'package:flutter/material.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_snackbar.dart';
 import 'package:rev_glacier_sma_mobile/screens/settings/settings_section.dart';
 import 'package:rev_glacier_sma_mobile/screens/settings/settings_widgets.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_processor.dart';
 
-/// Section "Autres" qui contient À propos **et** Langue
+/// Section "Autres" qui contient uniquement la partie "À propos"
+/// Affiche un ExpansionTile détaillant les informations du firmware
 class AboutSection extends StatelessWidget {
+
+        /// Notifier contenant les données RawData reçues depuis le bloc `<id>`
         final ValueNotifier<RawData?> firmwareNotifier;
 
         const AboutSection({Key? key, required this.firmwareNotifier}) : super(key: key);
@@ -16,11 +18,13 @@ class AboutSection extends StatelessWidget {
                 return SettingsSection(
                         title: "Autres",
                         children: [
-                                // --- Votre section À propos existante ---
+                                // Écoute les changements sur firmwareNotifier
                                 ValueListenableBuilder<RawData?>(
                                         valueListenable: firmwareNotifier,
                                         builder: (ctx, data, _) {
+                                                // Récupère le map header→valeur sinon null
                                                 final info = data?.asMap;
+                                                // Extraction des champs par header
                                                 final name = info?['name'] ?? '';
                                                 final code = info?['code'] ?? '';
                                                 final repo = info?['url'] ?? '';
@@ -32,12 +36,13 @@ class AboutSection extends StatelessWidget {
                                                 final email = info?['email'] ?? '';
                                                 final repoUrl = '$repo/tree/$hash';
 
+                                                // Affiche un ExpansionTile contenant les infos
                                                 return ExpansionTile(
                                                         leading: const Icon(Icons.info_outline),
                                                         title: const Text('À propos'),
-                                                        childrenPadding:
-                                                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                                        childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                                         children: [
+                                                                // Chaque LabelRow montre un label + valeur
                                                                 LabelRow(label: 'Nom de la station', value: name),
                                                                 LabelRow(label: 'Micrologiciel', value: code),
                                                                 LinkRow(
@@ -52,7 +57,12 @@ class AboutSection extends StatelessWidget {
                                                                                 iconColor: Colors.white
                                                                         )
                                                                 ),
-                                                                LabelRow(label: 'Code', value: dirty ? 'Commit était modifié' : 'Correspond au Commit'),
+                                                                LabelRow(
+                                                                        label: 'Code',
+                                                                        value: dirty
+                                                                                ? 'Commit était modifié'
+                                                                                : 'Correspond au Commit'
+                                                                ),
                                                                 LabelRow(
                                                                         label: 'Compilé le',
                                                                         value:
@@ -67,10 +77,7 @@ class AboutSection extends StatelessWidget {
                                                         ]
                                                 );
                                         }
-                                ),
-
-                                // --- Nouvelle section Langue ---
-                                const LanguageSection()
+                                )
                         ]
                 );
         }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rev_glacier_sma_mobile/screens/settings/sections/about_section.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_processor.dart';
+import 'package:rev_glacier_sma_mobile/screens/settings/sections/language_section.dart';
 
 /// Écran principal des Paramètres
 class SettingsScreen extends StatelessWidget {
@@ -19,6 +20,11 @@ class SettingsScreen extends StatelessWidget {
                         child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                        // Section "Langue"
+                                        LanguageSection(),
+
+                                        const SizedBox(height: 16),
+
                                         // Section "À propos"
                                         AboutSection(firmwareNotifier: firmwareNotifier)
                                 ]
