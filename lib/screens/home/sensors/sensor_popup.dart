@@ -31,14 +31,14 @@ class SensorPopupState extends State<SensorPopup>
                 )..forward();
                 scale = CurvedAnimation(parent: controller, curve: Curves.easeOutBack);
 
-                timestamp = _now();
+                timestamp = now();
                 timer = Timer.periodic(
                         const Duration(seconds: 1),
-                        (_) => setState(() => timestamp = _now())
+                        (_) => setState(() => timestamp = now())
                 );
         }
 
-        String _now() => DateFormat("dd-MM-yyyy 'à' HH:mm:ss").format(DateTime.now());
+        String now() => DateFormat("dd-MM-yyyy   HH:mm:ss").format(DateTime.now());
 
         @override
         void dispose() {
@@ -52,7 +52,7 @@ class SensorPopupState extends State<SensorPopup>
                 return ScaleTransition(
                         scale: scale,
                         child: CustomPopup(
-                                title: (widget.sensor.title ?? tr('sensor_details')),
+                                title: (tr(widget.sensor.title ?? 'dashboard.sensors.sensor_details')),
                                 content: Padding(
                                         padding: const EdgeInsets.all(12),
                                         child: Scrollbar(
@@ -70,7 +70,7 @@ class SensorPopupState extends State<SensorPopup>
                                                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                                                         children: [
                                                                                                 Text(
-                                                                                                        tr('updated_at', args: [timestamp]),
+                                                                                                        tr('dashboard.sensors.updated_at', namedArgs: {'timestamp': timestamp}),
                                                                                                         style: const TextStyle(
                                                                                                                 color: Colors.white54,
                                                                                                                 fontSize: 16,
@@ -123,7 +123,7 @@ class SensorPopupState extends State<SensorPopup>
                                                         ),
                                                         const SizedBox(width: 8),
                                                         Text(
-                                                                key.name,
+                                                                tr(key.name),
                                                                 style: const TextStyle(color: Colors.white70, fontSize: 15)
                                                         )
                                                 ]

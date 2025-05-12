@@ -30,19 +30,19 @@ class BottomNavBar extends StatelessWidget {
                         items: [
                                 BottomNavigationBarItem(
                                         icon: const Icon(Icons.home),
-                                        label: tr('nav_home')
+                                        label: tr('dashboard.sensors.navbar.home')
                                 ),
                                 BottomNavigationBarItem(
                                         icon: const Icon(Icons.bug_report),
-                                        label: tr('nav_debug')
+                                        label: tr('dashboard.sensors.navbar.debug')
                                 ),
                                 BottomNavigationBarItem(
                                         icon: const Icon(Icons.tune),
-                                        label: tr('nav_config')
+                                        label: tr('dashboard.sensors.navbar.config')
                                 ),
                                 BottomNavigationBarItem(
                                         icon: const Icon(Icons.settings),
-                                        label: tr('nav_settings')
+                                        label: tr('dashboard.sensors.navbar.settings')
                                 )
                         ],
 

@@ -98,8 +98,5 @@ class MyApp extends StatelessWidget {
 // TODO Créer des réglages pour les limites min/max des capteurs avec notifications
 // TODO capture <config> (afficher dans config)
 
-//TODO check parametres de traduction dans diconnect popup et battery popup
-//TODO dashboard header ET bottom navbar s'update pas si je change settings
-//TODO check fatal erreurs traduction avec ARGS
-//TODO traduire sensordata, settings utils
-//TODO refactor JSON traduction pour nesting
+//TODO check all traductions
+//TODO traduction dropdown on connection screen

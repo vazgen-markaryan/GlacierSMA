@@ -21,20 +21,20 @@ Future<bool> showDisconnectPopup({
                 final result = await showDialog<bool>(
                         context: context,
                         builder: (_) => CustomPopup(
-                                title: tr("disconnect"),
-                                content: Text(tr("disconnect_confirmation"),
+                                title: tr("connection.disconnect"),
+                                content: Text(tr("connection.disconnect_confirmation"),
                                         style: TextStyle(color: Colors.white)
                                 ),
                                 actions: [
                                         TextButton(
                                                 // Action "Non" : renvoie false
                                                 onPressed: () => Navigator.of(context).pop(false),
-                                                child: Text(tr("no"), style: TextStyle(color: primaryColor))
+                                                child: Text(tr("connection.no"), style: TextStyle(color: primaryColor))
                                         ),
                                         TextButton(
                                                 // Action "Oui" : renvoie true
                                                 onPressed: () => Navigator.of(context).pop(true),
-                                                child: Text(tr("yes"), style: TextStyle(color: primaryColor))
+                                                child: Text(tr("connection.yes"), style: TextStyle(color: primaryColor))
                                         )
                                 ]
                         )
@@ -76,9 +76,9 @@ Future<void> showLostConnectionPopup({
         await showDialog(
                 context: context,
                 builder: (_) => CustomPopup(
-                        title: tr("disconnect"),
+                        title: tr("connection.disconnect"),
                         content: Text(
-                                tr('lost_connection', namedArgs: {'time': formatted}),
+                                tr('connection.lost_connection', namedArgs: {'time': formatted}),
                                 style: const TextStyle(color: Colors.white70)
                         ),
                         actions: [

@@ -25,23 +25,23 @@ Future<bool> showPasswordDialog(
                                                 padding: EdgeInsets.symmetric(horizontal: errorText == null ? 0 : 8),
                                                 duration: const Duration(milliseconds: 50),
                                                 child: CustomPopup(
-                                                        title: tr('password_required'),
+                                                        title: tr('config.password_required'),
                                                         content: TextField(
                                                                 controller: controller,
                                                                 obscureText: true,
                                                                 decoration: InputDecoration(
-                                                                        labelText: tr('password'),
+                                                                        labelText: tr('config.password'),
                                                                         errorText: errorText
                                                                 )
                                                         ),
                                                         actions: [
                                                                 TextButton(
                                                                         onPressed: () => Navigator.of(ctx).pop(false),
-                                                                        child: Text(tr('quit'))
+                                                                        child: Text(tr('config.quit'))
                                                                 ),
                                                                 TextButton(
                                                                         onPressed: () => Navigator.of(ctx).pop(true),
-                                                                        child: Text(tr('validate'))
+                                                                        child: Text(tr('config.validate'))
                                                                 )
                                                         ]
                                                 )
@@ -54,7 +54,7 @@ Future<bool> showPasswordDialog(
                 if (controller.text == motDePasse) return true;
 
                 // Affiche l’erreur et recommence
-                errorText = tr('invalid_password');
+                errorText = tr('config.invalid_password');
                 controller.clear();
         }
 }
@@ -65,8 +65,8 @@ Future<bool> showDiscardDialog(BuildContext context) async {
                 context: context,
                 barrierDismissible: false,
                 builder: (ctx) => CustomPopup(
-                        title: tr('unsaved_changes_title'),
-                        content: Text(tr('unsaved_changes_content')),
+                        title: tr('config.unsaved_changes_title'),
+                        content: Text(tr('config.unsaved_changes_content')),
                         actions: [
                                 TextButton(
                                         onPressed: () => Navigator.of(ctx).pop(false),
@@ -117,11 +117,11 @@ Future<bool> submitConfiguration({
                 context: context,
                 barrierDismissible: false,
                 builder: (_) => CustomPopup(
-                        title: tr('confirm_apply_title'),
+                        title: tr('config.confirm_apply_title'),
                         content: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                        Text(tr('modified_sensors'), style: const TextStyle(color: Colors.white70)),
+                                        Text(tr('config.modified_sensors'), style: const TextStyle(color: Colors.white70)),
                                         const SizedBox(height: 12),
                                         ...differences
                                 ]
@@ -129,11 +129,11 @@ Future<bool> submitConfiguration({
                         actions: [
                                 TextButton(
                                         onPressed: () => Navigator.of(context).pop(false),
-                                        child: Text(tr('cancel'))
+                                        child: Text(tr('config.cancel'))
                                 ),
                                 TextButton(
                                         onPressed: () => Navigator.of(context).pop(true),
-                                        child: Text(tr('apply'))
+                                        child: Text(tr('config.apply'))
                                 )
                         ]
                 )

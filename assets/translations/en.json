@@ -1,105 +1,205 @@
 {
-        "appTitle": "Glacier SMA Connect",
-        "language": "Language",
 	"yes": "Yes",
 	"no": "No",
 
-	"-----CONNECTION SCREEN-----": "",
-        "devices_found": "Devices detected",
-        "no_device_found": "No compatible device found:\n1. Flash the RevGlacierSMA code\n2. Check the cable\n3. Check the physical Debug Switch.",
-        "failed_to_connect": "Connection failed. Check the cable or permissions.",
-        "bluetooth_connection": "Bluetooth Connection",
-        "arrow_instruction": "Select a connection method",
-        "cable_connection": "Cable Connection",
-        "disconnect": "Disconnect",
-        "disconnect_confirmation": "Do you really want to disconnect?",
-	"lost_connection": "Connection lost after: {time}\nCheck the cable or the hardware Debug Switch.",
-
-	"-----ACCUEIL SCREEN-----": "",
-	"sensors_empty_active": "No sensors are active.\nCheck your configuration.",
-	"sensors_empty_inactive": "No sensors are inactive.",
-	"group_data_processors": "Data Processors",
-	"group_internals": "Internal Sensors",
-	"group_modbus": "ModBus Sensors",
-	"sensor_details": "Sensor Details",
-	"updated_at": "Updated at: {0}",
-	"sensor_unknown": "Unknown sensor",
-	"activated": "Activated",
-	"deactivated": "Deactivated",
-	"status_disabled": "Disabled",
-	"section": {
-		"data_processors": "Data Processors",
-		"internal_sensors": "Internal Sensors",
-		"modbus_sensors": "ModBus Sensors"
+	"connection": {
+		"appTitle": "Glacier SMA Connect",
+		"devices_found": "Devices detected",
+		"no_device_found": "No compatible device found:\n1. Flash the RevGlacierSMA code\n2. Check the cable\n3. Check the physical Debug Switch.",
+		"failed_to_connect": "Connection failed. Check the cable or permissions.",
+		"bluetooth_connection": "Bluetooth Connection",
+		"arrow_instruction": "Select a connection method",
+		"cable_connection": "Cable Connection",
+		"disconnect": "Disconnect",
+		"disconnect_confirmation": "Do you really want to disconnect?",
+		"lost_connection": "Connection lost after: {time}\n\nCheck the cable or the hardware Debug Switch."
 	},
-	"empty": {
-		"active": {
-			"data_processors": "No data processor active.",
-			"internal_sensors": "No internal sensor active.",
-			"modbus_sensors": "No ModBus sensor active."
+
+	"home": {
+		"battery": {
+			"voltage": "Voltage: {value} V",
+			"voltage_unknown": "Voltage: Unknown",
+			"state": "State: {percent}%"
 		},
-		"inactive": {
-			"data_processors": "No data processor inactive.",
-			"internal_sensors": "No internal sensor inactive.",
-			"modbus_sensors": "No ModBus sensor inactive."
+		"dashboard": {
+			"unknown_device": "Unknown device",
+			"not_connected": "Not connected",
+			"fatal_title": "Fatal error",
+			"fatal_generic": "Device is resetting.",
+			"fatal_dcflag": "Invalid data container flag.",
+			"fatal_hardfault": "Illegal instruction (HardFault) on Microcontroller.",
+			"fatal_watchdog": "Watchdog timer expired too quickly too often.",
+			"fatal_unknown": "Unknown fatal error: {reason}",
+			"fatal_duration": "Connection duration: {duration}",
+			"rename_title": "Rename station",
+			"rename_label": "Name",
+			"rename_error": "Only 0–20 ANSI chars allowed",
+			"cancel_button": "Cancel",
+			"confirm_button": "OK",
+			"snack_rename_success": "Station name updated",
+			"snack_rename_error": "Error sending station name"
+		},
+		"sensors": {
+			"empty_active": "No sensors are active.\nCheck your configuration.",
+			"sensor_details": "Sensor Details",
+			"updated_at": "Updated at: {timestamp}",
+			"title_unknown": "Unknown sensor",
+			"status": {
+				"activated": "Activated",
+				"deactivated": "Deactivated",
+				"unknown": "Unknown",
+				"disabled": "Disabled",
+				"operational": "Operational",
+				"disconnected": "Disconnected",
+				"error": "Error"
+			},
+			"section": {
+				"data_processors": "Data Processors",
+				"internal_sensors": "Internal Sensors",
+				"modbus_sensors": "ModBus Sensors",
+				"empty": {
+					"active": {
+						"data_processors": "No active Data Processor.",
+						"internal_sensors": "No active Internal Sensor.",
+						"modbus_sensors": "No active ModBus Sensor."
+					},
+					"inactive": {
+						"data_processors": "No inactive Data Processor.",
+						"internal_sensors": "No inactive Internal Sensor.",
+						"modbus_sensors": "No inactive ModBus Sensor."
+					}
+				}
+			}
+		},
+		"navbar": {
+			"home": "Home",
+			"debug": "Debug",
+			"config": "Config",
+			"settings": "Settings"
 		}
 	},
 
-	"-----DEBUG SCREEN-----": "",
-	"status_operational": "Operational",
-	"status_disconnected": "Disconnected",
-	"status_error": "Error",
-	"status_unknown": "Unknown",
-	"section_status": "STATUS",
-	"section_values": "VALUES",
-	"no_data_received": "No data received.\nCheck your hardware, Arduino code and app logic.",
+	"debug": {
+		"status_operational": "Operational",
+		"status_disconnected": "Disconnected",
+		"status_error": "Error",
+		"status_unknown": "Unknown",
+		"section_status": "STATUS",
+		"section_values": "VALUES",
+		"no_data_received": "No data received.\nCheck your hardware, Arduino code and app logic.",
+		"message_sent": "Message sent: {log}",
+		"message_error": "Send error: {log}"
+	},
 
-	"-----CONFIG SCREEN-----": "",
-        "password_required": "Password required",
-        "password": "Password",
-        "quit": "Quit",
-        "validate": "Validate",
-        "invalid_password": "Invalid password",
-        "unsaved_changes_title": "Unsaved changes",
-        "unsaved_changes_content": "You have unsaved changes. Leave anyway?",
-        "confirm_apply_title": "Confirm application",
-        "modified_sensors": "Modified sensors:",
-        "cancel": "Cancel",
-        "apply": "Apply",
-	"config_apply": "Apply configuration",
-	"config_saved": "Saved",
-	"config_failed": "Failed",
+	"config": {
+		"password_required": "Password required",
+		"password": "Password",
+		"quit": "Quit",
+		"validate": "Validate",
+		"invalid_password": "Invalid password",
+		"unsaved_changes_title": "Unsaved changes",
+		"unsaved_changes_content": "You have unsaved changes. Leave anyway?",
+		"confirm_apply_title": "Confirm application",
+		"modified_sensors": "Modified sensors:",
+		"cancel": "Cancel",
+		"apply": "Apply",
+		"config_apply": "Apply configuration",
+		"config_saved": "Saved",
+		"config_failed": "Failed"
+	},
 
-	"-----SETTINGS SCREEN-----": "",
+	"settings": {
+		"others": "Other",
+		"about": {
+			"title": "About",
+			"station_name": "Station name",
+			"firmware": "Firmware",
+			"github": "GitHub (private)",
+			"github_error": "Could not open link",
+			"code": "Code",
+			"commit_modified": "Commit was modified",
+			"commit_ok": "Matches the commit",
+			"compiled_on": "Compiled on",
+			"compiled_by": "Compiled by",
+			"contact": "Contact"
+		},
+		"language": {
+			"title": "Language",
+			"en": "English",
+			"fr": "Français",
+			"es": "Español"
+		}
+	},
 
+	"sensor-data": {
+		"title": {
+			"thermo_barometer": "Thermo-Barometer",
+			"accel_magnetometer": "Accelero-Magnetometer",
+			"gps": "GPS",
+			"sd_card": "SD Card",
+			"iridium": "Iridium",
+			"anemometer": "Anemometer",
+			"wind_vane": "Wind Vane",
+			"lux_meter": "Lux Meter"
+		},
+		"placement": {
+			"interior": "Interior",
+			"exterior": "Exterior"
+		},
+		"datamap": {
+			"temperature": "Temperature",
+			"pressure": "Pressure",
+			"altitude": "Altitude",
+			"humidity": "Humidity",
+			"accel_x": "Acceleration X",
+			"accel_y": "Acceleration Y",
+			"accel_z": "Acceleration Z",
+			"roll": "Roll",
+			"pitch": "Pitch",
+			"accel_range": "Acceleration Range",
+			"latitude": "Latitude",
+			"longitude": "Longitude",
+			"satellites": "Satellites",
+			"hdop": "HDOP",
+			"iridium_quality": "Signal Quality",
+			"wind_speed": "Wind Speed",
+			"wind_direction_angle": "Wind Direction Angle",
+			"wind_direction_facing": "Wind Direction",
+			"lux": "Lux",
+			"mb_temperature": "Temperature",
+			"mb_pressure": "Pressure",
+			"mb_humidity": "Humidity"
+		}
+	},
 
-
-	"-----BATTERY POPUP-----": "",
-	"battery_voltage": "Voltage: {value} V",
-	"battery_voltage_unknown": "Voltage: unknown",
-	"battery_state": "State: {percent}%",
-
-	"-----BOTTOM NAVBAR-----": "",
-	"nav_home": "Home",
-	"nav_debug": "Debug",
-	"nav_config": "Config",
-	"nav_settings": "Settings",
-
-	"-----DASHBOARD-----": "",
-	"unknown_device": "Unknown device",
-	"not_connected": "Not connected",
-	"fatal_title": "Fatal error",
-	"fatal_generic": "Device is resetting.",
-	"fatal_dcflag": "Invalid data container flag.",
-	"fatal_hardfault": "Illegal instruction (HardFault) on Microcontroller.",
-	"fatal_watchdog": "Watchdog timer expired too quickly too often.",
-	"fatal_unknown": "Unknown fatal error: {0}",
-	"fatal_duration": "Connection duration: {0}",
-	"rename_title": "Rename station",
-	"rename_label": "Name",
-	"rename_error": "Only 0–20 ANSI chars allowed",
-	"cancel_button": "Cancel",
-	"confirm_button": "OK",
-	"snack_rename_success": "Station name updated",
-	"snack_rename_error": "Error sending station name"
+	"switch_utils": {
+		"wind_direction": {
+			"north": "North",
+			"north_northeast": "North-northeast",
+			"northeast": "Northeast",
+			"east_northeast": "East-northeast",
+			"east": "East",
+			"east_southeast": "East-southeast",
+			"southeast": "Southeast",
+			"south_southeast": "South-southeast",
+			"south": "South",
+			"south_southwest": "South-southwest",
+			"southwest": "Southwest",
+			"west_southwest": "West-southwest",
+			"west": "West",
+			"west_northwest": "West-northwest",
+			"northwest": "Northwest",
+			"north_northwest": "North-northwest",
+			"unknown": "Unknown"
+		},
+		"iridium": {
+			"quality": {
+				"excellent": "Excellent",
+				"very_good": "Very good",
+				"ok": "OK",
+				"bad": "Bad",
+				"error": "Error"
+			}
+		}
+	}
 }

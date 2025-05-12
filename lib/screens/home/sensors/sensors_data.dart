@@ -54,7 +54,7 @@ List<SensorsData> getSensors(SensorType type) {
         switch (type) {
                 case SensorType.internal:
                         return allSensors
-                                .where((s) => s.placement == 'Intérieur')
+                                .where((s) => s.bus == 'I2C' || s.bus == 'SPI' || s.dataProcessor == 'true')
                                 .toList();
                 case SensorType.modbus:
                         return allSensors
@@ -65,59 +65,59 @@ List<SensorsData> getSensors(SensorType type) {
 
 List<SensorsData> allSensors = [
         SensorsData(
-                title: "Thermo-Baromètre",
+                title: "sensor-data.title.thermo_barometer",
                 header: "bme280_status",
                 codeName: "BME280",
                 bitIndex: 0,
                 bus: "I2C",
-                placement: "Intérieur",
+                placement: "sensor-data.placement.interior",
                 svgIcon: microchip,
                 data: {
-                        DataMap(name: "Temperature", header: "bme280_temperature", svgLogo: temperature) : "---",
-                        DataMap(name: "Pression", header: "bme280_pression", svgLogo: pressure) : "---",
-                        DataMap(name: "Altitude", header: "bme280_altitude", svgLogo: altitude) : "---",
-                        DataMap(name: "Humidité", header: "bme280_humidity", svgLogo: humidity) : "---"
+                        DataMap(name: "sensor-data.datamap.temperature", header: "bme280_temperature", svgLogo: temperature) : "---",
+                        DataMap(name: "sensor-data.datamap.pressure", header: "bme280_pression", svgLogo: pressure) : "---",
+                        DataMap(name: "sensor-data.datamap.altitude", header: "bme280_altitude", svgLogo: altitude) : "---",
+                        DataMap(name: "sensor-data.datamap.humidity", header: "bme280_humidity", svgLogo: humidity) : "---"
                 }
         ),
 
         SensorsData(
-                title: "Accéléro-Magnétomètre",
+                title: "sensor-data.title.accel_magnetometer",
                 header: "lsm303_status",
                 codeName: "LSM303",
                 bitIndex: 1,
                 bus: "I2C",
-                placement: "Intérieur",
+                placement: "sensor-data.placement.interior",
                 svgIcon: microchip,
                 data: {
-                        DataMap(name: "Accélération X", header: "lsm303_accel_x", svgLogo: acceleration) : "---",
-                        DataMap(name: "Accélération Y", header: "lsm303_accel_y", svgLogo: acceleration) : "---",
-                        DataMap(name: "Accélération Z", header: "lsm303_accel_z", svgLogo: acceleration) : "---",
-                        DataMap(name: "Roll", header: "lsm303_roll", svgLogo: pitchAndRoll) : "---",
-                        DataMap(name: "Pitch", header: "lsm303_pitch", svgLogo: pitchAndRoll) : "---",
-                        DataMap(name: "Accélération Range", header: "lsm303_accel_range", svgLogo: range) : "---"
+                        DataMap(name: "sensor-data.datamap.accel_x", header: "lsm303_accel_x", svgLogo: acceleration) : "---",
+                        DataMap(name: "sensor-data.datamap.accel_y", header: "lsm303_accel_y", svgLogo: acceleration) : "---",
+                        DataMap(name: "sensor-data.datamap.accel_z", header: "lsm303_accel_z", svgLogo: acceleration) : "---",
+                        DataMap(name: "sensor-data.datamap.roll", header: "lsm303_roll", svgLogo: pitchAndRoll) : "---",
+                        DataMap(name: "sensor-data.datamap.pitch", header: "lsm303_pitch", svgLogo: pitchAndRoll) : "---",
+                        DataMap(name: "sensor-data.datamap.accel_range", header: "lsm303_accel_range", svgLogo: range) : "---"
                 }
         ),
 
         SensorsData(
-                title: "GPS",
+                title: "sensor-data.title.gps",
                 header: "gps_status",
                 bitIndex: 6,
                 bus: "I2C",
-                placement: "Intérieur",
+                placement: "sensor-data.placement.interior",
                 svgIcon: gps,
                 data: {
-                        DataMap(name: "Latitude", header: "gps_latitude", svgLogo: gps) : "---",
-                        DataMap(name: "Longitude", header: "gps_longitude", svgLogo: gps) : "---",
-                        DataMap(name: "Satelites", header: "gps_satelites", svgLogo: gps) : "---",
-                        DataMap(name: "HDOP", header: "gps_hdop", svgLogo: gps) : "---"
+                        DataMap(name: "sensor-data.datamap.latitude", header: "gps_latitude", svgLogo: gps) : "---",
+                        DataMap(name: "sensor-data.datamap.longitude", header: "gps_longitude", svgLogo: gps) : "---",
+                        DataMap(name: "sensor-data.datamap.satellites", header: "gps_satelites", svgLogo: gps) : "---",
+                        DataMap(name: "sensor-data.datamap.hdop", header: "gps_hdop", svgLogo: gps) : "---"
                 }
         ),
 
         SensorsData(
-                title: "SD Card",
+                title: "sensor-data.title.sd_card",
                 header: "sdcard",
                 bitIndex: 8,
-                placement: "Intérieur",
+                placement: "sensor-data.placement.interior",
                 bus: "SPI",
                 dataProcessor: "true",
                 svgIcon: flashCard,
@@ -125,68 +125,68 @@ List<SensorsData> allSensors = [
         ),
 
         SensorsData(
-                title: "Iriduim",
+                title: "sensor-data.title.iridium",
                 header: "iridium_status",
                 bitIndex: 9,
                 codeName: "RockBLOCK",
-                placement: "Intérieur",
+                placement: "sensor-data.placement.interior",
                 dataProcessor: "true",
                 svgIcon: satellite,
                 data: {
-                        DataMap(name: "Qualité du signal", header: "iridium_signal_quality", svgLogo: satellite) : "---"
+                        DataMap(name: "sensor-data.datamap.iridium_quality", header: "iridium_signal_quality", svgLogo: satellite) : "---"
                 }
         ),
 
         SensorsData(
-                title: "Anémomètre",
+                title: "sensor-data.title.anemometer",
                 header: "wind_speed_status",
                 bitIndex: 2,
                 bus: "ModBus",
-                placement: "Extérieur",
+                placement: "sensor-data.placement.exterior",
                 svgIcon: ventilation,
                 data: {
-                        DataMap(name: "Vitesse", header: "wind_speed", svgLogo: windSpeed) : "---"
+                        DataMap(name: "sensor-data.datamap.wind_speed", header: "wind_speed", svgLogo: windSpeed) : "---"
                 }
         ),
 
         SensorsData(
-                title: "Girouette",
+                title: "sensor-data.title.wind_vane",
                 header: "wind_direction_status",
                 bitIndex: 3,
                 bus: "ModBus",
-                placement: "Extérieur",
+                placement: "sensor-data.placement.exterior",
                 svgIcon: ventilation,
                 data: {
-                        DataMap(name: "Angle", header: "wind_direction_angle", svgLogo: windAngle) : "---",
-                        DataMap(name: "Orientation", header: "wind_direction_facing", svgLogo: windDirection) : "---"
+                        DataMap(name: "sensor-data.datamap.wind_direction_angle", header: "wind_direction_angle", svgLogo: windAngle) : "---",
+                        DataMap(name: "sensor-data.datamap.wind_direction_facing", header: "wind_direction_facing", svgLogo: windDirection) : "---"
                 }
         ),
 
         SensorsData(
-                title: "Luxmètre",
+                title: "sensor-data.title.lux_meter",
                 header: "mb_asl20_status",
                 codeName: "ASL20",
                 bitIndex: 4,
                 bus: "ModBus",
-                placement: "Extérieur",
+                placement: "sensor-data.placement.exterior",
                 svgIcon: luxmetre,
                 data: {
-                        DataMap(name: "Luminosité", header: "mb_asl20", svgLogo: luxmetre) : "---"
+                        DataMap(name: "sensor-data.datamap.lux", header: "mb_asl20", svgLogo: luxmetre) : "---"
                 }
         ),
 
         SensorsData(
-                title: "Thermo-Baromètre",
+                title: "sensor-data.title.thermo_barometer",
                 header: "mb_bme280_status",
                 codeName: "BME280",
                 bitIndex: 5,
                 bus: "ModBus",
-                placement: "Extérieur",
+                placement: "sensor-data.placement.exterior",
                 svgIcon: microchip,
                 data: {
-                        DataMap(name: "Temperature", header: "mb_bme280_temp", svgLogo: temperature) : "---",
-                        DataMap(name: "Pression", header: "mb_bme280_press", svgLogo: pressure) : "---",
-                        DataMap(name: "Humidité", header: "mb_bme280_hum", svgLogo: humidity) : "---"
+                        DataMap(name: "sensor-data.datamap.mb_temperature", header: "mb_bme280_temp", svgLogo: temperature) : "---",
+                        DataMap(name: "sensor-data.datamap.mb_pressure", header: "mb_bme280_press", svgLogo: pressure) : "---",
+                        DataMap(name: "sensor-data.datamap.mb_humidity", header: "mb_bme280_hum", svgLogo: humidity) : "---"
                 }
         )
 ];

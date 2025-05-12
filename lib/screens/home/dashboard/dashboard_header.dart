@@ -37,11 +37,11 @@ class DashboardHeader extends StatelessWidget {
                                                 name = connectedDevices.first.productName;
                                         }
                                         else {
-                                                name = tr('unknown_device');
+                                                name = tr('home.dashboard.unknown_device');
                                         }
                                 }
                                 else {
-                                        name = tr('not_connected');
+                                        name = tr('home.dashboard.not_connected');
                                 }
 
                                 return Row(

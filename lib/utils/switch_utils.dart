@@ -1,4 +1,6 @@
 import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Contient des utilitaires pour :
 ///  Obtenir l’unité à afficher selon l’en-tête de donnée Arduino
@@ -38,27 +40,27 @@ String getUnitForHeader(String header) {
         }
 }
 
-// Convertit le code de direction du vent (0–16) en texte français.
+// Convertit le code de direction du vent (0–16) en texte localisé.
 String getWindDirectionFacing(int value) {
         switch (value) {
-                case 0:  return "Nord";
-                case 1:  return "Nord-nord-est";
-                case 2:  return "Nord-est";
-                case 3:  return "Est-nord-est";
-                case 4:  return "Est";
-                case 5:  return "Est-sud-est";
-                case 6:  return "Sud-est";
-                case 7:  return "Sud-sud-est";
-                case 8:  return "Sud";
-                case 9:  return "Sud-sud-ouest";
-                case 10: return "Sud-ouest";
-                case 11: return "Ouest-sud-ouest";
-                case 12: return "Ouest";
-                case 13: return "Ouest-nord-ouest";
-                case 14: return "Nord-ouest";
-                case 15: return "Nord-nord-ouest";
-                case 16: return "Nord";
-                default: return "Inconnu";
+                case 0:  return tr('switch_utils.wind_direction.north');
+                case 1:  return tr('switch_utils.wind_direction.north_northeast');
+                case 2:  return tr('switch_utils.wind_direction.northeast');
+                case 3:  return tr('switch_utils.wind_direction.east_northeast');
+                case 4:  return tr('switch_utils.wind_direction.east');
+                case 5:  return tr('switch_utils.wind_direction.east_southeast');
+                case 6:  return tr('switch_utils.wind_direction.southeast');
+                case 7:  return tr('switch_utils.wind_direction.south_southeast');
+                case 8:  return tr('switch_utils.wind_direction.south');
+                case 9:  return tr('switch_utils.wind_direction.south_southwest');
+                case 10: return tr('switch_utils.wind_direction.southwest');
+                case 11: return tr('switch_utils.wind_direction.west_southwest');
+                case 12: return tr('switch_utils.wind_direction.west');
+                case 13: return tr('switch_utils.wind_direction.west_northwest');
+                case 14: return tr('switch_utils.wind_direction.northwest');
+                case 15: return tr('switch_utils.wind_direction.north_northwest');
+                case 16: return tr('switch_utils.wind_direction.north');
+                default: return tr('switch_utils.wind_direction.unknown');
         }
 }
 
@@ -69,34 +71,34 @@ Map<String, dynamic> getIridiumSvgLogoAndColor(int quality) {
                 case 5:
                         return {
                                 'icon':  'assets/icons/satellite_excellent.svg',
-                                'color': const Color(0xFF00FF00), // Vert,
-                                'value': 'Excellent'
+                                'color': const Color(0xFF00FF00), // Vert
+                                'value': tr('switch_utils.iridium.quality.excellent')
                         };
                 case 4:
                         return {
                                 'icon':  'assets/icons/satellite_very_good.svg',
                                 'color': const Color(0xFF7FFF00), // Vert clair
-                                'value': 'Très bon'
+                                'value': tr('switch_utils.iridium.quality.very_good')
                         };
                 case 3:
                 case 2:
                         return {
                                 'icon':  'assets/icons/satellite_ok.svg',
                                 'color': const Color(0xFFFFA500), // Orange
-                                'value': 'OK'
+                                'value': tr('switch_utils.iridium.quality.ok')
                         };
                 case 1:
                 case 0:
                         return {
-                                'icon': 'assets/icons/satellite_bad.svg',
+                                'icon':  'assets/icons/satellite_bad.svg',
                                 'color': const Color(0xFFFF0000), // Rouge
-                                'value': 'Mauvais'
+                                'value': tr('switch_utils.iridium.quality.bad')
                         };
                 default:
                 return {
                         'icon':  'assets/icons/satellite_error.svg',
                         'color': const Color(0xFF000000), // Noir
-                        'value': 'Erreur'
+                        'value': tr('switch_utils.iridium.quality.error')
                 };
         }
 }

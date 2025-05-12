@@ -63,10 +63,10 @@ mixin DashboardUtils on State<Home_Screen> {
 
         /// Mapping des raisons fatales en message utilisateur
         static const fatalMessages = {
-                'GENERIC': 'fatal_generic',
-                'DC_FLAG_NOT_FOUND': 'fatal_dcflag',
-                'HARDFAULT': 'fatal_hardfault',
-                'WATCHDOG': 'fatal_watchdog'
+                'GENERIC': 'home.dashboard.fatal_generic',
+                'DC_FLAG_NOT_FOUND': 'home.dashboard.fatal_dcflag',
+                'HARDFAULT': 'home.dashboard.fatal_hardfault',
+                'WATCHDOG': 'home.dashboard.fatal_watchdog'
         };
 
         /// Callback quand on reçoit `<fatal>`
@@ -77,8 +77,8 @@ mixin DashboardUtils on State<Home_Screen> {
                 controller.dispose();
 
                 // Message humain des erreurs fatales du BackEnd
-                final key = fatalMessages[reason] ?? 'fatal_unknown';
-                final human = tr(key, args: [reason]);
+                final key = fatalMessages[reason] ?? 'home.dashboard.fatal_unknown';
+                final human = tr(key, namedArgs: {'reason': reason});
 
                 // Durée formatée HH:MM:SS
                 final elapsed = controller.connectionStopwatch.elapsed;
@@ -91,7 +91,7 @@ mixin DashboardUtils on State<Home_Screen> {
                         context: context,
                         barrierDismissible: false,
                         builder: (ctx) => CustomPopup(
-                                title: tr('fatal_title'),
+                                title: tr('home.dashboard.fatal_title'),
                                 content: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -103,7 +103,7 @@ mixin DashboardUtils on State<Home_Screen> {
                                                 ),
                                                 const SizedBox(height: 12),
                                                 Text(
-                                                        tr('fatal_duration', args: [formattedDuration]),
+                                                        tr('home.dashboard.fatal_duration', namedArgs: {'duration': formattedDuration}),
                                                         textAlign: TextAlign.center,
                                                         style: const TextStyle(color: Colors.white70)
                                                 )
@@ -116,7 +116,7 @@ mixin DashboardUtils on State<Home_Screen> {
                                                         widget.plugin?.disconnect();
                                                         Navigator.of(context).pop();
                                                 },
-                                                child: Text(tr('ok_button'))
+                                                child: Text(tr('home.dashboard.ok_button'))
                                         )
                                 ]
                         )
@@ -161,26 +161,26 @@ mixin DashboardUtils on State<Home_Screen> {
                         builder: (context) => StatefulBuilder(
                                 builder: (context, setState) {
                                         return CustomPopup(
-                                                title: tr('rename_title'),
+                                                title: tr('home.dashboard.rename_title'),
                                                 content: TextField(
                                                         controller: textController,
                                                         maxLength: 20,
                                                         decoration: InputDecoration(
-                                                                labelText: tr('rename_label'),
+                                                                labelText: tr('home.dashboard.rename_label'),
                                                                 errorText: errorText
                                                         ),
                                                         onChanged: (v) {
                                                                 setState(() {
-                                                                                errorText = regex.hasMatch(v) ? null : tr('rename_error');
+                                                                                errorText = regex.hasMatch(v) ? null : tr('home.dashboard.rename_error');
                                                                         }
                                                                 );
                                                         }
                                                 ),
                                                 actions: [
-                                                        TextButton(onPressed: () => Navigator.pop(context, false), child: Text(tr('cancel_button'))),
+                                                        TextButton(onPressed: () => Navigator.pop(context, false), child: Text(tr('home.dashboard.cancel_button'))),
                                                         TextButton(
                                                                 onPressed: errorText == null ? () => Navigator.pop(context, true) : null,
-                                                                child: Text(tr('confirm_button'))
+                                                                child: Text(tr('home.dashboard.confirm_button'))
                                                         )
                                                 ]
                                         );
@@ -203,7 +203,7 @@ mixin DashboardUtils on State<Home_Screen> {
                 final ok = await messageService.sendStationName(name);
                 showCustomSnackBar(
                         context,
-                        message: ok ? tr('snack_rename_success') : tr('snack_rename_error'),
+                        message: ok ? tr('home.dashboard.snack_rename_success') : tr('home.dashboard.snack_rename_error'),
                         iconData: ok ? Icons.check_circle : Icons.error,
                         backgroundColor: ok ? Colors.green : Colors.red,
                         textColor: Colors.white,

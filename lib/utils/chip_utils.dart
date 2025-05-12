@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Données pour générer un chip
 class ChipData {
@@ -18,7 +19,7 @@ Widget buildChip(
                 const VisualDensity(horizontal: -4, vertical: -4)
         }) {
         return Chip(
-                label: Text(text, style: TextStyle(fontSize: fontSize, color: Colors.white)),
+                label: Text(tr(text), style: TextStyle(fontSize: fontSize, color: Colors.white)),
                 backgroundColor: bgColor,
                 padding: padding,
                 labelPadding: labelPadding,

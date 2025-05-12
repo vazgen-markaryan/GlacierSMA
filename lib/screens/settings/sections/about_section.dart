@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_snackbar.dart';
 import 'package:rev_glacier_sma_mobile/screens/settings/settings_section.dart';
 import 'package:rev_glacier_sma_mobile/screens/settings/settings_widgets.dart';
@@ -7,7 +8,6 @@ import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_processor
 /// Section "Autres" qui contient uniquement la partie "À propos"
 /// Affiche un ExpansionTile détaillant les informations du firmware
 class AboutSection extends StatelessWidget {
-
         /// Notifier contenant les données RawData reçues depuis le bloc `<id>`
         final ValueNotifier<RawData?> firmwareNotifier;
 
@@ -16,7 +16,7 @@ class AboutSection extends StatelessWidget {
         @override
         Widget build(BuildContext context) {
                 return SettingsSection(
-                        title: "Autres",
+                        title: tr('settings.others'),
                         children: [
                                 // Écoute les changements sur firmwareNotifier
                                 ValueListenableBuilder<RawData?>(
@@ -39,18 +39,25 @@ class AboutSection extends StatelessWidget {
                                                 // Affiche un ExpansionTile contenant les infos
                                                 return ExpansionTile(
                                                         leading: const Icon(Icons.info_outline),
-                                                        title: const Text('À propos'),
-                                                        childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                                        // titre de l'expansion
+                                                        title: Text(tr('settings.about.title')),
+                                                        childrenPadding:
+                                                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                                         children: [
-                                                                // Chaque LabelRow montre un label + valeur
-                                                                LabelRow(label: 'Nom de la station', value: name),
-                                                                LabelRow(label: 'Micrologiciel', value: code),
+                                                                LabelRow(
+                                                                        label: tr('settings.about.station_name'),
+                                                                        value: name
+                                                                ),
+                                                                LabelRow(
+                                                                        label: tr('settings.about.firmware'),
+                                                                        value: code
+                                                                ),
                                                                 LinkRow(
-                                                                        label: 'GitHub (Privé)',
+                                                                        label: tr('settings.about.github'),
                                                                         url: repoUrl,
                                                                         onError: () => showCustomSnackBar(
                                                                                 context,
-                                                                                message: "Impossible d'ouvrir le lien",
+                                                                                message: tr('settings.about.github_error'),
                                                                                 iconData: Icons.error,
                                                                                 backgroundColor: Colors.red,
                                                                                 textColor: Colors.white,
@@ -58,22 +65,28 @@ class AboutSection extends StatelessWidget {
                                                                         )
                                                                 ),
                                                                 LabelRow(
-                                                                        label: 'Code',
+                                                                        label: tr('settings.about.code'),
                                                                         value: dirty
-                                                                                ? 'Commit était modifié'
-                                                                                : 'Correspond au Commit'
+                                                                                ? tr('settings.about.commit_modified')
+                                                                                : tr('settings.about.commit_ok')
                                                                 ),
                                                                 LabelRow(
-                                                                        label: 'Compilé le',
+                                                                        label: tr('settings.about.compiled_on'),
                                                                         value:
                                                                         '${buildD.day.toString().padLeft(2, '0')}/'
                                                                         '${buildD.month.toString().padLeft(2, '0')}/'
-                                                                        '${buildD.year} à '
+                                                                        '${buildD.year} '
                                                                         '${buildD.hour.toString().padLeft(2, '0')}:'
                                                                         '${buildD.minute.toString().padLeft(2, '0')}'
                                                                 ),
-                                                                LabelRow(label: 'Compilé par', value: user),
-                                                                LabelRow(label: 'Contact', value: email)
+                                                                LabelRow(
+                                                                        label: tr('settings.about.compiled_by'),
+                                                                        value: user
+                                                                ),
+                                                                LabelRow(
+                                                                        label: tr('settings.about.contact'),
+                                                                        value: email
+                                                                )
                                                         ]
                                                 );
                                         }

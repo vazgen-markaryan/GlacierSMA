@@ -49,10 +49,10 @@ class ConfigButtonState extends State<ConfigButton> {
                                 ),
                                 label: Text(
                                         state == ConfigButtonStateEnum.idle
-                                                ? tr('config_apply')
+                                                ? tr('config.config_apply')
                                                 : state == ConfigButtonStateEnum.success
-                                                        ? tr('config_saved')
-                                                        : tr('config_failed'),
+                                                        ? tr('config.config_saved')
+                                                        : tr('config.config_failed'),
                                         style: const TextStyle(color: Colors.white)
                                 ),
                                 style: ElevatedButton.styleFrom(

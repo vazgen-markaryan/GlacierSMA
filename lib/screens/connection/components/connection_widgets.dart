@@ -22,7 +22,7 @@ Widget buildBluetoothSection(BuildContext context) {
                                         children: [
                                                 Icon(Icons.bluetooth, size: 64, color: Colors.white),
                                                 SizedBox(height: 8),
-                                                Text(tr("bluetooth_connection"), style: TextStyle(fontSize: 18, color: Colors.white))
+                                                Text(tr("connection.bluetooth_connection"), style: TextStyle(fontSize: 18, color: Colors.white))
                                         ]
                                 )
                         )
@@ -43,7 +43,7 @@ Widget buildCableSection(BuildContext context, Function onTap) {
                                         children: [
                                                 Icon(Icons.usb_rounded, size: 64, color: Colors.white),
                                                 SizedBox(height: 8),
-                                                Text(tr("cable_connection"), style: TextStyle(fontSize: 18, color: Colors.white))
+                                                Text(tr("connection.cable_connection"), style: TextStyle(fontSize: 18, color: Colors.white))
                                         ]
                                 )
                         )
@@ -61,7 +61,7 @@ Widget buildArrowInstruction() {
                                 child: Column(
                                         children: [
                                                 Icon(Icons.keyboard_arrow_up, color: Colors.white54),
-                                                Text(tr("arrow_instruction"), style: TextStyle(color: Colors.white54)),
+                                                Text(tr("connection.arrow_instruction"), style: TextStyle(color: Colors.white54)),
                                                 Icon(Icons.keyboard_arrow_down, color: Colors.white54)
                                         ]
                                 )

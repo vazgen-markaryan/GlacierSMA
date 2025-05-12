@@ -6,12 +6,12 @@ import 'package:rev_glacier_sma_mobile/screens/debug_log/components/debug_log_up
 /// Retourne le libellé traduit correspondant à un code de statut
 String statusLabel(int status) {
         switch (status) {
-                case 1: return tr('status_operational');
-                case 2: return tr('status_disconnected');
-                case 3: return tr('status_error');
+                case 1: return tr('debug.status_operational');
+                case 2: return tr('debug.status_disconnected');
+                case 3: return tr('debug.status_error');
                 case 0:
                 default:
-                return tr('status_unknown');
+                return tr('debug.status_unknown');
         }
 }
 
@@ -38,12 +38,12 @@ class DebugLogProcessor extends StatelessWidget {
                                         final lower = trimmed.toLowerCase();
 
                                         // Repère les switches de section (dans la langue d’origine)
-                                        if (lower == 'status' || lower == tr('section_status').toLowerCase()) {
+                                        if (lower == 'status' || lower == tr('debug.section_status').toLowerCase()) {
                                                 isInStatus = true;
                                                 isInValeurs = false;
                                                 continue;
                                         }
-                                        if (lower == 'valeurs' || lower == tr('section_values').toLowerCase()) {
+                                        if (lower == 'valeurs' || lower == tr('debug.section_values').toLowerCase()) {
                                                 isInStatus = false;
                                                 isInValeurs = true;
                                                 continue;
@@ -105,6 +105,9 @@ class DebugLogProcessor extends StatelessWidget {
                                         if (isInValeurs) valeurRows.add(row);
                                 }
 
+                                final sentPrefix = tr('debug.message_sent', namedArgs: {'log': ''}).toLowerCase();
+                                final errPrefix = tr('debug.message_error', namedArgs: {'log': ''}).toLowerCase();
+
                                 return SingleChildScrollView(
                                         scrollDirection: Axis.vertical,
                                         child: SizedBox(
@@ -119,7 +122,10 @@ class DebugLogProcessor extends StatelessWidget {
                                                                                 // Affiche le premier message "message envoyé", s'il y en a un
                                                                                 Text(
                                                                                         logs.firstWhere(
-                                                                                                (l) => l.toLowerCase().contains('message envoyé'),
+                                                                                                (line) {
+                                                                                                        final l = line.toLowerCase();
+                                                                                                        return l.startsWith(sentPrefix) || l.startsWith(errPrefix);
+                                                                                                },
                                                                                                 orElse: () => ''
                                                                                         ),
                                                                                         style: const TextStyle(fontSize: 12)
@@ -130,7 +136,7 @@ class DebugLogProcessor extends StatelessWidget {
                                                                                 Align(
                                                                                         alignment: Alignment.center,
                                                                                         child: Text(
-                                                                                                tr('section_status'),
+                                                                                                tr('debug.section_status'),
                                                                                                 style: Theme.of(context).textTheme.titleMedium
                                                                                         )
                                                                                 ),
@@ -154,7 +160,7 @@ class DebugLogProcessor extends StatelessWidget {
                                                                                 Align(
                                                                                         alignment: Alignment.center,
                                                                                         child: Text(
-                                                                                                tr('section_values'),
+                                                                                                tr('debug.section_values'),
                                                                                                 style: Theme.of(context).textTheme.titleMedium
                                                                                         )
                                                                                 ),
@@ -184,14 +190,14 @@ class DebugLogProcessor extends StatelessWidget {
         /// Titre de section à ignorer
         bool isSectionTitle(String key) {
                 final low = key.toLowerCase();
-                return low == 'status' || low == tr('section_status').toLowerCase() || low == 'valeurs' || low == tr('section_values').toLowerCase();
+                return low == 'status' || low == tr('debug.section_status').toLowerCase() || low == 'valeurs' || low == tr('debug.section_values').toLowerCase();
         }
 
         /// Widget affiché quand aucune ligne n’existe
         Widget buildEmptyMessage(BuildContext context) => Align(
                 alignment: Alignment.center,
                 child: Text(
-                        tr('no_data_received'),
+                        tr('debug.no_data_received'),
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.titleSmall
                 )

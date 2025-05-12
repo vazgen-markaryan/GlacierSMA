@@ -18,22 +18,22 @@ List<Widget> createAllSensorGroups({
 }) {
         final sections = [
         {
-                'titleKey': 'section.data_processors',
+                'titleKey': 'dashboard.sensors.section.data_processors',
                 'groupKey': 'data',
-                'emptyActive': 'empty.active.data_processors',
-                'emptyInactive': 'empty.inactive.data_processors'
+                'emptyActive': 'dashboard.sensors.section.empty.active.data_processors',
+                'emptyInactive': 'dashboard.sensors.section.empty.inactive.data_processors'
         },
         {
-                'titleKey': 'section.internal_sensors',
+                'titleKey': 'dashboard.sensors.section.internal_sensors',
                 'groupKey': 'internal',
-                'emptyActive': 'empty.active.internal_sensors',
-                'emptyInactive': 'empty.inactive.internal_sensors'
+                'emptyActive': 'dashboard.sensors.section.empty.active.internal_sensors',
+                'emptyInactive': 'dashboard.sensors.section.empty.inactive.internal_sensors'
         },
         {
-                'titleKey': 'section.modbus_sensors',
+                'titleKey': 'dashboard.sensors.section.modbus_sensors',
                 'groupKey': 'modbus',
-                'emptyActive': 'empty.active.modbus_sensors',
-                'emptyInactive': 'empty.inactive.modbus_sensors'
+                'emptyActive': 'dashboard.sensors.section.empty.active.modbus_sensors',
+                'emptyInactive': 'dashboard.sensors.section.empty.inactive.modbus_sensors'
         }
         ];
 

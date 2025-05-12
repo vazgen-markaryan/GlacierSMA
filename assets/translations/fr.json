@@ -1,105 +1,205 @@
 {
-        "appTitle": "Glacier SMA Connexion",
-        "language": "Langue",
-        "yes": "Oui",
-        "no": "Non",
+	"yes": "Oui",
+	"no": "Non",
 
-        "-----CONNECTION SCREEN-----": "",
-        "devices_found": "Appareils détectés",
-        "no_device_found": "Aucun appareil compatible n'est trouvé.\n1. Flashez le code RevGlacierSMA\n2. Vérifiez le câble\n3. Vérifiez le Debug Switch physique.",
-        "failed_to_connect": "Échec de la connexion. Vérifiez le câble ou les permissions.",
-        "bluetooth_connection": "Connexion Bluetooth",
-        "arrow_instruction": "Sélectionnez une méthode de connexion",
-        "cable_connection": "Connexion par câble",
-        "disconnect": "Déconnexion",
-        "disconnect_confirmation": "Voulez-vous vraiment vous déconnecter?",
-        "lost_connection": "Connexion perdue après : {time}\nVérifiez le câble ou le commutateur de débogage matériel.",
+	"connection": {
+		"appTitle": "Glacier SMA Connexion",
+		"devices_found": "Appareils détectés",
+		"no_device_found": "Aucun appareil compatible n'est trouvé.\n1. Flashez le code RevGlacierSMA\n2. Vérifiez le câble\n3. Vérifiez le Debug Switch physique.",
+		"failed_to_connect": "Échec de la connexion. Vérifiez le câble ou les permissions.",
+		"bluetooth_connection": "Connexion Bluetooth",
+		"arrow_instruction": "Sélectionnez une méthode de connexion",
+		"cable_connection": "Connexion par câble",
+		"disconnect": "Déconnexion",
+		"disconnect_confirmation": "Voulez-vous vraiment vous déconnecter?",
+		"lost_connection": "Connexion perdue après : {time}\n\nVérifiez le câble ou le commutateur de débogage matériel."
+	},
 
-        "-----ACCUEIL SCREEN-----": "",
-        "sensors_empty_active": "Aucun capteur actif.\nVérifiez votre configuration.",
-        "sensors_empty_inactive": "Aucun capteur inactif.",
-        "group_data_processors": "Processeurs de données",
-        "group_internals": "Capteurs internes",
-        "group_modbus": "Capteurs ModBus",
-        "sensor_details": "Détails du capteur",
-        "updated_at": "Mise à jour : {0}",
-        "sensor_unknown": "Capteur inconnu",
-        "activated": "Activé",
-        "deactivated": "Désactivé",
-        "status_disabled": "Désactivé",
-        "section": {
-                "data_processors": "Processeurs de Données",
-                "internal_sensors": "Capteurs Internes",
-                "modbus_sensors": "Capteurs ModBus"
-        },
-        "empty": {
-                "active": {
-                        "data_processors": "Aucun Data Processor actif.",
-                        "internal_sensors": "Aucun capteur interne actif.",
-                        "modbus_sensors": "Aucun capteur ModBus actif."
-                },
-                "inactive": {
-                        "data_processors": "Aucun Data Processor inactif.",
-                        "internal_sensors": "Aucun capteur interne inactif.",
-                        "modbus_sensors": "Aucun capteur ModBus inactif."
-                }
-        },
+	"home": {
+		"battery": {
+			"voltage": "Tension : {value} V",
+			"voltage_unknown": "Tension : Inconnue",
+			"state": "État : {percent} %"
+		},
+		"dashboard": {
+			"unknown_device": "Appareil inconnu",
+			"not_connected": "Non connecté",
+			"fatal_title": "Erreur fatale",
+			"fatal_generic": "Réinitialisation de l’appareil.",
+			"fatal_dcflag": "Drapeau de conteneur de données invalide.",
+			"fatal_hardfault": "Instruction illégale (HardFault) sur le microcontrôleur.",
+			"fatal_watchdog": "Le watchdog a expiré trop rapidement trop souvent.",
+			"fatal_unknown": "Erreur fatale inconnue : {reason}",
+			"fatal_duration": "Durée de connexion : {duration}",
+			"rename_title": "Renommer la station",
+			"rename_label": "Nom",
+			"rename_error": "Seuls 0–20 caractères ANSI autorisés",
+			"cancel_button": "Annuler",
+			"confirm_button": "OK",
+			"snack_rename_success": "Nom de station mis à jour",
+			"snack_rename_error": "Erreur lors de l’envoi du nom de station"
+		},
+		"sensors": {
+			"empty_active": "Aucun capteur actif.\nVérifiez votre configuration.",
+			"sensor_details": "Détails du capteur",
+			"updated_at": "Mis à jour : {timestamp}",
+			"title_unknown": "Capteur inconnu",
+			"status": {
+				"activated": "Activé",
+				"deactivated": "Désactivé",
+				"unknown": "Inconnu",
+				"disabled": "Désactivé",
+				"operational": "Opérationnel",
+				"disconnected": "Déconnecté",
+				"error": "Erreur"
+			},
+			"section": {
+				"data_processors": "Processeurs de données",
+				"internal_sensors": "Capteurs internes",
+				"modbus_sensors": "Capteurs ModBus",
+				"empty": {
+					"active": {
+						"data_processors": "Aucun processeur de données actif.",
+						"internal_sensors": "Aucun capteur interne actif.",
+						"modbus_sensors": "Aucun capteur ModBus actif."
+					},
+					"inactive": {
+						"data_processors": "Aucun processeur de données inactif.",
+						"internal_sensors": "Aucun capteur interne inactif.",
+						"modbus_sensors": "Aucun capteur ModBus inactif."
+					}
+				}
+			}
+		},
+		"navbar": {
+			"home": "Accueil",
+			"debug": "Debug",
+			"config": "Config",
+			"settings": "Paramètres"
+		}
+	},
 
-        "-----DEBUG SCREEN-----": "",
-        "status_operational": "Fonctionne",
-        "status_disconnected": "Déconnecté",
-        "status_error": "Erreur",
-        "status_unknown": "Inconnu",
-        "section_status": "STATUS",
-        "section_values": "VALEURS",
-        "no_data_received": "Aucune donnée n'a été reçue.\nVérifiez votre hardware, votre code Arduino et la logique de l'application.",
+	"debug": {
+		"status_operational": "Fonctionne",
+		"status_disconnected": "Déconnecté",
+		"status_error": "Erreur",
+		"status_unknown": "Inconnu",
+		"section_status": "STATUS",
+		"section_values": "VALEURS",
+		"no_data_received": "Aucune donnée n'a été reçue.\nVérifiez votre hardware, votre code Arduino et la logique de l'application.",
+		"message_sent": "Message envoyé : {log}",
+		"message_error": "Erreur d’envoi : {log}"
+	},
 
-        "-----CONFIG SCREEN-----": "",
-        "password_required": "Mot de passe requis",
-        "password": "Mot de passe",
-        "quit": "Quitter",
-        "validate": "Valider",
-        "invalid_password": "Mot de passe invalide",
-        "unsaved_changes_title": "Modifications non sauvegardées",
-        "unsaved_changes_content": "Vous avez des changements non appliqués. Quitter quand même ?",
-        "confirm_apply_title": "Confirmer l’application",
-        "modified_sensors": "Les capteurs modifiés :",
-        "cancel": "Annuler",
-        "apply": "Valider",
-        "config_apply": "Appliquer la configuration",
-        "config_saved": "Enregistré",
-        "config_failed": "Échec",
+	"config": {
+		"password_required": "Mot de passe requis",
+		"password": "Mot de passe",
+		"quit": "Quitter",
+		"validate": "Valider",
+		"invalid_password": "Mot de passe invalide",
+		"unsaved_changes_title": "Modifications non sauvegardées",
+		"unsaved_changes_content": "Vous avez des changements non appliqués. Quitter quand même ?",
+		"confirm_apply_title": "Confirmer l’application",
+		"modified_sensors": "Les capteurs modifiés :",
+		"cancel": "Annuler",
+		"apply": "Valider",
+		"config_apply": "Appliquer la configuration",
+		"config_saved": "Enregistré",
+		"config_failed": "Échec"
+	},
 
-        "-----SETTINGS SCREEN-----": "",
+	"settings": {
+		"others": "Autres",
+		"about": {
+			"title": "À propos",
+			"station_name": "Nom de la station",
+			"firmware": "Micrologiciel",
+			"github": "GitHub (Privé)",
+			"github_error": "Impossible d'ouvrir le lien",
+			"code": "Code",
+			"commit_modified": "Commit était modifié",
+			"commit_ok": "Correspond au Commit",
+			"compiled_on": "Compilé le",
+			"compiled_by": "Compilé par",
+			"contact": "Contact"
+		},
+		"language": {
+			"title": "Langue",
+			"en": "English",
+			"fr": "Français",
+			"es": "Español"
+		}
+	},
 
+	"sensor-data": {
+		"title": {
+			"thermo_barometer": "Thermo-Baromètre",
+			"accel_magnetometer": "Accéléro-Magnétomètre",
+			"gps": "GPS",
+			"sd_card": "Carte SD",
+			"iridium": "Iridium",
+			"anemometer": "Anémomètre",
+			"wind_vane": "Girouette",
+			"lux_meter": "Luxmètre"
+		},
+		"placement": {
+			"interior": "Intérieur",
+			"exterior": "Extérieur"
+		},
+		"datamap": {
+			"temperature": "Température",
+			"pressure": "Pression",
+			"altitude": "Altitude",
+			"humidity": "Humidité",
+			"accel_x": "Accélération X",
+			"accel_y": "Accélération Y",
+			"accel_z": "Accélération Z",
+			"roll": "Roulis",
+			"pitch": "Tangage",
+			"accel_range": "Plage d’accélération",
+			"latitude": "Latitude",
+			"longitude": "Longitude",
+			"satellites": "Satellites",
+			"hdop": "HDOP",
+			"iridium_quality": "Qualité du signal",
+			"wind_speed": "Vitesse du vent",
+			"wind_direction_angle": "Angle du vent",
+			"wind_direction_facing": "Direction du vent",
+			"lux": "Lux",
+			"mb_temperature": "Température",
+			"mb_pressure": "Pression",
+			"mb_humidity": "Humidité"
+		}
+	},
 
-
-        "-----BATTERY POPUP-----": "",
-        "battery_voltage": "Tension : {value} V",
-        "battery_voltage_unknown": "Tension : inconnue",
-        "battery_state": "État : {percent} %",
-
-        "-----BOTTOM NAVBAR-----": "",
-        "nav_home": "Accueil",
-        "nav_debug": "Débogue",
-        "nav_config": "Configuration",
-        "nav_settings": "Paramètres",
-
-        "-----DASHBOARD SCREEN-----": "",
-        "unknown_device": "Appareil inconnu",
-        "not_connected": "Non connecté",
-        "fatal_title": "Erreur fatale",
-        "fatal_generic": "Réinitialisation de l’appareil.",
-        "fatal_dcflag": "Drapeau de conteneur de données invalide.",
-        "fatal_hardfault": "Instruction illégale (HardFault) sur le Microcontrôleur.",
-        "fatal_watchdog": "Le timer WatchDog a expiré trop tôt trop de fois.",
-        "fatal_unknown": "Erreur fatale inconnue : {0}",
-        "fatal_duration": "Durée de connexion : {0}",
-        "rename_title": "Modifier le nom de la station",
-        "rename_label": "Nom",
-        "rename_error": "Seulement 0–20 caractères ANSI autorisés",
-        "cancel_button": "Annuler",
-        "confirm_button": "Valider",
-        "snack_rename_success": "Nom de station mis à jour",
-        "snack_rename_error": "Erreur lors de l’envoi du nom"
+	"switch_utils": {
+		"wind_direction": {
+			"north": "Nord",
+			"north_northeast": "Nord-nord-est",
+			"northeast": "Nord-est",
+			"east_northeast": "Est-nord-est",
+			"east": "Est",
+			"east_southeast": "Est-sud-est",
+			"southeast": "Sud-est",
+			"south_southeast": "Sud-sud-est",
+			"south": "Sud",
+			"south_southwest": "Sud-sud-ouest",
+			"southwest": "Sud-ouest",
+			"west_southwest": "Ouest-sud-ouest",
+			"west": "Ouest",
+			"west_northwest": "Ouest-nord-ouest",
+			"northwest": "Nord-ouest",
+			"north_northwest": "Nord-nord-ouest",
+			"unknown": "Inconnu"
+		},
+		"iridium": {
+			"quality": {
+				"excellent": "Excellent",
+				"very_good": "Très bon",
+				"ok": "OK",
+				"bad": "Mauvais",
+				"error": "Erreur"
+			}
+		}
+	}
 }

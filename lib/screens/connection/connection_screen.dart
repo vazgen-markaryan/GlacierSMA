@@ -28,7 +28,7 @@ class ConnectionScreenState extends State<ConnectionScreen> {
                 return Scaffold(
                         appBar: AppBar(
                                 automaticallyImplyLeading: false,
-                                title: Center(child: Text(tr("appTitle")))
+                                title: Center(child: Text(tr("connection.appTitle")))
                         ),
                         body: LayoutBuilder(
                                 builder: (context, constraints) {

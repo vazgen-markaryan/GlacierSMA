@@ -111,10 +111,10 @@ class BatteryPopupState extends State<BatteryPopup> with SingleTickerProviderSta
                                                                                                         Text(
                                                                                                                 voltage != null
                                                                                                                         ? tr(
-                                                                                                                                'battery_voltage',
+                                                                                                                                'home.battery.voltage',
                                                                                                                                 namedArgs: {'value': voltage.toStringAsFixed(2)}
                                                                                                                         )
-                                                                                                                        : tr('battery_voltage_unknown'),
+                                                                                                                        : tr('home.battery.voltage_unknown'),
                                                                                                                 style: TextStyle(
                                                                                                                         color: widget.color,
                                                                                                                         fontWeight: FontWeight.bold
@@ -122,7 +122,7 @@ class BatteryPopupState extends State<BatteryPopup> with SingleTickerProviderSta
                                                                                                         ),
                                                                                                         Text(
                                                                                                                 tr(
-                                                                                                                        'battery_state',
+                                                                                                                        'home.battery.state',
                                                                                                                         namedArgs: {'percent': (percent * 100).round().toString()}
                                                                                                                 ),
                                                                                                                 style: TextStyle(

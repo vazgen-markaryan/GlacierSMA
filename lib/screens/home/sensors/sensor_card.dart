@@ -92,7 +92,7 @@ class SensorCard extends StatelessWidget {
                                                         mainAxisAlignment: MainAxisAlignment.center,
                                                         children: [
                                                                 Text(
-                                                                        sensor.title ?? tr('sensor_unknown'),
+                                                                        tr(sensor.title ?? tr('dashboard.sensors.title_unknown')),
                                                                         style: Theme.of(context).textTheme.bodyLarge,
                                                                         overflow: TextOverflow.ellipsis
                                                                 ),
@@ -148,7 +148,7 @@ class SensorCard extends StatelessWidget {
                                                         ),
                                                         child: Text(
                                                                 configMode
-                                                                        ? (isOn! ? tr('activated') : tr('deactivated'))
+                                                                        ? (isOn! ? tr('dashboard.sensors.status.activated') : tr('dashboard.sensors.status.deactivated'))
                                                                         : statusLabel,
                                                                 style: TextStyle(
                                                                         color: configMode
@@ -170,11 +170,11 @@ class SensorCard extends StatelessWidget {
         /// Retourne (couleurIcône, couleurBordure, libelléStatut)
         (Color, Color, String) getStatusUI(int? status) {
                 switch (status) {
-                        case 1: return (Colors.green,  Colors.green,  tr('status_operational'));
-                        case 2: return (Colors.yellow, Colors.yellow, tr('status_disconnected'));
-                        case 3: return (Colors.red,    Colors.red,    tr('status_error'));
-                        case 0: return (Colors.grey,   Colors.grey,   tr('status_unknown'));
-                        default:return (Colors.black,  Colors.black,  tr('status_disabled'));
+                        case 1: return (Colors.green,  Colors.green,  tr('dashboard.sensors.status.operational'));
+                        case 2: return (Colors.yellow, Colors.yellow, tr('dashboard.sensors.status.disconnected'));
+                        case 3: return (Colors.red,    Colors.red,    tr('dashboard.sensors.status.error'));
+                        case 0: return (Colors.grey,   Colors.grey,   tr('dashboard.sensors.status.unknown'));
+                        default:return (Colors.black,  Colors.black,  tr('dashboard.sensors.status.disabled'));
                 }
         }
 }

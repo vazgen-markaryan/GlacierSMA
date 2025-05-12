@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
 import 'package:rev_glacier_sma_mobile/screens/debug_log/components/debug_log_updater.dart';
 
@@ -18,15 +19,17 @@ class MessageService {
         /// Envoie un simple message de type "heartbeat" ou toute autre chaîne.
         Future<bool> sendHeartbeat(String message) async {
                 if (isEmulator) return false;
-                final data = Uint8List.fromList(message.codeUnits);
+
                 try {
-                        final ok = await plugin!.write(data);
-                        debugLogManager.setLogChunk(0, 'Message envoyé : $message');
+                        final ok = await plugin!.write(Uint8List.fromList(message.codeUnits));
+                        final sentLog = tr('message_service.message_sent', namedArgs: {'log': message});
+                        debugLogManager.setLogChunk(0, sentLog);
                         debugLogManager.updateLogs();
                         return ok;
                 }
                 catch (e) {
-                        debugLogManager.setLogChunk(0, 'Erreur envoi : $e');
+                        final errLog = tr('message_service.message_error', namedArgs: {'log': e.toString()});
+                        debugLogManager.setLogChunk(0, errLog);
                         debugLogManager.updateLogs();
                         return false;
                 }
@@ -49,15 +52,9 @@ class MessageService {
 
                 final data = Uint8List.fromList([...prefix.codeUnits, ...payload]);
                 try {
-                        final ok = await plugin!.write(data);
-                        final hex = data.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
-                        debugLogManager.setLogChunk(0, 'Config envoyé : $hex');
-                        debugLogManager.updateLogs();
-                        return ok;
+                        return await plugin!.write(data);
                 }
                 catch (e) {
-                        debugLogManager.setLogChunk(0, 'Erreur config : $e');
-                        debugLogManager.updateLogs();
                         return false;
                 }
         }
@@ -71,7 +68,8 @@ class MessageService {
                 try {
                         final data = Uint8List.fromList(full.codeUnits);
                         return await plugin?.write(data) ?? false;
-                } catch (e) {
+                }
+                catch (e) {
                         return false;
                 }
         }

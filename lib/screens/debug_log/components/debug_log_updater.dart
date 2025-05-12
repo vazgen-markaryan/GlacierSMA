@@ -15,9 +15,9 @@ class DebugLogUpdater {
         void updateLogs() {
                 debugLogsNotifier.value = [
                         tempLogBuffer[0],
-                        tr('section_status'),
+                        tr('debug.section_status'),
                         ...tempLogBuffer[1].split('\n').where((line) => line.trim().isNotEmpty),
-                        tr('section_values'),
+                        tr('debug.section_values'),
                         ...tempLogBuffer[2].split('\n').where((line) => line.trim().isNotEmpty)
                 ];
         }

@@ -22,7 +22,7 @@ class SensorsGroup extends StatelessWidget {
                 required this.title,
                 required this.sensors,
                 required this.itemBuilder,
-                this.emptyMessage = 'sensors_empty_active'
+                this.emptyMessage = 'dashboard.sensors.empty_active'
         }) : super(key: key);
 
         @override
@@ -37,6 +37,8 @@ class SensorsGroup extends StatelessWidget {
                                         )
                                 ),
 
+                                const SizedBox(height: defaultPadding),
+
                                 // Soit la grille, soit le message "vide"
                                 if (sensors.isNotEmpty)
                                 Wrap(
@@ -45,13 +47,10 @@ class SensorsGroup extends StatelessWidget {
                                         children: sensors.map((s) => itemBuilder(context, s)).toList()
                                 )
                                 else
-                                Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: defaultPadding),
-                                        child: Text(
-                                                tr(emptyMessage),
-                                                textAlign: TextAlign.center,
-                                                style: Theme.of(context).textTheme.bodyMedium
-                                        )
+                                Text(
+                                        tr(emptyMessage),
+                                        textAlign: TextAlign.center,
+                                        style: Theme.of(context).textTheme.bodyMedium
                                 ),
 
                                 const SizedBox(height: defaultPadding)

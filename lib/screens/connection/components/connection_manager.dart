@@ -41,7 +41,7 @@ Future<void> showDeviceSelectionDialog(
 
                 final controller = ScaffoldMessenger.of(context).showSnackBar(
                         buildCustomSnackBar(
-                                message: tr("no_device_found"),
+                                message: tr("connection.no_device_found"),
                                 iconData: Icons.error,
                                 backgroundColor: Colors.white,
                                 textColor: Colors.black,
@@ -59,7 +59,7 @@ Future<void> showDeviceSelectionDialog(
                 builder: (_) => AlertDialog(
                         backgroundColor: secondaryColor,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        title: Text(tr("devices_found"),
+                        title: Text(tr("connection.devices_found"),
                                 style: TextStyle(
                                         color: primaryColor,
                                         fontSize: 18,
@@ -105,7 +105,7 @@ Future<void> showDeviceSelectionDialog(
                                                                                 Navigator.pop(context);
                                                                                 showCustomSnackBar(
                                                                                         context,
-                                                                                        message: tr("failed_to_connect")
+                                                                                        message: tr("connection.failed_to_connect")
                                                                                 );
                                                                         }
                                                                 }
