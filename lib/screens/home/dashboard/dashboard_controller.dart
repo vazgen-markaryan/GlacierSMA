@@ -25,6 +25,7 @@ class DashboardController {
         final ValueNotifier<double?> batteryVoltage = ValueNotifier(null);
         final ValueNotifier<RawData?> firmwareNotifier = ValueNotifier(null);
         final ValueNotifier<int?> activeMaskNotifier = ValueNotifier(null);
+        final ValueNotifier<RawData?> configNotifier = ValueNotifier(null);
         Timer? pingTimer;
         EventChannel? messageChannel;
         bool isEmulator = false;
@@ -76,7 +77,8 @@ class DashboardController {
                         batteryVoltage: batteryVoltage,
                         onIdReceived: (id) => firmwareNotifier.value = id,
                         onActiveReceived: (mask) => activeMaskNotifier.value = mask,
-                        onFatalReceived: (reason) => onFatalReceived(reason)
+                        onFatalReceived: (reason) => onFatalReceived(reason),
+                        onConfigReceived: (config) {configNotifier.value = config;}
                 );
 
                 // Ping toutes les 2s pour détecter la perte de connexion
@@ -100,5 +102,6 @@ class DashboardController {
                 batteryVoltage.dispose();
                 firmwareNotifier.dispose();
                 activeMaskNotifier.dispose();
+                configNotifier.dispose();
         }
 }

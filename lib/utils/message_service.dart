@@ -73,4 +73,24 @@ class MessageService {
                         return false;
                 }
         }
+
+        // En MessageService :
+        Future<bool> sendConfigFloat(String typeChar, double value) async {
+                final prefix = '<cfg>';
+                final bd = ByteData(4)..setFloat32(0, value, Endian.little);
+                final payload = Uint8List.fromList([typeChar.codeUnitAt(0), ...bd.buffer.asUint8List()]);
+                final data = Uint8List.fromList([...prefix.codeUnits, ...payload]);
+                if (isEmulator) return false;
+                return plugin!.write(data);
+        }
+
+        Future<bool> sendConfigUint8(String typeChar, int value) async {
+                final prefix = '<cfg>';
+                final bd = ByteData(4)..setUint32(0, value, Endian.little);
+                final payload = Uint8List.fromList([typeChar.codeUnitAt(0), ...bd.buffer.asUint8List()]);
+                final data = Uint8List.fromList([...prefix.codeUnits, ...payload]);
+                if (isEmulator) return false;
+                return plugin!.write(data);
+        }
+
 }

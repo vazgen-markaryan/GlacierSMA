@@ -15,7 +15,8 @@ void readMessage({
         required ValueNotifier<double?> batteryVoltage,
         required void Function(RawData idData) onIdReceived,
         required void Function(int mask) onActiveReceived,
-        required void Function(String reason) onFatalReceived
+        required void Function(String reason) onFatalReceived,
+        required void Function(RawData configData) onConfigReceived
 }) {
         sendAndroidMessage(communicationMessageAndroid);
 
@@ -47,7 +48,8 @@ void readMessage({
                                                 batteryVoltage: batteryVoltage,
                                                 onIdReceived: onIdReceived,
                                                 onActiveReceived: onActiveReceived,
-                                                onFatalReceived: onFatalReceived
+                                                onFatalReceived: onFatalReceived,
+                                                onConfigReceived: onConfigReceived
                                         );
 
                                         buffer = '';

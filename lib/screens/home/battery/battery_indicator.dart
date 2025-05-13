@@ -80,23 +80,6 @@ class BatteryIndicatorState extends State<BatteryIndicator>
                                                                                         colorFilter: ColorFilter.mode(color, BlendMode.srcIn)
                                                                                 )
                                                                         )
-                                                                ),
-                                                                // Petite icône "touch" pour indiquer que c'est cliquable
-                                                                Positioned(
-                                                                        top: -3,
-                                                                        right: -3,
-                                                                        child: Container(
-                                                                                padding: const EdgeInsets.all(2),
-                                                                                decoration: const BoxDecoration(
-                                                                                        shape: BoxShape.circle,
-                                                                                        color: Colors.white
-                                                                                ),
-                                                                                child: const Icon(
-                                                                                        Icons.touch_app,
-                                                                                        size: 14,
-                                                                                        color: Colors.black
-                                                                                )
-                                                                        )
                                                                 )
                                                         ]
                                                 );

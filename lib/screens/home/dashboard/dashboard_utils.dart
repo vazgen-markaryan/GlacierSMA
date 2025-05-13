@@ -242,7 +242,8 @@ mixin DashboardUtils on State<Home_Screen> {
                         key: configKey,
                         activeMaskNotifier: controller.activeMaskNotifier,
                         messageService: messageService,
-                        onCancel: () => setState(() => selectedIndex = 0)
+                        onCancel: () => setState(() => selectedIndex = 0),
+                        configNotifier: controller.configNotifier
                 ),
 
                 // Paramètres

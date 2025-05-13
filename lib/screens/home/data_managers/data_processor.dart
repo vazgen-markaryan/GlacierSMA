@@ -49,7 +49,8 @@ void processRawData({
         required ValueNotifier<double?> batteryVoltage,
         required void Function(RawData idData) onIdReceived,
         required void Function(int mask) onActiveReceived,
-        required void Function(String reason) onFatalReceived
+        required void Function(String reason) onFatalReceived,
+        required void Function(RawData configData) onConfigReceived
 }) {
         // Bloc <id>
         if (rawData.startsWith('<id>')) {
@@ -67,9 +68,17 @@ void processRawData({
                                 onIdReceived: (_) {
                                 },
                                 onActiveReceived: onActiveReceived,
-                                onFatalReceived: onFatalReceived
+                                onFatalReceived: onFatalReceived,
+                                onConfigReceived: onConfigReceived
                         );
                 }
+                return;
+        }
+
+        // Bloc <config>
+        if (rawData.startsWith('<config>')) {
+                final configData = RawDataParser.parse(rawData);
+                onConfigReceived(configData);
                 return;
         }
 
