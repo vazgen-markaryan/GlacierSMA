@@ -18,22 +18,22 @@ List<Widget> createAllSensorGroups({
 }) {
         final sections = [
         {
-                'titleKey': 'dashboard.sensors.section.data_processors',
+                'titleKey': 'home.sensors.section.data_processors',
                 'groupKey': 'data',
-                'emptyActive': 'dashboard.sensors.section.empty.active.data_processors',
-                'emptyInactive': 'dashboard.sensors.section.empty.inactive.data_processors'
+                'emptyActive': 'home.sensors.section.empty.active.data_processors',
+                'emptyInactive': 'home.sensors.section.empty.inactive.data_processors'
         },
         {
-                'titleKey': 'dashboard.sensors.section.internal_sensors',
+                'titleKey': 'home.sensors.section.internal_sensors',
                 'groupKey': 'internal',
-                'emptyActive': 'dashboard.sensors.section.empty.active.internal_sensors',
-                'emptyInactive': 'dashboard.sensors.section.empty.inactive.internal_sensors'
+                'emptyActive': 'home.sensors.section.empty.active.internal_sensors',
+                'emptyInactive': 'home.sensors.section.empty.inactive.internal_sensors'
         },
         {
-                'titleKey': 'dashboard.sensors.section.modbus_sensors',
+                'titleKey': 'home.sensors.section.modbus_sensors',
                 'groupKey': 'modbus',
-                'emptyActive': 'dashboard.sensors.section.empty.active.modbus_sensors',
-                'emptyInactive': 'dashboard.sensors.section.empty.inactive.modbus_sensors'
+                'emptyActive': 'home.sensors.section.empty.active.modbus_sensors',
+                'emptyInactive': 'home.sensors.section.empty.inactive.modbus_sensors'
         }
         ];
 

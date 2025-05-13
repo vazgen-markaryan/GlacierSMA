@@ -54,19 +54,19 @@
 				"error": "Erreur"
 			},
 			"section": {
-				"data_processors": "Processeurs de données",
-				"internal_sensors": "Capteurs internes",
+				"data_processors": "Processeurs de Données",
+				"internal_sensors": "Capteurs Internes",
 				"modbus_sensors": "Capteurs ModBus",
 				"empty": {
 					"active": {
-						"data_processors": "Aucun processeur de données actif.",
-						"internal_sensors": "Aucun capteur interne actif.",
-						"modbus_sensors": "Aucun capteur ModBus actif."
+						"data_processors": "Aucun Processeur de Données actif.",
+						"internal_sensors": "Aucun Capteur Interne actif.",
+						"modbus_sensors": "Aucun Capteur ModBus actif."
 					},
 					"inactive": {
-						"data_processors": "Aucun processeur de données inactif.",
-						"internal_sensors": "Aucun capteur interne inactif.",
-						"modbus_sensors": "Aucun capteur ModBus inactif."
+						"data_processors": "Aucun Processeur de Données inactif.",
+						"internal_sensors": "Aucun Capteur Interne inactif.",
+						"modbus_sensors": "Aucun Capteur ModBus inactif."
 					}
 				}
 			}
@@ -162,9 +162,9 @@
 			"satellites": "Satellites",
 			"hdop": "HDOP",
 			"iridium_quality": "Qualité du signal",
-			"wind_speed": "Vitesse du vent",
-			"wind_direction_angle": "Angle du vent",
-			"wind_direction_facing": "Direction du vent",
+			"wind_speed": "Vitesse",
+			"wind_direction_angle": "Angle",
+			"wind_direction_facing": "Direction",
 			"lux": "Lux",
 			"mb_temperature": "Température",
 			"mb_pressure": "Pression",

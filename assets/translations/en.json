@@ -163,7 +163,7 @@
 			"hdop": "HDOP",
 			"iridium_quality": "Signal Quality",
 			"wind_speed": "Wind Speed",
-			"wind_direction_angle": "Wind Direction Angle",
+			"wind_direction_angle": "Wind Angle",
 			"wind_direction_facing": "Wind Direction",
 			"lux": "Lux",
 			"mb_temperature": "Temperature",

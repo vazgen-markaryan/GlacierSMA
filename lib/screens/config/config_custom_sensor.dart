@@ -1,5 +1,6 @@
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/chip_utils.dart';
 
 /// Widget représentant un capteur et son changement ON→OFF ou OFF→ON
@@ -56,7 +57,7 @@ class ConfigCustomSensor extends StatelessWidget {
                                                         Column(
                                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                                 children: [
-                                                                        Text(title, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                                                                        Text(tr(title), style: const TextStyle(color: Colors.white70, fontSize: 12)),
                                                                         const SizedBox(height: 4),
                                                                         // Affiche toutes les puces en dessous du titre
                                                                         buildChips(chips, fontSize: 10, spacing: 4, runSpacing: 2)

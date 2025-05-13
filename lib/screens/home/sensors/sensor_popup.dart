@@ -52,7 +52,7 @@ class SensorPopupState extends State<SensorPopup>
                 return ScaleTransition(
                         scale: scale,
                         child: CustomPopup(
-                                title: (tr(widget.sensor.title ?? 'dashboard.sensors.sensor_details')),
+                                title: (tr(widget.sensor.title ?? 'home.sensors.sensor_details')),
                                 content: Padding(
                                         padding: const EdgeInsets.all(12),
                                         child: Scrollbar(
@@ -70,7 +70,7 @@ class SensorPopupState extends State<SensorPopup>
                                                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                                                         children: [
                                                                                                 Text(
-                                                                                                        tr('dashboard.sensors.updated_at', namedArgs: {'timestamp': timestamp}),
+                                                                                                        tr('home.sensors.updated_at', namedArgs: {'timestamp': timestamp}),
                                                                                                         style: const TextStyle(
                                                                                                                 color: Colors.white54,
                                                                                                                 fontSize: 16,

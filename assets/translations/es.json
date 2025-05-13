@@ -54,19 +54,19 @@
 				"error": "Error"
 			},
 			"section": {
-				"data_processors": "Procesadores de datos",
-				"internal_sensors": "Sensores internos",
+				"data_processors": "Procesadores de Datos",
+				"internal_sensors": "Sensores Internos",
 				"modbus_sensors": "Sensores ModBus",
 				"empty": {
 					"active": {
-						"data_processors": "No hay procesador de datos activo.",
-						"internal_sensors": "No hay sensor interno activo.",
-						"modbus_sensors": "No hay sensor ModBus activo."
+						"data_processors": "No hay Procesador de Datos activo.",
+						"internal_sensors": "No hay Sensor Interno activo.",
+						"modbus_sensors": "No hay Sensor ModBus activo."
 					},
 					"inactive": {
-						"data_processors": "No hay procesador de datos inactivo.",
-						"internal_sensors": "No hay sensor interno inactivo.",
-						"modbus_sensors": "No hay sensor ModBus inactivo."
+						"data_processors": "No hay Procesador de Datos inactivo.",
+						"internal_sensors": "No hay Sensor Interno inactivo.",
+						"modbus_sensors": "No hay Sensor ModBus inactivo."
 					}
 				}
 			}
@@ -137,7 +137,7 @@
 			"accel_magnetometer": "Aceleró-Magnetómetro",
 			"gps": "GPS",
 			"sd_card": "Tarjeta SD",
-			"iridium": "Iridio",
+			"iridium": "Iridium",
 			"anemometer": "Anemómetro",
 			"wind_vane": "Veleta",
 			"lux_meter": "Luxómetro"
@@ -162,9 +162,9 @@
 			"satellites": "Satélites",
 			"hdop": "HDOP",
 			"iridium_quality": "Calidad de señal",
-			"wind_speed": "Velocidad del viento",
-			"wind_direction_angle": "Ángulo del viento",
-			"wind_direction_facing": "Dirección del viento",
+			"wind_speed": "Velocidad",
+			"wind_direction_angle": "Ángulo",
+			"wind_direction_facing": "Dirección",
 			"lux": "Lux",
 			"mb_temperature": "Temperatura",
 			"mb_pressure": "Presión",

@@ -29,12 +29,12 @@ Future<bool> showDisconnectPopup({
                                         TextButton(
                                                 // Action "Non" : renvoie false
                                                 onPressed: () => Navigator.of(context).pop(false),
-                                                child: Text(tr("connection.no"), style: TextStyle(color: primaryColor))
+                                                child: Text(tr("no"), style: TextStyle(color: primaryColor))
                                         ),
                                         TextButton(
                                                 // Action "Oui" : renvoie true
                                                 onPressed: () => Navigator.of(context).pop(true),
-                                                child: Text(tr("connection.yes"), style: TextStyle(color: primaryColor))
+                                                child: Text(tr("yes"), style: TextStyle(color: primaryColor))
                                         )
                                 ]
                         )
