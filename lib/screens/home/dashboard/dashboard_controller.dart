@@ -89,6 +89,9 @@ class DashboardController {
                                 }
                         }
                 );
+
+                // Demander info ACTIVE des sensors lors de la connexion
+                messageService.sendHeartbeat("<info>");
         }
 
         void dispose() {
