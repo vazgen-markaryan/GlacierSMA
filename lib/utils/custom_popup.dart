@@ -24,12 +24,12 @@ class CustomPopup extends StatelessWidget {
                                 child: ConstrainedBox(
                                         constraints: const BoxConstraints(
                                                 maxWidth: 500,
-                                                maxHeight: 700 // ou MediaQuery.of(context).size.height * 0.8
+                                                maxHeight: 700
                                         ),
                                         child: Column(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
-                                                        // Header
+                                                        // Header avec titre et icône de fermeture
                                                         Container(
                                                                 width: double.infinity,
                                                                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
@@ -54,13 +54,17 @@ class CustomPopup extends StatelessWidget {
                                                                                 ),
                                                                                 GestureDetector(
                                                                                         onTap: () => Navigator.of(context).pop(),
-                                                                                        child: const Icon(Icons.close, color: Colors.red, size: 30)
+                                                                                        child: const Icon(
+                                                                                                Icons.close,
+                                                                                                color: Colors.red,
+                                                                                                size: 30
+                                                                                        )
                                                                                 )
                                                                         ]
                                                                 )
                                                         ),
 
-                                                        // Contenu + actions
+                                                        // Contenu centré et boutons d'action centrés
                                                         Flexible(
                                                                 child: Container(
                                                                         width: double.infinity,
@@ -82,11 +86,15 @@ class CustomPopup extends StatelessWidget {
                                                                                         child: Column(
                                                                                                 mainAxisSize: MainAxisSize.min,
                                                                                                 children: [
-                                                                                                        content,
+                                                                                                        Container(
+                                                                                                                width: double.infinity,
+                                                                                                                alignment: Alignment.center,
+                                                                                                                child: content
+                                                                                                        ),
                                                                                                         if (actions.isNotEmpty) ...[
                                                                                                                 const SizedBox(height: 16),
                                                                                                                 Row(
-                                                                                                                        mainAxisAlignment: MainAxisAlignment.end,
+                                                                                                                        mainAxisAlignment: MainAxisAlignment.center,
                                                                                                                         children: actions
                                                                                                                 )
                                                                                                         ]
