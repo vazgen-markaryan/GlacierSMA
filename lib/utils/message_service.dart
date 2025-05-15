@@ -22,13 +22,13 @@ class MessageService {
 
                 try {
                         final ok = await plugin!.write(Uint8List.fromList(message.codeUnits));
-                        final sentLog = tr('message_service.message_sent', namedArgs: {'log': message});
+                        final sentLog = tr('debug.message_sent', namedArgs: {'log': message});
                         debugLogManager.setLogChunk(0, sentLog);
                         debugLogManager.updateLogs();
                         return ok;
                 }
                 catch (e) {
-                        final errLog = tr('message_service.message_error', namedArgs: {'log': e.toString()});
+                        final errLog = tr('debug.message_error', namedArgs: {'log': e.toString()});
                         debugLogManager.setLogChunk(0, errLog);
                         debugLogManager.updateLogs();
                         return false;
@@ -74,8 +74,8 @@ class MessageService {
                 }
         }
 
-        // En MessageService :
-        Future<bool> sendConfigFloat(String typeChar, double value) async {
+        /// Envoie une nouvelle valeur de configuration au firmware.
+        Future<bool> sendConfigDouble(String typeChar, double value) async {
                 final prefix = '<cfg>';
                 final bd = ByteData(4)..setFloat32(0, value, Endian.little);
                 final payload = Uint8List.fromList([typeChar.codeUnitAt(0), ...bd.buffer.asUint8List()]);
@@ -84,7 +84,8 @@ class MessageService {
                 return plugin!.write(data);
         }
 
-        Future<bool> sendConfigUint8(String typeChar, int value) async {
+        /// Envoie une nouvelle valeur de configuration au firmware.
+        Future<bool> sendConfigInteger(String typeChar, int value) async {
                 final prefix = '<cfg>';
                 final bd = ByteData(4)..setUint32(0, value, Endian.little);
                 final payload = Uint8List.fromList([typeChar.codeUnitAt(0), ...bd.buffer.asUint8List()]);
@@ -92,5 +93,4 @@ class MessageService {
                 if (isEmulator) return false;
                 return plugin!.write(data);
         }
-
 }

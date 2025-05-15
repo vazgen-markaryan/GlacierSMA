@@ -92,11 +92,7 @@ class MyApp extends StatelessWidget {
         }
 }
 
-// TODO's pour les futures améliorations de l'application :
-
 // TODO Sensor popup graph real time (ou pas popup mais autre page)
 // TODO Créer des réglages pour les limites min/max des capteurs avec notifications
-// TODO capture <config> (afficher dans config)
 
 // TODO message envoye android  - invisible dans debug
-// TODO polir + traduire + refactor config screen + message service

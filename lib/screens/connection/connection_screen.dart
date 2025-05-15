@@ -154,6 +154,6 @@ class ConnectionScreenState extends State<ConnectionScreen> {
                         }
                 );
 
-                Overlay.of(context)!.insert(langOverlay!);
+                Overlay.of(context).insert(langOverlay!);
         }
 }

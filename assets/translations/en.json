@@ -143,8 +143,8 @@
 			"lux_meter": "Lux Meter"
 		},
 		"placement": {
-			"interior": "Interior",
-			"exterior": "Exterior"
+			"interior": "Internal",
+			"exterior": "External"
 		},
 		"datamap": {
 			"temperature": "Temperature",
