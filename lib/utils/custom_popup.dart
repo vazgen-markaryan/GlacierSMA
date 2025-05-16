@@ -64,7 +64,7 @@ class CustomPopup extends StatelessWidget {
                                                                 )
                                                         ),
 
-                                                        // Contenu centré et boutons d'action centrés
+                                                        // Contenu et boutons d'action
                                                         Flexible(
                                                                 child: Container(
                                                                         width: double.infinity,
@@ -88,13 +88,12 @@ class CustomPopup extends StatelessWidget {
                                                                                                 children: [
                                                                                                         Container(
                                                                                                                 width: double.infinity,
-                                                                                                                alignment: Alignment.center,
                                                                                                                 child: content
                                                                                                         ),
                                                                                                         if (actions.isNotEmpty) ...[
                                                                                                                 const SizedBox(height: 16),
                                                                                                                 Row(
-                                                                                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                                                                                        mainAxisAlignment: MainAxisAlignment.end,
                                                                                                                         children: actions
                                                                                                                 )
                                                                                                         ]

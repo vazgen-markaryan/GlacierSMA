@@ -1,99 +1,143 @@
-import 'config_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:rev_glacier_sma_mobile/utils/message_service.dart';
+import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 
-enum ConfigButtonStateEnum { idle, success, failure }
+/// États internes du bouton
+enum ConfigButtonStateEnum {
+        idle, loading, success, failure }
 
+/// Bouton générique avec confirmation facultative, spinner interne et feedback visuel
 class ConfigButton extends StatefulWidget {
-        final ValueNotifier<int> localMaskNotifier;
-        final int initialMask;
-        final ValueNotifier<int?> activeMaskNotifier;
-        final MessageService messageService;
-        final bool isEnabled;
-        final VoidCallback? onSuccess;
+        final Future<bool> Function() action;
+        final String idleLabel;
+        final String loadingLabel;
+        final String successLabel;
+        final String failureLabel;
+        final IconData idleIcon;
+        final IconData successIcon;
+        final IconData failureIcon;
+        final Color idleColor;
+        final Color successColor;
+        final Color failureColor;
+        final bool enabled;
+        final bool skipConfirmation;
+        final String? confirmTitle;
+        final String? confirmContent;
 
         const ConfigButton({
                 Key? key,
-                required this.localMaskNotifier,
-                required this.initialMask,
-                required this.activeMaskNotifier,
-                required this.messageService,
-                required this.isEnabled,
-                this.onSuccess
-        }) : super(key: key);
+                required this.action,
+                this.confirmTitle,
+                this.confirmContent,
+                required this.idleLabel,
+                this.loadingLabel = '…',
+                required this.successLabel,
+                required this.failureLabel,
+                required this.idleIcon,
+                required this.successIcon,
+                required this.failureIcon,
+                required this.idleColor,
+                required this.successColor,
+                required this.failureColor,
+                this.enabled = true,
+                this.skipConfirmation = false
+        }) : assert(
+                skipConfirmation || (confirmTitle != null && confirmContent != null), 'Si skipConfirmation est à false, confirmTitle et confirmContent doivent être fournis'),
+                super(key: key);
 
         @override
-        State<ConfigButton> createState() => ConfigButtonState();
+        ConfigButtonState createState() => ConfigButtonState();
 }
+
 
 class ConfigButtonState extends State<ConfigButton> {
         ConfigButtonStateEnum state = ConfigButtonStateEnum.idle;
 
         @override
         Widget build(BuildContext context) {
+                final canTap = state == ConfigButtonStateEnum.idle && widget.enabled;
+
                 return SizedBox(
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton.icon(
-                                onPressed: (state == ConfigButtonStateEnum.idle && widget.isEnabled)
-                                        ? handleTap
-                                        : null,
-                                icon: Icon(
-                                        state == ConfigButtonStateEnum.idle
-                                                ? Icons.send
-                                                : state == ConfigButtonStateEnum.success
-                                                        ? Icons.check_circle
-                                                        : Icons.error,
-                                        color: Colors.white
-                                ),
+                                onPressed: canTap ? handleTap : null,
+                                icon: state == ConfigButtonStateEnum.loading
+                                        ? SizedBox(
+                                                width: 16,
+                                                height: 16,
+                                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                                        )
+                                        : Icon(
+                                                state == ConfigButtonStateEnum.idle
+                                                        ? widget.idleIcon
+                                                        : state == ConfigButtonStateEnum.success
+                                                                ? widget.successIcon
+                                                                : widget.failureIcon,
+                                                color: Colors.white
+                                        ),
                                 label: Text(
                                         state == ConfigButtonStateEnum.idle
-                                                ? tr('config.config_apply')
-                                                : state == ConfigButtonStateEnum.success
-                                                        ? tr('config.config_saved')
-                                                        : tr('config.config_failed'),
+                                                ? widget.idleLabel
+                                                : state == ConfigButtonStateEnum.loading
+                                                        ? widget.loadingLabel
+                                                        : state == ConfigButtonStateEnum.success
+                                                                ? widget.successLabel
+                                                                : widget.failureLabel,
                                         style: const TextStyle(color: Colors.white)
                                 ),
                                 style: ElevatedButton.styleFrom(
                                         backgroundColor: state == ConfigButtonStateEnum.idle
-                                                ? Theme.of(context).primaryColor
+                                                ? widget.idleColor
                                                 : state == ConfigButtonStateEnum.success
-                                                        ? Colors.green.withOpacity(0.8)
-                                                        : Colors.red.withOpacity(0.8)
+                                                        ? widget.successColor
+                                                        : widget.failureColor
                                 )
                         )
                 );
         }
 
         Future<void> handleTap() async {
-                bool ok = false;
-
-                try {
-                        ok = await submitConfiguration(
+                // Si on ne skip pas, on requiert confirmTitle & confirmContent
+                if (!widget.skipConfirmation) {
+                        final confirmed = await showDialog<bool>(
                                 context: context,
-                                initialMask: widget.initialMask,
-                                newMask: widget.localMaskNotifier.value,
-                                messageService: widget.messageService
+                                barrierDismissible: false,
+                                builder: (ctx) => CustomPopup(
+                                        title: widget.confirmTitle!,
+                                        content: Text(widget.confirmContent!),
+                                        actions: [
+                                                TextButton(
+                                                        onPressed: () => Navigator.of(ctx).pop(false),
+                                                        child: Text(tr("config.cancel"))
+                                                ),
+                                                TextButton(
+                                                        onPressed: () => Navigator.of(ctx).pop(true),
+                                                        child: Text(tr("config.apply"))
+                                                )
+                                        ]
+                                )
                         );
-                }
-                on CancelledException {
-                        // Utilisateur a annulé → on ne change rien
-                        return;
+                        if (confirmed != true) return;
                 }
 
-                // Affiche Succès ou Échec
-                setState(() => state = ok
-                                ? ConfigButtonStateEnum.success
-                                : ConfigButtonStateEnum.failure);
+                // Passage en mode chargement
+                setState(() => state = ConfigButtonStateEnum.loading);
 
-                if (ok) {
-                        widget.activeMaskNotifier.value = widget.localMaskNotifier.value;
-                        widget.onSuccess?.call();
+                // Exécution de l'action
+                bool ok = false;
+                try {
+                        ok = await widget.action();
+                }
+                catch (_) {
+                        ok = false;
                 }
 
-                // Reset button state après 1 seconde
-                await Future.delayed(const Duration(seconds: 1));
+                // Feedback visuel
+                setState(() => state = ok ? ConfigButtonStateEnum.success : ConfigButtonStateEnum.failure);
+
+                // Retour à l'état idle après un délai
+                await Future.delayed(const Duration(seconds: 2));
                 if (!mounted) return;
                 setState(() => state = ConfigButtonStateEnum.idle);
         }

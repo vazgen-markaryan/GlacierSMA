@@ -95,6 +95,4 @@ class MyApp extends StatelessWidget {
 // TODO Sensor popup graph real time (ou pas popup mais autre page)
 // TODO Créer des réglages pour les limites min/max des capteurs avec notifications
 
-// TODO apply config empehcer spam ajouter animation de loading + disable
-//TODO reset default prends du temps, desactiver button et afficher loading
-// TODO tout traduire dans config
+// TODO tout traduire dans config + refactor config screen button et utils

@@ -102,10 +102,7 @@
 		"confirm_apply_title": "Confirmar aplicación",
 		"modified_sensors": "Sensores modificados:",
 		"cancel": "Cancelar",
-		"apply": "Aplicar",
-		"config_apply": "Aplicar configuración",
-		"config_saved": "Guardado",
-		"config_failed": "Error"
+		"apply": "Confirmar"
 	},
 
 	"settings": {
