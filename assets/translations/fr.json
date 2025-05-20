@@ -99,10 +99,25 @@
 		"invalid_password": "Mot de passe invalide",
 		"unsaved_changes_title": "Modifications non sauvegardées",
 		"unsaved_changes_content": "Vous avez des changements non appliqués. Quitter quand même ?",
-		"confirm_apply_title": "Confirmer l’application",
+		"confirm_title": "Confirmer l’application",
 		"modified_sensors": "Les capteurs modifiés :",
 		"cancel": "Annuler",
-		"apply": "Confirmer"
+		"confirm": "Confirmer",
+		"apply": "Appliquer",
+		"collection_settings": "Paramètres de la Collecte",
+		"sleep_minutes": "Minutes de Sleep (0–1440)",
+		"sea_level_pressure": "Pression de la Mer (hectoPascal)",
+		"number_of_captures": "Nombre de Captures (0–255)",
+		"confirm_send": "Confirmer l’envoi",
+		"new_parameters_send": "Voulez-vous envoyer les nouveaux paramètres ?",
+		"send": "Envoyer",
+		"sending": "Envoi…",
+		"success": "Succès",
+		"error": "Échec",
+		"confirm_reset": "Confirmer la réinitialisation",
+		"reset_default_title": "Voulez-vous restaurer les paramètres par défaut ?",
+		"reset_default": "Reset default"
+
 	},
 
 	"settings": {

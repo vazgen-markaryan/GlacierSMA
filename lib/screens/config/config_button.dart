@@ -113,7 +113,7 @@ class ConfigButtonState extends State<ConfigButton> {
                                                 ),
                                                 TextButton(
                                                         onPressed: () => Navigator.of(ctx).pop(true),
-                                                        child: Text(tr("config.apply"))
+                                                        child: Text(tr("config.confirm"))
                                                 )
                                         ]
                                 )

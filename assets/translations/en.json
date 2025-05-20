@@ -99,10 +99,23 @@
 		"invalid_password": "Invalid password",
 		"unsaved_changes_title": "Unsaved changes",
 		"unsaved_changes_content": "You have unsaved changes. Leave anyway?",
-		"confirm_apply_title": "Confirm application",
+		"confirm_title": "Confirm application",
 		"modified_sensors": "Modified sensors:",
 		"cancel": "Cancel",
-		"apply": "Apply"
+		"confirm": "Apply",
+		"collection_settings": "Collection Settings",
+		"sleep_minutes": "Sleep Minutes (0–1440)",
+		"sea_level_pressure": "Sea Level Pressure (hPa)",
+		"number_of_captures": "Number of Captures (0–255)",
+		"confirm_send": "Confirm Send",
+		"new_parameters_send": "Do you want to send the new parameters?",
+		"send": "Send",
+		"sending": "Sending…",
+		"success": "Success",
+		"error": "Error",
+		"confirm_reset": "Confirm Reset",
+		"reset_default_title": "Do you want to restore default settings?",
+		"reset_default": "Reset default"
 	},
 
 	"settings": {

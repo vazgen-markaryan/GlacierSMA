@@ -99,10 +99,23 @@
 		"invalid_password": "Contraseña inválida",
 		"unsaved_changes_title": "Cambios no guardados",
 		"unsaved_changes_content": "Tienes cambios sin guardar. Salir de todos modos?",
-		"confirm_apply_title": "Confirmar aplicación",
+		"confirm_title": "Confirmar aplicación",
 		"modified_sensors": "Sensores modificados:",
 		"cancel": "Cancelar",
-		"apply": "Confirmar"
+		"confirm": "Confirmar",
+		"collection_settings": "Parámetros de recopilación",
+		"sleep_minutes": "Minutos de espera (0–1440)",
+		"sea_level_pressure": "Presión al nivel del mar (hPa)",
+		"number_of_captures": "Número de capturas (0–255)",
+		"confirm_send": "Confirmar envío",
+		"new_parameters_send": "¿Desea enviar los nuevos parámetros?",
+		"send": "Enviar",
+		"sending": "Enviando…",
+		"success": "Éxito",
+		"error": "Error",
+		"confirm_reset": "Confirmar reinicio",
+		"reset_default_title": "¿Desea restaurar los ajustes predeterminados?",
+		"reset_default": "Restablecer valores predeterminados"
 	},
 
 	"settings": {

@@ -190,7 +190,7 @@ Future<bool> submitConfiguration({
                 context: context,
                 barrierDismissible: false,
                 builder: (_) => CustomPopup(
-                        title: tr('config.confirm_apply_title'),
+                        title: tr('config.confirm_title'),
                         content: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -206,7 +206,7 @@ Future<bool> submitConfiguration({
                                 ),
                                 TextButton(
                                         onPressed: () => Navigator.of(context).pop(true),
-                                        child: Text(tr('config.apply'))
+                                        child: Text(tr('config.confirm'))
                                 )
                         ]
                 )

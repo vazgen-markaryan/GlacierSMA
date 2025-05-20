@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:rev_glacier_sma_mobile/utils/message_service.dart';
 import 'package:rev_glacier_sma_mobile/screens/config/config_utils.dart';
@@ -118,10 +119,10 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                                                 return ok;
                                                                         }
                                                                 ),
-                                                        idleLabel: 'Appliquer',
+                                                        idleLabel: tr('config.apply'),
                                                         loadingLabel: '…',
                                                         successLabel: 'OK',
-                                                        failureLabel: 'Erreur',
+                                                        failureLabel: tr('config.error'),
                                                         idleIcon: Icons.send,
                                                         successIcon: Icons.check,
                                                         failureIcon: Icons.error,
@@ -133,7 +134,7 @@ class ConfigScreenState extends State<ConfigScreen> {
 
                                                 const SizedBox(height: defaultPadding * 1.5),
 
-                                                Center(child: Text('Paramètres de la Collecte', style: Theme.of(ctx).textTheme.titleMedium)),
+                                                Center(child: Text(tr('config.collection_settings'), style: Theme.of(ctx).textTheme.titleMedium)),
 
                                                 const SizedBox(height: defaultPadding / 2),
 
@@ -147,7 +148,7 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                                                 TextFormField(
                                                                                         controller: sleepCtrl,
                                                                                         decoration: InputDecoration(
-                                                                                                labelText: 'Minutes de Sleep (0–1440)',
+                                                                                                labelText: tr('config.sleep_minutes'),
                                                                                                 labelStyle: TextStyle(color: invalidSleep ? Colors.red : null, fontWeight: FontWeight.bold)
                                                                                         ),
                                                                                         keyboardType: TextInputType.number,
@@ -163,8 +164,8 @@ class ConfigScreenState extends State<ConfigScreen> {
 
                                                                                 TextFormField(
                                                                                         controller: seaCtrl,
-                                                                                        decoration: const InputDecoration(
-                                                                                                labelText: 'Pression de la Mer (hectoPascal)'
+                                                                                        decoration: InputDecoration(
+                                                                                                labelText: tr('config.sea_level_pressure')
                                                                                         ),
                                                                                         keyboardType: TextInputType.numberWithOptions(decimal: true),
                                                                                         onChanged: (v) => setState(() => sea = double.tryParse(v) ?? sea)
@@ -175,7 +176,7 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                                                 TextFormField(
                                                                                         controller: captureCtrl,
                                                                                         decoration: InputDecoration(
-                                                                                                labelText: 'Nombre de Captures (0–255)',
+                                                                                                labelText: tr('config.number_of_captures'),
                                                                                                 labelStyle: TextStyle(color: invalidCap ? Colors.red : null, fontWeight: FontWeight.bold)
                                                                                         ),
                                                                                         keyboardType: TextInputType.number,
@@ -211,12 +212,12 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                                                         initCapture: initCapture,
                                                                                         updateInitCapture: (v) => initCapture = v
                                                                                 ),
-                                                                                confirmTitle: 'Confirmer l’envoi',
-                                                                                confirmContent: 'Voulez-vous envoyer les nouveaux paramètres ?',
-                                                                                idleLabel: 'Envoyer',
-                                                                                loadingLabel: 'Envoi…',
-                                                                                successLabel: 'Succès',
-                                                                                failureLabel: 'Échec',
+                                                                                confirmTitle: tr('config.confirm_send'),
+                                                                                confirmContent: tr('config.new_parameters_send'),
+                                                                                idleLabel: tr('config.send'),
+                                                                                loadingLabel: tr('config.sending'),
+                                                                                successLabel: tr('config.success'),
+                                                                                failureLabel: tr('config.error'),
                                                                                 idleIcon: Icons.send,
                                                                                 successIcon: Icons.check_circle,
                                                                                 failureIcon: Icons.error,
@@ -234,12 +235,12 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                                         flex: 1,
                                                                         child: ConfigButton(
                                                                                 action: () => resetToDefaults(widget.messageService),
-                                                                                confirmTitle: 'Confirmer la réinitialisation',
-                                                                                confirmContent: 'Voulez-vous restaurer les paramètres par défaut ?',
-                                                                                idleLabel: 'Reset default',
+                                                                                confirmTitle: tr('config.confirm_reset'),
+                                                                                confirmContent: tr('config.reset_default_title'),
+                                                                                idleLabel: tr('config.reset_default'),
                                                                                 loadingLabel: '…',
-                                                                                successLabel: 'Succès',
-                                                                                failureLabel: 'Échec',
+                                                                                successLabel: tr('config.success'),
+                                                                                failureLabel: tr('config.error'),
                                                                                 idleIcon: Icons.refresh,
                                                                                 successIcon: Icons.check_circle,
                                                                                 failureIcon: Icons.error,
