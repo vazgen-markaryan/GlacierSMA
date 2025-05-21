@@ -116,7 +116,7 @@ mixin DashboardUtils on State<Home_Screen> {
                                                         widget.plugin?.disconnect();
                                                         Navigator.of(context).pop();
                                                 },
-                                                child: Text(tr('home.dashboard.ok_button'))
+                                                child: Text(tr('ok'))
                                         )
                                 ]
                         )

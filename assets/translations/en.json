@@ -1,6 +1,7 @@
 {
 	"yes": "Yes",
 	"no": "No",
+	"ok": "OK",
 
 	"connection": {
 		"appTitle": "Glacier SMA Connect",
@@ -21,6 +22,7 @@
 			"voltage_unknown": "Voltage: Unknown",
 			"state": "State: {percent}%"
 		},
+
 		"dashboard": {
 			"unknown_device": "Unknown device",
 			"not_connected": "Not connected",
@@ -35,15 +37,17 @@
 			"rename_label": "Name",
 			"rename_error": "Only 0–20 ANSI chars allowed",
 			"cancel_button": "Cancel",
-			"confirm_button": "OK",
-			"snack_rename_success": "Station name updated",
-			"snack_rename_error": "Error sending station name"
+			"confirm_button": "Confirm",
+			"snack_rename_success": "Station name has been updated",
+			"snack_rename_error": "Error occured on updating station name"
 		},
+
 		"sensors": {
 			"empty_active": "No sensors are active.\nCheck your configuration.",
 			"sensor_details": "Sensor Details",
 			"updated_at": "Updated at: {timestamp}",
 			"title_unknown": "Unknown sensor",
+
 			"status": {
 				"activated": "Activated",
 				"deactivated": "Deactivated",
@@ -53,16 +57,19 @@
 				"disconnected": "Disconnected",
 				"error": "Error"
 			},
+
 			"section": {
 				"data_processors": "Data Processors",
 				"internal_sensors": "Internal Sensors",
 				"modbus_sensors": "ModBus Sensors",
+
 				"empty": {
 					"active": {
 						"data_processors": "No active Data Processor.",
 						"internal_sensors": "No active Internal Sensor.",
 						"modbus_sensors": "No active ModBus Sensor."
 					},
+
 					"inactive": {
 						"data_processors": "No inactive Data Processor.",
 						"internal_sensors": "No inactive Internal Sensor.",
@@ -71,6 +78,7 @@
 				}
 			}
 		},
+
 		"navbar": {
 			"home": "Home",
 			"debug": "Debug",
@@ -120,6 +128,7 @@
 
 	"settings": {
 		"others": "Other",
+
 		"about": {
 			"title": "About",
 			"station_name": "Station name",
@@ -133,6 +142,7 @@
 			"compiled_by": "Compiled by",
 			"contact": "Contact"
 		},
+
 		"language": {
 			"title": "Language",
 			"en": "English",
@@ -152,10 +162,12 @@
 			"wind_vane": "Wind Vane",
 			"lux_meter": "Lux Meter"
 		},
+
 		"placement": {
 			"interior": "Internal",
 			"exterior": "External"
 		},
+
 		"datamap": {
 			"temperature": "Temperature",
 			"pressure": "Pressure",
@@ -202,11 +214,12 @@
 			"north_northwest": "North-northwest",
 			"unknown": "Unknown"
 		},
+
 		"iridium": {
 			"quality": {
 				"excellent": "Excellent",
 				"very_good": "Very good",
-				"ok": "OK",
+				"good": "Good",
 				"bad": "Bad",
 				"error": "Error"
 			}

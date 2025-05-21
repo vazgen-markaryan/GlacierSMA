@@ -85,7 +85,7 @@ Map<String, dynamic> getIridiumSvgLogoAndColor(int quality) {
                         return {
                                 'icon':  'assets/icons/satellite_ok.svg',
                                 'color': const Color(0xFFFFA500), // Orange
-                                'value': tr('switch_utils.iridium.quality.ok')
+                                'value': tr('switch_utils.iridium.quality.good')
                         };
                 case 1:
                 case 0:

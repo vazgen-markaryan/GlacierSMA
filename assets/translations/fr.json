@@ -1,6 +1,7 @@
 {
 	"yes": "Oui",
 	"no": "Non",
+	"ok": "OK",
 
 	"connection": {
 		"appTitle": "Glacier SMA Connexion",
@@ -21,6 +22,7 @@
 			"voltage_unknown": "Tension : Inconnue",
 			"state": "État : {percent} %"
 		},
+
 		"dashboard": {
 			"unknown_device": "Appareil inconnu",
 			"not_connected": "Non connecté",
@@ -35,15 +37,17 @@
 			"rename_label": "Nom",
 			"rename_error": "Seuls 0–20 caractères ANSI autorisés",
 			"cancel_button": "Annuler",
-			"confirm_button": "OK",
-			"snack_rename_success": "Nom de station mis à jour",
+			"confirm_button": "Confirmer",
+			"snack_rename_success": "Nom de la station mis à jour",
 			"snack_rename_error": "Erreur lors de l’envoi du nom de station"
 		},
+
 		"sensors": {
 			"empty_active": "Aucun capteur actif.\nVérifiez votre configuration.",
 			"sensor_details": "Détails du capteur",
 			"updated_at": "Mis à jour : {timestamp}",
 			"title_unknown": "Capteur inconnu",
+
 			"status": {
 				"activated": "Activé",
 				"deactivated": "Désactivé",
@@ -53,16 +57,19 @@
 				"disconnected": "Déconnecté",
 				"error": "Erreur"
 			},
+
 			"section": {
 				"data_processors": "Processeurs de Données",
 				"internal_sensors": "Capteurs Internes",
 				"modbus_sensors": "Capteurs ModBus",
+
 				"empty": {
 					"active": {
 						"data_processors": "Aucun Processeur de Données actif.",
 						"internal_sensors": "Aucun Capteur Interne actif.",
 						"modbus_sensors": "Aucun Capteur ModBus actif."
 					},
+
 					"inactive": {
 						"data_processors": "Aucun Processeur de Données inactif.",
 						"internal_sensors": "Aucun Capteur Interne inactif.",
@@ -71,6 +78,7 @@
 				}
 			}
 		},
+
 		"navbar": {
 			"home": "Accueil",
 			"debug": "Debug",
@@ -117,7 +125,6 @@
 		"confirm_reset": "Confirmer la réinitialisation",
 		"reset_default_title": "Voulez-vous restaurer les paramètres par défaut ?",
 		"reset_default": "Reset default"
-
 	},
 
 	"settings": {
@@ -135,6 +142,7 @@
 			"compiled_by": "Compilé par",
 			"contact": "Contact"
 		},
+
 		"language": {
 			"title": "Langue",
 			"en": "English",
@@ -154,10 +162,12 @@
 			"wind_vane": "Girouette",
 			"lux_meter": "Luxmètre"
 		},
+
 		"placement": {
 			"interior": "Intérieur",
 			"exterior": "Extérieur"
 		},
+
 		"datamap": {
 			"temperature": "Température",
 			"pressure": "Pression",
@@ -204,11 +214,12 @@
 			"north_northwest": "Nord-nord-ouest",
 			"unknown": "Inconnu"
 		},
+
 		"iridium": {
 			"quality": {
 				"excellent": "Excellent",
 				"very_good": "Très bon",
-				"ok": "OK",
+				"good": "Bon",
 				"bad": "Mauvais",
 				"error": "Erreur"
 			}

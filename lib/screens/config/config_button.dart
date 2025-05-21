@@ -86,12 +86,24 @@ class ConfigButtonState extends State<ConfigButton> {
                                                                 : widget.failureLabel,
                                         style: const TextStyle(color: Colors.white)
                                 ),
-                                style: ElevatedButton.styleFrom(
-                                        backgroundColor: state == ConfigButtonStateEnum.idle
-                                                ? widget.idleColor
-                                                : state == ConfigButtonStateEnum.success
-                                                        ? widget.successColor
-                                                        : widget.failureColor
+                                style: ButtonStyle(
+                                        // La couleur de fond en fonction de l'état interne, sans tenir compte de MaterialState.disabled
+                                        backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+                                                        switch (state) {
+                                                                case ConfigButtonStateEnum.success:
+                                                                        return widget.successColor;
+                                                                case ConfigButtonStateEnum.failure:
+                                                                        return widget.failureColor;
+                                                                case ConfigButtonStateEnum.loading:
+                                                                        return widget.idleColor;
+                                                                case ConfigButtonStateEnum.idle:
+                                                                default:
+                                                                // Si on est à l'état idle mais que enabled=false, on retombe sur gris
+                                                                return widget.enabled ? widget.idleColor : Colors.grey;
+                                                        }
+                                                }
+                                        ),
+                                        foregroundColor: MaterialStateProperty.all(Colors.white)
                                 )
                         )
                 );

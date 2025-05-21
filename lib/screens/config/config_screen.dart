@@ -1,6 +1,6 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:rev_glacier_sma_mobile/utils/message_service.dart';
 import 'package:rev_glacier_sma_mobile/screens/config/config_utils.dart';
@@ -114,14 +114,20 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                                 initialMask: initialMask,
                                                                 newMask: localMaskNotifier.value,
                                                                 svc: widget.messageService
-                                                        ).then((ok) {
-                                                                                if (ok) setState(() => initialMask = localMaskNotifier.value);
+                                                        ).then(
+                                                                        (ok) {
+                                                                                if (ok) {
+                                                                                        // Met à jour la valeur partagée
+                                                                                        widget.activeMaskNotifier.value = localMaskNotifier.value;
+                                                                                        // Réinitialise initialMask pour désactiver le bouton
+                                                                                        setState(() => initialMask = localMaskNotifier.value);
+                                                                                }
                                                                                 return ok;
                                                                         }
                                                                 ),
                                                         idleLabel: tr('config.apply'),
                                                         loadingLabel: '…',
-                                                        successLabel: 'OK',
+                                                        successLabel: tr("config.success"),
                                                         failureLabel: tr('config.error'),
                                                         idleIcon: Icons.send,
                                                         successIcon: Icons.check,

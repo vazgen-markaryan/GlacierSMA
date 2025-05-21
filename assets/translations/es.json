@@ -1,6 +1,7 @@
 {
 	"yes": "Sí",
 	"no": "No",
+	"ok": "OK",
 
 	"connection": {
 		"appTitle": "Conexión Glacier SMA",
@@ -21,6 +22,7 @@
 			"voltage_unknown": "Voltaje: Desconocido",
 			"state": "Estado: {percent}%"
 		},
+
 		"dashboard": {
 			"unknown_device": "Dispositivo desconocido",
 			"not_connected": "No conectado",
@@ -35,15 +37,17 @@
 			"rename_label": "Nombre",
 			"rename_error": "Solo se permiten de 0 a 20 caracteres ANSI",
 			"cancel_button": "Cancelar",
-			"confirm_button": "OK",
+			"confirm_button": "Confirmar",
 			"snack_rename_success": "Nombre de la estación actualizado",
 			"snack_rename_error": "Error al enviar el nombre de la estación"
 		},
+
 		"sensors": {
 			"empty_active": "No hay sensores activos.\nVerifica tu configuración.",
 			"sensor_details": "Detalles del sensor",
 			"updated_at": "Actualizado: {timestamp}",
 			"title_unknown": "Sensor desconocido",
+
 			"status": {
 				"activated": "Activado",
 				"deactivated": "Desactivado",
@@ -53,16 +57,19 @@
 				"disconnected": "Desconectado",
 				"error": "Error"
 			},
+
 			"section": {
 				"data_processors": "Procesadores de Datos",
 				"internal_sensors": "Sensores Internos",
 				"modbus_sensors": "Sensores ModBus",
+
 				"empty": {
 					"active": {
 						"data_processors": "No hay Procesador de Datos activo.",
 						"internal_sensors": "No hay Sensor Interno activo.",
 						"modbus_sensors": "No hay Sensor ModBus activo."
 					},
+
 					"inactive": {
 						"data_processors": "No hay Procesador de Datos inactivo.",
 						"internal_sensors": "No hay Sensor Interno inactivo.",
@@ -71,6 +78,7 @@
 				}
 			}
 		},
+
 		"navbar": {
 			"home": "Inicio",
 			"debug": "Depuración",
@@ -120,6 +128,7 @@
 
 	"settings": {
 		"others": "Otros",
+
 		"about": {
 			"title": "Acerca de",
 			"station_name": "Nombre de la estación",
@@ -133,6 +142,7 @@
 			"compiled_by": "Compilado por",
 			"contact": "Contacto"
 		},
+
 		"language": {
 			"title": "Idioma",
 			"en": "English",
@@ -152,10 +162,12 @@
 			"wind_vane": "Veleta",
 			"lux_meter": "Luxómetro"
 		},
+
 		"placement": {
 			"interior": "Interno",
 			"exterior": "Externo"
 		},
+
 		"datamap": {
 			"temperature": "Temperatura",
 			"pressure": "Presión",
@@ -202,11 +214,12 @@
 			"north_northwest": "Norte-noroeste",
 			"unknown": "Desconocido"
 		},
+
 		"iridium": {
 			"quality": {
 				"excellent": "Excelente",
 				"very_good": "Muy bueno",
-				"ok": "OK",
+				"good": "Bueno",
 				"bad": "Malo",
 				"error": "Error"
 			}
