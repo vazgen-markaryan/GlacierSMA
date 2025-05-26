@@ -41,6 +41,10 @@ class BottomNavBar extends StatelessWidget {
                                         label: tr('home.navbar.config')
                                 ),
                                 BottomNavigationBarItem(
+                                        icon: const Icon(Icons.eco),
+                                        label: tr('home.navbar.test')
+                                ),
+                                BottomNavigationBarItem(
                                         icon: const Icon(Icons.settings),
                                         label: tr('home.navbar.settings')
                                 )

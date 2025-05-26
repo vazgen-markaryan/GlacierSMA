@@ -4,7 +4,6 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:rev_glacier_sma_mobile/utils/message_service.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
@@ -28,7 +27,6 @@ class DashboardController {
         final ValueNotifier<RawData?> configNotifier = ValueNotifier(null);
         Timer? pingTimer;
         EventChannel? messageChannel;
-        bool isEmulator = false;
         late final Stopwatch connectionStopwatch;
 
         DashboardController({
@@ -43,16 +41,6 @@ class DashboardController {
         }
 
         Future<void> init(void Function() onDataReceived) async {
-                final info = await DeviceInfoPlugin().androidInfo;
-                isEmulator = !info.isPhysicalDevice;
-
-                if (isEmulator) {
-                        // Simule un chargement rapide en émulateur
-                        await Future.delayed(const Duration(seconds: 1));
-                        isInitialLoading.value = false;
-                        return;
-                }
-
                 // Vrai matériel : démarrage du stopwatch
                 connectionStopwatch = Stopwatch()..start();
 

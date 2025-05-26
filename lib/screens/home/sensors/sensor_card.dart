@@ -11,6 +11,7 @@ import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_graph_popup.d
 class SensorCard extends StatelessWidget {
         final SensorsData sensor;
         final bool configMode;
+        final bool testMode;
         final bool? isOn;
         final ValueChanged<bool>? onToggle;
         final VoidCallback? onTap;
@@ -19,6 +20,7 @@ class SensorCard extends StatelessWidget {
                 Key? key,
                 required this.sensor,
                 this.configMode = false,
+                this.testMode = false,
                 this.isOn,
                 this.onToggle,
                 this.onTap
@@ -120,11 +122,11 @@ class SensorCard extends StatelessWidget {
                                                                         ]
 
                                                                         // Bouton graphique en mode normal (ouvre SensorGraphPopup)
-                                                                        else if (
-                                                                        sensor.data.isNotEmpty &&
+                                                                        else if (sensor.data.isNotEmpty &&
                                                                                 sensor.header?.toLowerCase() != 'sdcard' &&
                                                                                 sensor.header?.toLowerCase() != 'gps_status' &&
-                                                                                sensor.header?.toLowerCase() != 'iridium_status'
+                                                                                sensor.header?.toLowerCase() != 'iridium_status' && 
+                                                                                !testMode && sensor.powerStatus == 1
                                                                         ) ...[
                                                                                 Padding(
                                                                                         padding: const EdgeInsets.only(left: defaultPadding),

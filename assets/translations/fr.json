@@ -83,6 +83,7 @@
 			"home": "Accueil",
 			"debug": "Debug",
 			"config": "Config",
+			"test": "Test",
 			"settings": "Paramètres"
 		}
 	},

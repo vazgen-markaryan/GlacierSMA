@@ -6,20 +6,16 @@ import 'package:rev_glacier_sma_mobile/screens/debug_log/components/debug_log_up
 class MessageService {
         final FlutterSerialCommunication? plugin;
         final DebugLogUpdater debugLogManager;
-        final bool isEmulator;
         final String heartbeatPrefix;
 
         MessageService({
                 required this.plugin,
                 required this.debugLogManager,
-                this.isEmulator = false,
                 this.heartbeatPrefix = '<android>'
         });
 
         /// Envoie un simple message de type "heartbeat" ou toute autre chaîne.
         Future<bool> sendHeartbeat(String message) async {
-                if (isEmulator) return false;
-
                 try {
                         final ok = await plugin!.write(Uint8List.fromList(message.codeUnits));
                         final sentLog = tr('debug.message_sent', namedArgs: {'log': message});
@@ -43,14 +39,13 @@ class MessageService {
                 for (int i = 0; i < enabledSensors.length && i < 16; i++) {
                         if (enabledSensors[i]) mask |= (1 << i);
                 }
+
                 // 2) Découpe en 2 octets (MSB puis LSB)
                 final high = (mask >> 8) & 0xFF;
                 final low = mask & 0xFF;
                 final payload = Uint8List.fromList([high, low]);
-
-                if (isEmulator) return false;
-
                 final data = Uint8List.fromList([...prefix.codeUnits, ...payload]);
+
                 try {
                         return await plugin!.write(data);
                 }
@@ -80,7 +75,6 @@ class MessageService {
                 final bd = ByteData(4)..setFloat32(0, value, Endian.little);
                 final payload = Uint8List.fromList([typeChar.codeUnitAt(0), ...bd.buffer.asUint8List()]);
                 final data = Uint8List.fromList([...prefix.codeUnits, ...payload]);
-                if (isEmulator) return false;
                 return plugin!.write(data);
         }
 
@@ -90,7 +84,6 @@ class MessageService {
                 final bd = ByteData(4)..setUint32(0, value, Endian.little);
                 final payload = Uint8List.fromList([typeChar.codeUnitAt(0), ...bd.buffer.asUint8List()]);
                 final data = Uint8List.fromList([...prefix.codeUnits, ...payload]);
-                if (isEmulator) return false;
                 return plugin!.write(data);
         }
 }

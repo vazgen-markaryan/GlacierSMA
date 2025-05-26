@@ -1,8 +1,6 @@
 import 'utils/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/home_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/connection/connection_screen.dart';
 
 /// Point d'entrée de l'application Flutter Glacier SMA.
@@ -11,10 +9,6 @@ Future<void> main() async {
         WidgetsFlutterBinding.ensureInitialized();
         await EasyLocalization.ensureInitialized();
 
-        // Détecte si on tourne sur un émulateur Android
-        final androidInfo = await DeviceInfoPlugin().androidInfo;
-        final runningOnEmulator = !androidInfo.isPhysicalDevice;
-
         runApp(
                 EasyLocalization(
                         supportedLocales: const[Locale('en'), Locale('fr'), Locale('es')],
@@ -22,14 +16,13 @@ Future<void> main() async {
                         fallbackLocale: const Locale('fr'),
                         saveLocale: true,
                         useOnlyLangCode: true,
-                        child: MyApp(isEmulator: runningOnEmulator)
+                        child: MyApp()
                 )
         );
 }
 
 class MyApp extends StatelessWidget {
-        final bool isEmulator;
-        const MyApp({super.key, required this.isEmulator});
+        const MyApp({super.key});
 
         @override
         Widget build(BuildContext context) {
@@ -84,13 +77,8 @@ class MyApp extends StatelessWidget {
                                 )
                         ),
 
-                        // Écran d'accueil selon l'environnement
-                        home: isEmulator
-                                ? const Home_Screen(plugin: null, isConnected: false, connectedDevices: [])
-                                : const ConnectionScreen()
+                        // Écran d'accueil
+                        home: const ConnectionScreen()
                 );
         }
 }
-
-// TODO Sensor popup graph real time (ou pas popup mais autre page)
-// TODO Créer des réglages pour les limites min/max des capteurs avec notifications

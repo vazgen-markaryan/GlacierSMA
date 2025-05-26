@@ -56,8 +56,7 @@ List<Widget> createAllSensorGroups({
                                 List<SensorsData> filter(List<SensorsData> list) {
                                         return list.where((sensor) {
                                                         if (configMode) return true;
-                                                        final isActive = sensor.bitIndex == null
-                                                                || (myMask & (1 << sensor.bitIndex!)) != 0;
+                                                        final isActive = sensor.bitIndex == null || (myMask & (1 << sensor.bitIndex!)) != 0;
                                                         return showInactive ? !isActive : isActive;
                                                 }
                                         ).toList();

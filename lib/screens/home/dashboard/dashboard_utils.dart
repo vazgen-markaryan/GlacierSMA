@@ -6,6 +6,7 @@ import 'package:rev_glacier_sma_mobile/utils/message_service.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_snackbar.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/home_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/config/config_screen.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/test/TestScreen.dart';
 import 'package:rev_glacier_sma_mobile/screens/settings/settings_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/debug_log/debug_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
@@ -34,7 +35,6 @@ mixin DashboardUtils on State<Home_Screen> {
                 messageService = MessageService(
                         plugin: widget.plugin,
                         debugLogManager: debugManager,
-                        isEmulator: false
                 );
                 controller = DashboardController(
                         plugin: widget.plugin,
@@ -244,6 +244,13 @@ mixin DashboardUtils on State<Home_Screen> {
                         messageService: messageService,
                         onCancel: () => setState(() => selectedIndex = 0),
                         configNotifier: controller.configNotifier
+                ),
+
+                // Environnement contrôlé
+
+                TestScreen(
+                        activeMaskNotifier: controller.activeMaskNotifier,
+                        getSensors: getSensors
                 ),
 
                 // Paramètres

@@ -83,6 +83,7 @@
 			"home": "Inicio",
 			"debug": "Depuración",
 			"config": "Config",
+			"test": "Test",
 			"settings": "Configuración"
 		}
 	},
