@@ -97,7 +97,6 @@ class ConfigButtonState extends State<ConfigButton> {
                                                                 case ConfigButtonStateEnum.loading:
                                                                         return widget.idleColor;
                                                                 case ConfigButtonStateEnum.idle:
-                                                                default:
                                                                 // Si on est à l'état idle mais que enabled=false, on retombe sur gris
                                                                 return widget.enabled ? widget.idleColor : Colors.grey;
                                                         }

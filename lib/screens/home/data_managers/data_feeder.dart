@@ -3,73 +3,58 @@ import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
 
 /// Analyse une chaîne de données brutes au format texte (>=3 lignes : message, en-têtes CSV, valeurs CSV)
 /// Met à jour les `dataNotifier` de chaque capteur si la valeur associée a changé.
-
 void populateSensorData(
         String rawData,
         List<List<SensorsData>> sensorGroups
 ) {
-        // Découpage en lignes
         final lines = rawData.split('\n');
+        if (lines.length < 3) return;
 
-        if (lines.length < 3) return; // Format invalide
+        final headers = lines[1].split(',').map((h) => h.trim().toLowerCase()).toList();
+        final values = lines[2].split(',').map((v) => v.trim()).toList();
 
-        // 2) Extraction des en-têtes et valeurs
-        final headers = lines[1]
-                .split(',')
-                .map((h) => h.trim().toLowerCase())
-                .toList();
-        final values = lines[2]
-                .split(',')
-                .map((v) => v.trim())
-                .toList();
-
-        // Pour chaque groupe de capteurs
         for (final sensors in sensorGroups) {
                 for (final sensor in sensors) {
-                        var hasChanged = false;
-                        // Copie mutable des données actuelles
-                        final updatedData = Map<DataMap, dynamic>.from(sensor.data);
-
-                        // Parcours de chaque DataMap attendue
                         for (final entry in sensor.data.entries) {
                                 final key = entry.key;
-                                final index = headers.indexOf(key.header.toLowerCase());
+                                final idx = headers.indexOf(key.header.toLowerCase());
+                                if (idx < 0) continue;
 
-                                if (index == -1) continue; // Colonne non trouvée
+                                String formatted;
+                                double? numeric;
 
-                                String newValue;
-
-                                // Cas spécial : orientation du vent
+                                // Calcul du texte ET de la valeur numérique
                                 if (key.header == 'wind_direction_facing') {
-                                        final dir = int.tryParse(values[index]) ?? -1;
-                                        newValue = getWindDirectionFacing(dir);
+                                        formatted = getWindDirectionFacing(int.tryParse(values[idx]) ?? -1);
+                                        numeric = null;
                                 }
-                                // Cas Iridium : on conserve la valeur brute (0–5)
                                 else if (key.header.toLowerCase() == 'iridium_signal_quality') {
-                                        newValue = values[index];
+                                        formatted = values[idx];
+                                        numeric = double.tryParse(values[idx]);
                                 }
-                                // Valeur numérique générique + unité
                                 else {
-                                        final raw = values[index];
-                                        final num = double.tryParse(raw);
-                                        if (num != null) {
-                                                newValue = '${num.toStringAsFixed(2)}${getUnitForHeader(key.header)}';
+                                        final raw = values[idx];
+                                        final n = double.tryParse(raw);
+                                        if (n != null) {
+                                                // texte limité à 2 décimales
+                                                formatted = '${n.toStringAsFixed(2)}${getUnitForHeader(key.header)}';
+                                                numeric = double.parse(n.toStringAsFixed(2));
                                         }
                                         else {
-                                                newValue = raw;
+                                                formatted = raw;
+                                                numeric = null;
                                         }
                                 }
 
-                                // Mise à jour si différent
-                                if (updatedData[key] != newValue) {
-                                        updatedData[key] = newValue;
-                                        hasChanged = true;
+                                // Mise à jour du popup texte si nécessaire
+                                if (sensor.data[key] != formatted) {
+                                        sensor.updateFormatted(key, formatted);
                                 }
-                        }
 
-                        // Notification du changement
-                        if (hasChanged) {
-                                sensor.dataNotifier.value = updatedData;
+                                // Enregistrement à chaque fois pour le graphique
+                                if (numeric != null) {
+                                        sensor.recordHistory(key, numeric);
+                                }
                         }
                 }
         }

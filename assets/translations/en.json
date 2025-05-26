@@ -187,7 +187,7 @@
 			"wind_speed": "Wind Speed",
 			"wind_direction_angle": "Wind Angle",
 			"wind_direction_facing": "Wind Direction",
-			"lux": "Lux",
+			"lux": "Luminosity",
 			"mb_temperature": "Temperature",
 			"mb_pressure": "Pressure",
 			"mb_humidity": "Humidity"
@@ -224,5 +224,9 @@
 				"error": "Error"
 			}
 		}
+	},
+
+	"graph": {
+		"real_time": "Last 60 seconds (Real Time)"
 	}
 }

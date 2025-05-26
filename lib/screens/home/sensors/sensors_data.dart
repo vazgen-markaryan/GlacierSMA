@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 
 /// Définit le modèle "DataMap" et "SensorsData", ainsi que la liste par défaut de tous les capteurs et la fonction d’accès.
@@ -30,20 +31,37 @@ class SensorsData {
                 this.svgIcon, this.title, this.color,
                 this.header, this.temp, this.pres,
                 this.hum, this.codeName, this.bitIndex,
-                this.bus, this.placement,  this.dataProcessor,
+                this.bus, this.placement, this.dataProcessor,
                 required Map<DataMap, dynamic> data,
                 int? powerStatus
         }) : dataNotifier = ValueNotifier(data),
-              powerStatusNotifier = ValueNotifier(powerStatus),
-              maskValue = bitIndex != null ? (1 << bitIndex) : null;
+                powerStatusNotifier = ValueNotifier(powerStatus),
+                maskValue = bitIndex != null ? (1 << bitIndex) : null;
 
         Map<DataMap, dynamic> get data => dataNotifier.value;
 
-        // Méthode utilitaire pour changer une valeur et notifier
-        void updateData(DataMap key, dynamic newValue) {
+        // Historique pour chaque DataMap (liste de FlSpot(x=sec,y=val))
+        final Map<DataMap, List<FlSpot>> history = {};
+        final DateTime start = DateTime.now();
+
+        /// Met à jour uniquement le libellé affiché (popup texte)
+        void updateFormatted(DataMap key, String formatted) {
+                // On clone la map courante et on change la valeur pour ce key
                 final updated = Map<DataMap, dynamic>.from(dataNotifier.value);
-                updated[key] = newValue;
+                updated[key] = formatted;
                 dataNotifier.value = updated;
+        }
+
+        /// Enregistre à chaque trame la composante numérique pour tracer le graph
+        void recordHistory(DataMap key, double newValue) {
+                final elapsed = DateTime.now().difference(start).inSeconds.toDouble();
+                final list = history.putIfAbsent(key, () => []);
+                list.add(FlSpot(elapsed, newValue));
+
+                // Ne garder que les 60 dernières secondes
+                while (list.isNotEmpty && elapsed - list.first.x > 60) {
+                        list.removeAt(0);
+                }
         }
 }
 
