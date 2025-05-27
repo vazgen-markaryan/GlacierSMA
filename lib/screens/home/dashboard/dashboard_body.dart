@@ -31,7 +31,8 @@ class DashboardBody extends StatelessWidget {
                                                                 getSensors: getSensors,
                                                                 onTap: (ctx, s) => showPopup(ctx, s),
                                                                 configMode: false,
-                                                                showInactive: false
+                                                                showInactive: false,
+                                                                testMode: false
                                                         )
                                                 ]
                                         )

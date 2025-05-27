@@ -93,14 +93,14 @@ class ConfigScreenState extends State<ConfigScreen> {
                         onWillPop: confirmDiscard,
                         child: SingleChildScrollView(
                                 padding: const EdgeInsets.all(defaultPadding),
-                                child: Column(children: [
-
+                                child: Column(
+                                        children: [
                                                 ...createAllSensorGroups(
                                                         maskNotifier: localMaskNotifier,
                                                         getSensors: getSensors,
-                                                        onTap: (_, __) {
-                                                        },
+                                                        onTap: (_, __) {},
                                                         configMode: true,
+                                                        testMode: false,
                                                         localMask: localMaskNotifier
                                                 ),
 

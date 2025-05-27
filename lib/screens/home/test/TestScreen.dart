@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
+import 'package:rev_glacier_sma_mobile/utils/switch_utils.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_card.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_group_factory.dart';
 
 /// Écran de test en environnement contrôlé
 class TestScreen extends StatefulWidget {
@@ -37,6 +39,28 @@ class TestScreenState extends State<TestScreen> {
         // Indicateur pour savoir si le test est en cours
         bool isTesting = false;
 
+        // Map des champs à exclure par capteur
+        final Map<String, Set<String>> bannedFields = {
+                "lsm303_status": {
+                        "lsm303_accel_x",
+                        "lsm303_accel_y",
+                        "lsm303_accel_z",
+                        "lsm303_accel_range"
+                },
+                "wind_direction_status": {
+                        "wind_direction_facing"
+                }
+        };
+
+        bool shouldIncludeDataMap(SensorsData sensor, DataMap key) {
+                final banned = bannedFields[sensor.header];
+
+                if (banned != null) {
+                        return !banned.contains(key.header);
+                }
+                return true; // Par défaut, inclure tout
+        }
+
         @override
         void initState() {
                 super.initState();
@@ -46,6 +70,7 @@ class TestScreenState extends State<TestScreen> {
                         if (!isActive(sensor, mask)) continue;
                         final dataMap = <DataMap, RangeValues>{};
                         for (var key in sensor.data.keys) {
+                                if (!shouldIncludeDataMap(sensor, key)) continue;
                                 dataMap[key] = getMinMax(sensor, key);
                         }
                         dataMapMinMax[sensor] = dataMap;
@@ -56,19 +81,7 @@ class TestScreenState extends State<TestScreen> {
         }
 
         RangeValues getMinMax(SensorsData sensor, DataMap key) {
-                if (sensor.header == "bme280_status" && key.header == "bme280_temperature") {
-                        return const RangeValues(-40, 85);
-                }
-                else if (sensor.header == "bme280_status" && key.header == "bme280_pression") {
-                        return const RangeValues(300, 1100);
-                }
-                else if (sensor.header == "bme280_status" && key.header == "bme280_humidity") {
-                        return const RangeValues(0, 100);
-                }
-                else if (sensor.header == "bme280_status" && key.header == "bme280_altitude") {
-                        return const RangeValues(0, 10000);
-                }
-                return const RangeValues(10, 10);
+                return minMaxRanges[sensor.header]?[key.header] ?? const RangeValues(0, 999999);
         }
 
         bool isActive(SensorsData sensor, int mask) {
@@ -145,29 +158,22 @@ class TestScreenState extends State<TestScreen> {
                 );
         }
 
-        List<Widget> buildSensorList(Iterable<SensorsData> sensors, String title) {
-                if (sensors.isEmpty) return [];
-                return [
-                        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                        ...sensors.map((sensor) => Padding(
-                                        padding: const EdgeInsets.only(bottom: defaultPadding),
-                                        child: SensorCard(sensor: sensor, testMode: true, onTap: () => showRangeDialog(sensor))
-                                ))
-                ];
-        }
-
         Widget buildConfigScreen() {
-                final mask = widget.activeMaskNotifier.value ?? 0;
-                final internal = widget.getSensors(SensorType.internal).where((sensor) => isActive(sensor, mask));
-                final modbus = widget.getSensors(SensorType.modbus).where((sensor) => isActive(sensor, mask));
-
                 return SingleChildScrollView(
                         padding: const EdgeInsets.all(defaultPadding),
                         child: Column(
                                 children: [
-                                        ...buildSensorList(internal, 'Internal Sensors'),
-                                        ...buildSensorList(modbus, 'ModBus Sensors'),
+                                        ...createAllSensorGroups(
+                                                maskNotifier: widget.activeMaskNotifier,
+                                                getSensors: widget.getSensors,
+                                                onTap: (ctx, s) => showRangeDialog(s),
+                                                configMode: false,
+                                                showDataProcessors: false,
+                                                testMode: true
+                                        ),
+
                                         const SizedBox(height: defaultPadding),
+
                                         SizedBox(
                                                 width: double.infinity,
                                                 height: 48,
@@ -266,12 +272,13 @@ class RangePopupState extends State<RangePopup> {
         @override
         Widget build(BuildContext context) {
                 return CustomPopup(
-                        title: widget.sensor.title ?? '',
+                        title: tr(widget.sensor.title ?? ''),
                         content: SingleChildScrollView(
                                 child: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                                for (var key in widget.currents.keys) ...[
+                                                for (var key in widget.currents.keys)
+                                                        ...[
                                                                 Container(
                                                                         margin: const EdgeInsets.only(bottom: 12, right: 8),
                                                                         padding: const EdgeInsets.all(12),
@@ -295,7 +302,7 @@ class RangePopupState extends State<RangePopup> {
                                                                                                         ),
                                                                                                         const SizedBox(width: 8),
                                                                                                         Text(
-                                                                                                                key.header,
+                                                                                                                tr(key.name),
                                                                                                                 style: const TextStyle(color: Colors.white70, fontSize: 15)
                                                                                                         )
                                                                                                 ]
@@ -304,38 +311,64 @@ class RangePopupState extends State<RangePopup> {
                                                                                         Row(
                                                                                                 children: [
                                                                                                         Expanded(
-                                                                                                                child: TextField(
-                                                                                                                        controller: controllersMin[key],
-                                                                                                                        decoration: const InputDecoration(
-                                                                                                                                labelText: 'Min',
-                                                                                                                                labelStyle: TextStyle(color: Colors.white70),
-                                                                                                                                enabledBorder: UnderlineInputBorder(
-                                                                                                                                        borderSide: BorderSide(color: Colors.white38)
+                                                                                                                child: Stack(
+                                                                                                                        alignment: Alignment.centerRight,
+                                                                                                                        children: [
+                                                                                                                                TextField(
+                                                                                                                                        controller: controllersMin[key],
+                                                                                                                                        decoration: const InputDecoration(
+                                                                                                                                                labelText: 'Min',
+                                                                                                                                                labelStyle: TextStyle(color: Colors.white70),
+                                                                                                                                                enabledBorder: UnderlineInputBorder(
+                                                                                                                                                        borderSide: BorderSide(color: Colors.white38)
+                                                                                                                                                ),
+                                                                                                                                                contentPadding: EdgeInsets.only(right: 40)
+                                                                                                                                        ),
+                                                                                                                                        style: const TextStyle(color: Colors.white),
+                                                                                                                                        keyboardType: TextInputType.number,
+                                                                                                                                        onChanged: (_) => setState(() {
+                                                                                                                                                }
+                                                                                                                                        )
+                                                                                                                                ),
+                                                                                                                                Padding(
+                                                                                                                                        padding: const EdgeInsets.only(right: 8),
+                                                                                                                                        child: Text(
+                                                                                                                                                getUnitForHeader(key.header),
+                                                                                                                                                style: const TextStyle(color: Colors.white70, fontSize: 14)
+                                                                                                                                        )
                                                                                                                                 )
-                                                                                                                        ),
-                                                                                                                        style: const TextStyle(color: Colors.white),
-                                                                                                                        keyboardType: TextInputType.number,
-                                                                                                                        onChanged: (_) => setState(() {
-                                                                                                                                }
-                                                                                                                        )
+                                                                                                                        ]
                                                                                                                 )
                                                                                                         ),
                                                                                                         const SizedBox(width: 12),
                                                                                                         Expanded(
-                                                                                                                child: TextField(
-                                                                                                                        controller: controllersMax[key],
-                                                                                                                        decoration: const InputDecoration(
-                                                                                                                                labelText: 'Max',
-                                                                                                                                labelStyle: TextStyle(color: Colors.white70),
-                                                                                                                                enabledBorder: UnderlineInputBorder(
-                                                                                                                                        borderSide: BorderSide(color: Colors.white38)
+                                                                                                                child: Stack(
+                                                                                                                        alignment: Alignment.centerRight,
+                                                                                                                        children: [
+                                                                                                                                TextField(
+                                                                                                                                        controller: controllersMax[key],
+                                                                                                                                        decoration: const InputDecoration(
+                                                                                                                                                labelText: 'Max',
+                                                                                                                                                labelStyle: TextStyle(color: Colors.white70),
+                                                                                                                                                enabledBorder: UnderlineInputBorder(
+                                                                                                                                                        borderSide: BorderSide(color: Colors.white38)
+                                                                                                                                                ),
+                                                                                                                                                contentPadding: EdgeInsets.only(right: 40)
+                                                                                                                                        ),
+                                                                                                                                        style: const TextStyle(color: Colors.white),
+                                                                                                                                        keyboardType: TextInputType.number,
+                                                                                                                                        onChanged: (_) => setState(() {
+                                                                                                                                                }
+                                                                                                                                        )
+                                                                                                                                ),
+                                                                                                                                Padding(
+                                                                                                                                        padding: const EdgeInsets.only(right: 8),
+                                                                                                                                        child: Text(
+                                                                                                                                                getUnitForHeader(key.header),
+                                                                                                                                                style: const TextStyle(color: Colors.white70, fontSize: 14)
+                                                                                                                                        )
                                                                                                                                 )
-                                                                                                                        ),
-                                                                                                                        style: const TextStyle(color: Colors.white),
-                                                                                                                        keyboardType: TextInputType.number,
-                                                                                                                        onChanged: (_) => setState(() {
-                                                                                                                                }
-                                                                                                                        )
+                                                                                                                        ]
                                                                                                                 )
                                                                                                         )
                                                                                                 ]
@@ -347,7 +380,8 @@ class RangePopupState extends State<RangePopup> {
                                                 ElevatedButton(
                                                         style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                                                         onPressed: () {
-                                                                setState(() {
+                                                                setState(
+                                                                        () {
                                                                                 widget.defaults.forEach((key, value) {
                                                                                                 controllersMin[key]!.text = value.start.toInt().toString();
                                                                                                 controllersMax[key]!.text = value.end.toInt().toString();
@@ -369,7 +403,8 @@ class RangePopupState extends State<RangePopup> {
                                 TextButton(
                                         onPressed: hasRangeChanges()
                                                 ? () {
-                                                        setState(() {
+                                                        setState(
+                                                                () {
                                                                         for (var key in widget.currents.keys) {
                                                                                 final min = int.tryParse(controllersMin[key]!.text) ?? widget.defaults[key]!.start.toInt();
                                                                                 final max = int.tryParse(controllersMax[key]!.text) ?? widget.defaults[key]!.end.toInt();

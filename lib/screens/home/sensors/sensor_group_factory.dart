@@ -12,9 +12,11 @@ List<Widget> createAllSensorGroups({
         required ValueListenable<int?> maskNotifier,
         required List<SensorsData> Function(SensorType) getSensors,
         required SensorTapCallback onTap,
+        required bool testMode,
         bool configMode = false,
         ValueNotifier<int>? localMask,
-        bool showInactive = false
+        bool showInactive = false,
+        bool showDataProcessors = true
 }) {
         final sections = [
         {
@@ -63,44 +65,50 @@ List<Widget> createAllSensorGroups({
                                 }
 
                                 return Column(
-                                        children: sections.map((section) {
-                                                        final raw = groups[section['groupKey']]!;
-                                                        final filtered = filter(raw);
-                                                        final emptyKey = showInactive
-                                                                ? section['emptyInactive'] as String
-                                                                : section['emptyActive']   as String;
+                                        children: sections
+                                                .where((section) =>
+                                                        showDataProcessors || section['groupKey'] != 'data'
+                                                )
+                                                .map(
+                                                        (section) {
+                                                                final raw = groups[section['groupKey']]!;
+                                                                final filtered = filter(raw);
+                                                                final emptyKey = showInactive
+                                                                        ? section['emptyInactive'] as String
+                                                                        : section['emptyActive']   as String;
 
-                                                        return SensorsGroup(
-                                                                title: tr(section['titleKey'] as String),
-                                                                sensors: filtered,
-                                                                emptyMessage: tr(emptyKey),
-                                                                itemBuilder: (context, sensor) {
-                                                                        if (configMode) {
-                                                                                final bit = sensor.bitIndex!;
-                                                                                final on = (localMask!.value & (1 << bit)) != 0;
-                                                                                return SensorCard(
-                                                                                        sensor: sensor,
-                                                                                        configMode: true,
-                                                                                        isOn: on,
-                                                                                        onToggle: (value) {
-                                                                                                localMask.value = value
-                                                                                                        ? (localMask.value | (1 << bit))
-                                                                                                        : (localMask.value & ~(1 << bit));
-                                                                                        }
-                                                                                );
+                                                                return SensorsGroup(
+                                                                        title: tr(section['titleKey'] as String),
+                                                                        sensors: filtered,
+                                                                        emptyMessage: tr(emptyKey),
+                                                                        itemBuilder: (context, sensor) {
+                                                                                if (configMode) {
+                                                                                        final bit = sensor.bitIndex!;
+                                                                                        final on = (localMask!.value & (1 << bit)) != 0;
+                                                                                        return SensorCard(
+                                                                                                sensor: sensor,
+                                                                                                configMode: true,
+                                                                                                isOn: on,
+                                                                                                onToggle: (value) {
+                                                                                                        localMask.value = value
+                                                                                                                ? (localMask.value | (1 << bit))
+                                                                                                                : (localMask.value & ~(1 << bit));
+                                                                                                }
+                                                                                        );
+                                                                                }
+                                                                                else {
+                                                                                        return SensorCard(
+                                                                                                sensor: sensor,
+                                                                                                testMode: testMode,
+                                                                                                onTap: (sensor.data.isNotEmpty && sensor.title != "sensor-data.title.sd_card")
+                                                                                                        ? () => onTap(context, sensor)
+                                                                                                        : null
+                                                                                        );
+                                                                                }
                                                                         }
-                                                                        else {
-                                                                                return SensorCard(
-                                                                                        sensor: sensor,
-                                                                                        onTap: (sensor.data.isNotEmpty && sensor.title != "sensor-data.title.sd_card")
-                                                                                                ? () => onTap(context, sensor)
-                                                                                                : null
-                                                                                );
-                                                                        }
-                                                                }
-                                                        );
-                                                }
-                                        ).toList()
+                                                                );
+                                                        }
+                                                ).toList()
                                 );
                         }
                 )

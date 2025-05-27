@@ -38,7 +38,8 @@ class DebugScreen extends StatelessWidget {
                                                                         getSensors: getSensors,
                                                                         onTap: (ctx, s) => showPopup(ctx, s),
                                                                         configMode: false,
-                                                                        showInactive: true
+                                                                        showInactive: true,
+                                                                        testMode: false
                                                                 )
                                                         ]
                                                 )
