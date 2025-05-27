@@ -96,8 +96,26 @@ class TestScreenState extends State<TestScreen> {
                         context: context,
                         barrierDismissible: false,
                         builder: (_) => CustomPopup(
-                                title: 'Environnement contrôlé',
-                                content: const Text('Tutoriel placeholder'),
+                                title: tr('test.intro.title'),
+                                content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: List.generate(
+                                                7,
+                                                (i) => Padding(
+                                                        padding: EdgeInsets.only(bottom: i < 6 ? 8 : 0),
+                                                        child: Text(
+                                                                tr('test.intro.description_${i + 1}'),
+                                                                style: const TextStyle(
+                                                                        color: Colors.white,
+                                                                        fontSize: 16,
+                                                                        height: 1.5,
+                                                                        fontWeight: FontWeight.w400
+                                                                )
+                                                        )
+                                                )
+                                        )
+                                ),
                                 actions: [
                                         TextButton(
                                                 onPressed: () => Navigator.of(context).pop(),

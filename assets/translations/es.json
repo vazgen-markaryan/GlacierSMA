@@ -84,7 +84,7 @@
 			"debug": "Depuración",
 			"config": "Config",
 			"test": "Test",
-			"settings": "Configuración"
+			"settings": "Config"
 		}
 	},
 
@@ -98,6 +98,19 @@
 		"no_data_received": "No se recibieron datos.\nVerifique su hardware, el código Arduino y la lógica de la aplicación.",
 		"message_sent": "Mensaje enviado: {log}",
 		"message_error": "Error al enviar: {log}"
+	},
+
+	"test": {
+		"intro": {
+			"title": "Entorno controlado",
+			"description_1": "Esta es una página de prueba que no afecta ningún dato real.",
+			"description_2": "El propósito de esta página es comprobar si los sensores transmiten valores en un entorno controlado.",
+			"description_3": "Puede modificar los rangos de valores de los sensores, crear un entorno definido por usted y luego iniciar una prueba para ver los registros.",
+			"description_4": "Si se detecta una anomalía, se mostrará en los registros.",
+			"description_5": "También puede restablecer los rangos de valores predeterminados para cada sensor.",
+			"description_6": "La prueba no puede ejecutarse en segundo plano. Debe mantener esta página abierta.",
+			"description_7": "Una vez iniciada la prueba, no puede navegar a otra página hasta que la prueba se detenga."
+		}
 	},
 
 	"config": {

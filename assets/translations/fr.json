@@ -100,6 +100,19 @@
 		"message_error": "Erreur d’envoi : {log}"
 	},
 
+	"test": {
+		"intro": {
+			"title": "Environnement contrôlé",
+			"description_1": "Ceci est une page de test qui n'affecte aucune donnée réelle.",
+			"description_2": "Le but de cette page est de vérifier si les capteurs transmettent des valeurs dans un environnement contrôlé.",
+			"description_3": "Vous pouvez modifier les plages de valeurs des capteurs, créer un environnement défini par vous-même, puis lancer un test pour voir les journaux.",
+			"description_4": "Si une anomalie est détectée, elle sera affichée dans les journaux.",
+			"description_5": "Vous pouvez également réinitialiser les plages de valeurs par défaut pour chaque capteur.",
+			"description_6": "Le test ne peut pas s'exécuter en arrière-plan. Vous devez rester sur cette page.",
+			"description_7": "Une fois que le test est lancé, vous ne pouvez plus naviguer vers d'autres pages avant d'arrêter le test."
+		}
+	},
+
 	"config": {
 		"password_required": "Mot de passe requis",
 		"password": "Mot de passe",
