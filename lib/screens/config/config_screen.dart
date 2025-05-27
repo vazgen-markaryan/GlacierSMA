@@ -33,7 +33,7 @@ class ConfigScreenState extends State<ConfigScreen> {
         bool authenticated = false;
 
         late TextEditingController sleepCtrl, seaCtrl, captureCtrl;
-        double initSleep = 0, sleep = 0;
+        int initSleep = 0, sleep = 0;
         double initSea = 0, sea = 0;
         int initCapture = 0, cap = 0;
         bool invalidSleep = false, invalidCap = false;
@@ -58,7 +58,7 @@ class ConfigScreenState extends State<ConfigScreen> {
                 if (raw == null) return;
                 final p = parseSeriesParams(raw);
                 setState(() {
-                                initSleep = p.sleep;  sleep = p.sleep;   sleepCtrl.text = p.sleep.toInt().toString();
+                                initSleep = p.sleep;  sleep = p.sleep;   sleepCtrl.text = p.sleep.toString();
                                 initSea = p.seaPressure; sea = p.seaPressure; seaCtrl.text = p.seaPressure.toString();
                                 initCapture = p.capture;    cap = p.capture; captureCtrl.text = p.capture.toString();
                         }
@@ -162,7 +162,7 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                                                         onChanged: (v) {
                                                                                                 final x = validateSleep(int.tryParse(v) ?? 0);
                                                                                                 invalidSleep = isSleepInvalid(int.tryParse(v) ?? 0);
-                                                                                                setState(() => sleep = x.toDouble());
+                                                                                                setState(() => sleep = x.toInt());
                                                                                         }
                                                                                 ),
 

@@ -92,7 +92,7 @@ List<Widget> createAllSensorGroups({
                                                                         else {
                                                                                 return SensorCard(
                                                                                         sensor: sensor,
-                                                                                        onTap: (sensor.data.isNotEmpty && sensor.title != 'SD Card')
+                                                                                        onTap: (sensor.data.isNotEmpty && sensor.title != "sensor-data.title.sd_card")
                                                                                                 ? () => onTap(context, sensor)
                                                                                                 : null
                                                                                 );

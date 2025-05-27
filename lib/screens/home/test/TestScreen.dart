@@ -18,41 +18,67 @@ class TestScreen extends StatefulWidget {
         }) : super(key: key);
 
         @override
-        State<TestScreen> createState() => _TestScreenState();
+        State<TestScreen> createState() => TestScreenState();
 }
 
-class _TestScreenState extends State<TestScreen> {
-        // Pour chaque capteur, une map DataMap -> RangeValues
+class TestScreenState extends State<TestScreen> {
+        // Map pour stocker les plages de valeurs par DataMap
         final Map<SensorsData, Map<DataMap, RangeValues>> ranges = {};
+
+        // Map pour les valeurs par défaut
         final Map<SensorsData, Map<DataMap, RangeValues>> defaultRanges = {};
+
+        // Map pour stocker les min/max par capteur et son DataMap
+        final Map<SensorsData, Map<DataMap, RangeValues>> dataMapMinMax = {};
+
+        // Liste des logs pour le test
         final List<String> logs = [];
+
+        // Indicateur pour savoir si le test est en cours
         bool isTesting = false;
 
         @override
         void initState() {
                 super.initState();
-                final m = widget.activeMaskNotifier.value ?? 0;
-                // Initialiser defaults 10/10 par DataMap (utilise int pour affichage)
-                for (var s in widget.getSensors(SensorType.internal) + widget.getSensors(SensorType.modbus)) {
-                        if (!_isActive(s, m)) continue;
-                        final dm = <DataMap, RangeValues>{};
-                        for (var key in s.data.keys) {
-                                dm[key] = const RangeValues(10, 10);
+                final mask = widget.activeMaskNotifier.value ?? 0;
+
+                for (var sensor in widget.getSensors(SensorType.internal) + widget.getSensors(SensorType.modbus)) {
+                        if (!isActive(sensor, mask)) continue;
+                        final dataMap = <DataMap, RangeValues>{};
+                        for (var key in sensor.data.keys) {
+                                dataMap[key] = getMinMax(sensor, key);
                         }
-                        defaultRanges[s] = Map.of(dm);
-                        ranges[s] = Map.of(dm);
+                        dataMapMinMax[sensor] = dataMap;
+                        defaultRanges[sensor] = Map.of(dataMap);
+                        ranges[sensor] = Map.of(dataMap);
                 }
-                WidgetsBinding.instance.addPostFrameCallback((_) => _showIntroDialog());
+                WidgetsBinding.instance.addPostFrameCallback((_) => showIntroDialog());
         }
 
-        bool _isActive(SensorsData s, int m) {
-                final h = s.header?.toLowerCase();
-                if (h == 'gps_status' || h == 'iridium_status' || h == 'sdcard' || s.dataProcessor != null) return false;
-                if (s.bitIndex != null && (m & (1 << s.bitIndex!)) == 0) return false;
+        RangeValues getMinMax(SensorsData sensor, DataMap key) {
+                if (sensor.header == "bme280_status" && key.header == "bme280_temperature") {
+                        return const RangeValues(-40, 85);
+                }
+                else if (sensor.header == "bme280_status" && key.header == "bme280_pression") {
+                        return const RangeValues(300, 1100);
+                }
+                else if (sensor.header == "bme280_status" && key.header == "bme280_humidity") {
+                        return const RangeValues(0, 100);
+                }
+                else if (sensor.header == "bme280_status" && key.header == "bme280_altitude") {
+                        return const RangeValues(0, 10000);
+                }
+                return const RangeValues(10, 10);
+        }
+
+        bool isActive(SensorsData sensor, int mask) {
+                final header = sensor.header?.toLowerCase();
+                if (header == 'gps_status' || header == 'iridium_status' || header == 'sdcard' || sensor.dataProcessor != null) return false;
+                if (sensor.bitIndex != null && (mask & (1 << sensor.bitIndex!)) == 0) return false;
                 return true;
         }
 
-        void _showIntroDialog() {
+        void showIntroDialog() {
                 showDialog(
                         context: context,
                         barrierDismissible: false,
@@ -69,161 +95,45 @@ class _TestScreenState extends State<TestScreen> {
                 );
         }
 
-        void _showRangeDialog(SensorsData sensor) {
-                final defaults = defaultRanges[sensor]!;
-                final currents = ranges[sensor]!;
-                final controllersMin = <DataMap, TextEditingController>{};
-                final controllersMax = <DataMap, TextEditingController>{};
-                for (var key in currents.keys) {
-                        controllersMin[key] = TextEditingController(text: currents[key]!.start.toInt().toString());
-                        controllersMax[key] = TextEditingController(text: currents[key]!.end.toInt().toString());
-                }
-                showDialog(
+        void showRangeDialog(SensorsData sensor) {
+                showGeneralDialog(
                         context: context,
                         barrierDismissible: false,
-                        builder: (_) => StatefulBuilder(
-                                builder: (ctx, sb) => CustomPopup(
-                                        title: sensor.title ?? '',
-                                        content: SingleChildScrollView(
-                                                child: Column(
-                                                        mainAxisSize: MainAxisSize.min,
-                                                        children: [
-                                                                for (var key in currents.keys) ...[
-                                                                                Container(
-                                                                                        margin: const EdgeInsets.only(bottom: 12, right: 8),
-                                                                                        padding: const EdgeInsets.all(12),
-                                                                                        decoration: BoxDecoration(
-                                                                                                color: Colors.white10,
-                                                                                                borderRadius: BorderRadius.circular(8)
-                                                                                        ),
-                                                                                        child: Column(
-                                                                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                                children: [
-                                                                                                        Row(
-                                                                                                                children: [
-                                                                                                                        SvgPicture.asset(
-                                                                                                                                key.svgLogo,
-                                                                                                                                height: 24,
-                                                                                                                                width: 24,
-                                                                                                                                colorFilter: const ColorFilter.mode(
-                                                                                                                                        Colors.white70,
-                                                                                                                                        BlendMode.srcIn
-                                                                                                                                )
-                                                                                                                        ),
-                                                                                                                        const SizedBox(width: 8),
-                                                                                                                        Text(
-                                                                                                                                key.header,
-                                                                                                                                style: const TextStyle(color: Colors.white70, fontSize: 15)
-                                                                                                                        )
-                                                                                                                ]
-                                                                                                        ),
-                                                                                                        const SizedBox(height: 8),
-                                                                                                        Row(
-                                                                                                                children: [
-                                                                                                                        Expanded(
-                                                                                                                                child: TextField(
-                                                                                                                                        controller: controllersMin[key],
-                                                                                                                                        decoration: const InputDecoration(
-                                                                                                                                                labelText: 'Min',
-                                                                                                                                                labelStyle: TextStyle(color: Colors.white70),
-                                                                                                                                                enabledBorder: UnderlineInputBorder(
-                                                                                                                                                        borderSide: BorderSide(color: Colors.white38)
-                                                                                                                                                )
-                                                                                                                                        ),
-                                                                                                                                        style: const TextStyle(color: Colors.white),
-                                                                                                                                        keyboardType: TextInputType.number,
-                                                                                                                                        onChanged: (_) => sb(() {
-                                                                                                                                                }
-                                                                                                                                        )
-                                                                                                                                )
-                                                                                                                        ),
-                                                                                                                        const SizedBox(width: 12),
-                                                                                                                        Expanded(
-                                                                                                                                child: TextField(
-                                                                                                                                        controller: controllersMax[key],
-                                                                                                                                        decoration: const InputDecoration(
-                                                                                                                                                labelText: 'Max',
-                                                                                                                                                labelStyle: TextStyle(color: Colors.white70),
-                                                                                                                                                enabledBorder: UnderlineInputBorder(
-                                                                                                                                                        borderSide: BorderSide(color: Colors.white38)
-                                                                                                                                                )
-                                                                                                                                        ),
-                                                                                                                                        style: const TextStyle(color: Colors.white),
-                                                                                                                                        keyboardType: TextInputType.number,
-                                                                                                                                        onChanged: (_) => sb(() {
-                                                                                                                                                }
-                                                                                                                                        )
-                                                                                                                                )
-                                                                                                                        )
-                                                                                                                ]
-                                                                                                        )
-                                                                                                ]
-                                                                                        )
-                                                                                )
-                                                                        ],
-                                                                ElevatedButton(
-                                                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                                                                        onPressed: () {
-                                                                                sb(() {
-                                                                                                defaults.forEach((k, v) => currents[k] = v);
-                                                                                                for (var key in controllersMin.keys) {
-                                                                                                        controllersMin[key]!.text = defaults[key]!.start.toInt().toString();
-                                                                                                        controllersMax[key]!.text = defaults[key]!.end.toInt().toString();
-                                                                                                }
-                                                                                        }
-                                                                                );
-                                                                                setState(() => ranges[sensor] = Map.of(defaults));
-                                                                        },
-                                                                        child: const Text('Reset defaults')
-                                                                )
-                                                        ]
-                                                )
-                                        ),
-                                        actions: [
-                                                TextButton(
-                                                        onPressed: () => Navigator.of(context).pop(),
-                                                        child: const Text('Cancel')
-                                                ),
-                                                TextButton(
-                                                        onPressed: () {
-                                                                sb(() {
-                                                                                for (var key in currents.keys) {
-                                                                                        final min = int.tryParse(controllersMin[key]!.text) ?? defaults[key]!.start.toInt();
-                                                                                        final max = int.tryParse(controllersMax[key]!.text) ?? defaults[key]!.end.toInt();
-                                                                                        currents[key] = RangeValues(min.toDouble(), max.toDouble());
-                                                                                }
-                                                                                ranges[sensor] = Map.of(currents);
-                                                                        }
-                                                                );
-                                                                Navigator.of(context).pop();
-                                                        },
-                                                        child: const Text('Apply')
-                                                )
-                                        ]
-                                )
+                        barrierLabel: '',
+                        barrierColor: Colors.black54,
+                        transitionDuration: const Duration(milliseconds: 200),
+                        pageBuilder: (_, __, ___) => RangePopup(
+                                sensor: sensor,
+                                defaults: defaultRanges[sensor]!,
+                                currents: ranges[sensor]!,
+                                onApply: (updated) => setState(() => ranges[sensor] = Map.of(updated))
+                        ),
+                        transitionBuilder: (context, animation, _, child) => Transform.scale(
+                                scale: Curves.easeOutBack.transform(animation.value),
+                                child: child
                         )
                 );
         }
 
-        bool get _hasChanges {
-                for (var s in ranges.keys) {
-                        final curr = ranges[s]!;
-                        final def = defaultRanges[s]!;
-                        if (curr.length != def.length) return true;
-                        for (var k in curr.keys) {
-                                if (curr[k] != def[k]) return true;
+        bool get hasChanges {
+                for (var sensor in ranges.keys) {
+                        final current = ranges[sensor]!;
+                        final defaults = defaultRanges[sensor]!;
+                        if (current.length != defaults.length) return true;
+                        for (var k in current.keys) {
+                                if (current[k] != defaults[k]) return true;
                         }
                 }
                 return false;
         }
 
-        void _launchTest() {
+        void launchTest() {
                 setState(() => isTesting = true);
                 logs.clear();
                 logs.add('Test started');
         }
 
-        void _stopTest() {
+        void stopTest() {
                 setState(() => isTesting = false);
                 logs.add('Test stopped');
         }
@@ -231,55 +141,51 @@ class _TestScreenState extends State<TestScreen> {
         @override
         Widget build(BuildContext context) {
                 return Scaffold(
-                        body: isTesting ? _buildLogScreen() : _buildConfigScreen()
+                        body: isTesting ? buildLogScreen() : buildConfigScreen()
                 );
         }
 
-        Widget _buildConfigScreen() {
-                final m = widget.activeMaskNotifier.value ?? 0;
-                final internal = widget.getSensors(SensorType.internal).where((s) => _isActive(s, m));
-                final modbus = widget.getSensors(SensorType.modbus).where((s) => _isActive(s, m));
-                final children = <Widget>[];
-                if (internal.isNotEmpty) {
-                        children.add(const Text('Internal Sensors', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)));
-                        for (var s in internal) {
-                                children.add(Padding(
-                                                padding: const EdgeInsets.only(bottom: defaultPadding),
-                                                child: SensorCard(sensor: s, testMode: true, onTap: () => _showRangeDialog(s))
-                                        ));
-                        }
-                }
-                if (modbus.isNotEmpty) {
-                        children.add(const Text('ModBus Sensors', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)));
-                        for (var s in modbus) {
-                                children.add(Padding(
-                                                padding: const EdgeInsets.only(bottom: defaultPadding),
-                                                child: SensorCard(sensor: s, testMode: true, onTap: () => _showRangeDialog(s))
-                                        ));
-                        }
-                }
-                // Bouton lancement en bas
-                children.add(const SizedBox(height: defaultPadding * 2));
-                children.add(SizedBox(
-                                width: double.infinity,
-                                height: 48,
-                                child: ElevatedButton.icon(
-                                        onPressed: _hasChanges ? _launchTest : null,
-                                        icon: const Icon(Icons.play_arrow, color: Colors.white),
-                                        label: const Text('Lancer Test', style: TextStyle(color: Colors.white)),
-                                        style: ElevatedButton.styleFrom(
-                                                backgroundColor: _hasChanges ? Theme.of(context).primaryColor : Colors.grey
-                                        )
-                                )
-                        ));
+        List<Widget> buildSensorList(Iterable<SensorsData> sensors, String title) {
+                if (sensors.isEmpty) return [];
+                return [
+                        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        ...sensors.map((sensor) => Padding(
+                                        padding: const EdgeInsets.only(bottom: defaultPadding),
+                                        child: SensorCard(sensor: sensor, testMode: true, onTap: () => showRangeDialog(sensor))
+                                ))
+                ];
+        }
+
+        Widget buildConfigScreen() {
+                final mask = widget.activeMaskNotifier.value ?? 0;
+                final internal = widget.getSensors(SensorType.internal).where((sensor) => isActive(sensor, mask));
+                final modbus = widget.getSensors(SensorType.modbus).where((sensor) => isActive(sensor, mask));
 
                 return SingleChildScrollView(
                         padding: const EdgeInsets.all(defaultPadding),
-                        child: Column(children: children)
+                        child: Column(
+                                children: [
+                                        ...buildSensorList(internal, 'Internal Sensors'),
+                                        ...buildSensorList(modbus, 'ModBus Sensors'),
+                                        const SizedBox(height: defaultPadding),
+                                        SizedBox(
+                                                width: double.infinity,
+                                                height: 48,
+                                                child: ElevatedButton.icon(
+                                                        onPressed: hasChanges ? launchTest : null,
+                                                        icon: const Icon(Icons.play_arrow, color: Colors.white),
+                                                        label: const Text('Lancer Test', style: TextStyle(color: Colors.white)),
+                                                        style: ElevatedButton.styleFrom(
+                                                                backgroundColor: hasChanges ? Theme.of(context).primaryColor : Colors.grey
+                                                        )
+                                                )
+                                        )
+                                ]
+                        )
                 );
         }
 
-        Widget _buildLogScreen() {
+        Widget buildLogScreen() {
                 return Padding(
                         padding: const EdgeInsets.all(defaultPadding),
                         child: Column(
@@ -294,12 +200,13 @@ class _TestScreenState extends State<TestScreen> {
                                                 )
                                         ),
                                         const SizedBox(height: defaultPadding),
+
                                         // Bouton Stop
                                         SizedBox(
                                                 width: double.infinity,
                                                 height: 48,
                                                 child: ElevatedButton.icon(
-                                                        onPressed: _stopTest,
+                                                        onPressed: stopTest,
                                                         icon: const Icon(Icons.stop, color: Colors.white),
                                                         label: const Text('Arrêter Test', style: TextStyle(color: Colors.white)),
                                                         style: ElevatedButton.styleFrom(backgroundColor: Colors.red)
@@ -307,6 +214,178 @@ class _TestScreenState extends State<TestScreen> {
                                         )
                                 ]
                         )
+                );
+        }
+}
+
+// Widget popup réutilisable
+class RangePopup extends StatefulWidget {
+        final SensorsData sensor;
+        final Map<DataMap, RangeValues> defaults;
+        final Map<DataMap, RangeValues> currents;
+        final void Function(Map<DataMap, RangeValues>) onApply;
+
+        const RangePopup({
+                required this.sensor,
+                required this.defaults,
+                required this.currents,
+                required this.onApply
+        });
+
+        @override
+        State<RangePopup> createState() => RangePopupState();
+}
+
+class RangePopupState extends State<RangePopup> {
+        late Map<DataMap, TextEditingController> controllersMin;
+        late Map<DataMap, TextEditingController> controllersMax;
+        late Map<DataMap, RangeValues> appliedValues;
+
+        @override
+        void initState() {
+                super.initState();
+                controllersMin = {};
+                controllersMax = {};
+                for (var key in widget.currents.keys) {
+                        controllersMin[key] = TextEditingController(text: widget.currents[key]!.start.toInt().toString());
+                        controllersMax[key] = TextEditingController(text: widget.currents[key]!.end.toInt().toString());
+                }
+                appliedValues = Map<DataMap, RangeValues>.from(widget.currents);
+        }
+
+        bool hasRangeChanges() {
+                for (var key in widget.currents.keys) {
+                        final min = int.tryParse(controllersMin[key]!.text) ?? widget.defaults[key]!.start.toInt();
+                        final max = int.tryParse(controllersMax[key]!.text) ?? widget.defaults[key]!.end.toInt();
+                        final value = RangeValues(min.toDouble(), max.toDouble());
+                        if (appliedValues[key] != value) return true;
+                }
+                return false;
+        }
+
+        @override
+        Widget build(BuildContext context) {
+                return CustomPopup(
+                        title: widget.sensor.title ?? '',
+                        content: SingleChildScrollView(
+                                child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                                for (var key in widget.currents.keys) ...[
+                                                                Container(
+                                                                        margin: const EdgeInsets.only(bottom: 12, right: 8),
+                                                                        padding: const EdgeInsets.all(12),
+                                                                        decoration: BoxDecoration(
+                                                                                color: Colors.white10,
+                                                                                borderRadius: BorderRadius.circular(8)
+                                                                        ),
+                                                                        child: Column(
+                                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                children: [
+                                                                                        Row(
+                                                                                                children: [
+                                                                                                        SvgPicture.asset(
+                                                                                                                key.svgLogo,
+                                                                                                                height: 24,
+                                                                                                                width: 24,
+                                                                                                                colorFilter: const ColorFilter.mode(
+                                                                                                                        Colors.white70,
+                                                                                                                        BlendMode.srcIn
+                                                                                                                )
+                                                                                                        ),
+                                                                                                        const SizedBox(width: 8),
+                                                                                                        Text(
+                                                                                                                key.header,
+                                                                                                                style: const TextStyle(color: Colors.white70, fontSize: 15)
+                                                                                                        )
+                                                                                                ]
+                                                                                        ),
+                                                                                        const SizedBox(height: 8),
+                                                                                        Row(
+                                                                                                children: [
+                                                                                                        Expanded(
+                                                                                                                child: TextField(
+                                                                                                                        controller: controllersMin[key],
+                                                                                                                        decoration: const InputDecoration(
+                                                                                                                                labelText: 'Min',
+                                                                                                                                labelStyle: TextStyle(color: Colors.white70),
+                                                                                                                                enabledBorder: UnderlineInputBorder(
+                                                                                                                                        borderSide: BorderSide(color: Colors.white38)
+                                                                                                                                )
+                                                                                                                        ),
+                                                                                                                        style: const TextStyle(color: Colors.white),
+                                                                                                                        keyboardType: TextInputType.number,
+                                                                                                                        onChanged: (_) => setState(() {
+                                                                                                                                }
+                                                                                                                        )
+                                                                                                                )
+                                                                                                        ),
+                                                                                                        const SizedBox(width: 12),
+                                                                                                        Expanded(
+                                                                                                                child: TextField(
+                                                                                                                        controller: controllersMax[key],
+                                                                                                                        decoration: const InputDecoration(
+                                                                                                                                labelText: 'Max',
+                                                                                                                                labelStyle: TextStyle(color: Colors.white70),
+                                                                                                                                enabledBorder: UnderlineInputBorder(
+                                                                                                                                        borderSide: BorderSide(color: Colors.white38)
+                                                                                                                                )
+                                                                                                                        ),
+                                                                                                                        style: const TextStyle(color: Colors.white),
+                                                                                                                        keyboardType: TextInputType.number,
+                                                                                                                        onChanged: (_) => setState(() {
+                                                                                                                                }
+                                                                                                                        )
+                                                                                                                )
+                                                                                                        )
+                                                                                                ]
+                                                                                        )
+                                                                                ]
+                                                                        )
+                                                                )
+                                                        ],
+                                                ElevatedButton(
+                                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                                        onPressed: () {
+                                                                setState(() {
+                                                                                widget.defaults.forEach((key, value) {
+                                                                                                controllersMin[key]!.text = value.start.toInt().toString();
+                                                                                                controllersMax[key]!.text = value.end.toInt().toString();
+                                                                                        }
+                                                                                );
+                                                                        }
+                                                                );
+                                                        },
+                                                        child: const Text('Reset defaults')
+                                                )
+                                        ]
+                                )
+                        ),
+                        actions: [
+                                TextButton(
+                                        onPressed: () => Navigator.of(context).pop(),
+                                        child: const Text('Cancel')
+                                ),
+                                TextButton(
+                                        onPressed: hasRangeChanges()
+                                                ? () {
+                                                        setState(() {
+                                                                        for (var key in widget.currents.keys) {
+                                                                                final min = int.tryParse(controllersMin[key]!.text) ?? widget.defaults[key]!.start.toInt();
+                                                                                final max = int.tryParse(controllersMax[key]!.text) ?? widget.defaults[key]!.end.toInt();
+                                                                                widget.currents[key] = RangeValues(min.toDouble(), max.toDouble());
+                                                                        }
+                                                                        appliedValues
+                                                                        ..clear()
+                                                                        ..addAll(widget.currents);
+                                                                        widget.onApply(widget.currents);
+                                                                }
+                                                        );
+                                                }
+                                                : null,
+                                        child: const Text('Apply')
+                                )
+                        ]
                 );
         }
 }

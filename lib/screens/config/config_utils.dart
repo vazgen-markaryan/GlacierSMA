@@ -12,7 +12,7 @@ class CancelledException implements Exception {
 
 /// Résultat du parsing CSV pour la config série.
 class SeriesParams {
-        final double sleep;
+        final int sleep;
         final double seaPressure;
         final int capture;
         SeriesParams(this.sleep, this.seaPressure, this.capture);
@@ -22,7 +22,7 @@ class SeriesParams {
 SeriesParams parseSeriesParams(RawData raw) {
         final m = raw.asMap;
         return SeriesParams(
-                double.tryParse(m['sleep_minutes'] ?? '') ?? 0,
+                int.tryParse(m['sleep_minutes'] ?? '') ?? 0,
                 double.tryParse(m['sea_level_pressure'] ?? '') ?? 0,
                 int.tryParse(m['capture_amount'] ?? '') ?? 0
         );
@@ -53,9 +53,9 @@ Future<bool> sendMaskConfig({
 /// Met à jour les init* par callbacks et renvoie true si tous OK.
 Future<bool> sendSeriesConfig({
         required MessageService svc,
-        required double sleep,
-        required double initSleep,
-        required void Function(double) updateInitSleep,
+        required int sleep,
+        required int initSleep,
+        required void Function(int) updateInitSleep,
         required double sea,
         required double initSea,
         required void Function(double) updateInitSea,
@@ -64,7 +64,7 @@ Future<bool> sendSeriesConfig({
         required void Function(int) updateInitCapture
 }) async {
         if (sleep != initSleep) {
-                if (!await svc.sendConfigDouble('S', sleep)) return false;
+                if (!await svc.sendConfigInteger('S', sleep)) return false;
                 updateInitSleep(sleep);
         }
         if (sea != initSea) {

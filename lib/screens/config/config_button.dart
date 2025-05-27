@@ -26,11 +26,13 @@ class ConfigButton extends StatefulWidget {
 
         const ConfigButton({
                 Key? key,
-                required this.action,
                 this.confirmTitle,
                 this.confirmContent,
-                required this.idleLabel,
                 this.loadingLabel = '…',
+                this.enabled = true,
+                this.skipConfirmation = false,
+                required this.action,
+                required this.idleLabel,
                 required this.successLabel,
                 required this.failureLabel,
                 required this.idleIcon,
@@ -39,8 +41,6 @@ class ConfigButton extends StatefulWidget {
                 required this.idleColor,
                 required this.successColor,
                 required this.failureColor,
-                this.enabled = true,
-                this.skipConfirmation = false
         }) : assert(
                 skipConfirmation || (confirmTitle != null && confirmContent != null), 'Si skipConfirmation est à false, confirmTitle et confirmContent doivent être fournis'),
                 super(key: key);
@@ -88,7 +88,7 @@ class ConfigButtonState extends State<ConfigButton> {
                                 ),
                                 style: ButtonStyle(
                                         // La couleur de fond en fonction de l'état interne, sans tenir compte de MaterialState.disabled
-                                        backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+                                        backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
                                                         switch (state) {
                                                                 case ConfigButtonStateEnum.success:
                                                                         return widget.successColor;
@@ -97,12 +97,12 @@ class ConfigButtonState extends State<ConfigButton> {
                                                                 case ConfigButtonStateEnum.loading:
                                                                         return widget.idleColor;
                                                                 case ConfigButtonStateEnum.idle:
-                                                                // Si on est à l'état idle mais que enabled=false, on retombe sur gris
-                                                                return widget.enabled ? widget.idleColor : Colors.grey;
+                                                                        // Si on est à l'état idle mais que enabled=false, on retombe sur gris
+                                                                        return widget.enabled ? widget.idleColor : Colors.grey;
                                                         }
                                                 }
                                         ),
-                                        foregroundColor: MaterialStateProperty.all(Colors.white)
+                                        foregroundColor: WidgetStateProperty.all(Colors.white)
                                 )
                         )
                 );
