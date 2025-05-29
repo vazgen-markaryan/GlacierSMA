@@ -39,7 +39,9 @@
 			"cancel_button": "Cancel",
 			"confirm_button": "Confirm",
 			"snack_rename_success": "Station name has been updated",
-			"snack_rename_error": "Error occured on updating station name"
+			"snack_rename_error": "Error occured on updating station name",
+			"test_enabled": "Test Running",
+			"stop_test_before_switching": "Please stop the test before switching to another page."
 		},
 
 		"sensors": {

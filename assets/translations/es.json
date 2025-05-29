@@ -39,7 +39,9 @@
 			"cancel_button": "Cancelar",
 			"confirm_button": "Confirmar",
 			"snack_rename_success": "Nombre de la estación actualizado",
-			"snack_rename_error": "Error al enviar el nombre de la estación"
+			"snack_rename_error": "Error al enviar el nombre de la estación",
+			"test_enabled": "Prueba en curso",
+			"stop_test_before_switching": "Por favor, detenga la prueba antes de cambiar de página."
 		},
 
 		"sensors": {

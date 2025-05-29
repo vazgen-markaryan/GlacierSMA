@@ -19,6 +19,9 @@ mixin DashboardUtils on State<Home_Screen> {
         /// Clé pour accéder à l’état de ConfigScreen
         final configKey = GlobalKey<ConfigScreenState>();
 
+        /// Clé pour accéder à l’état de TestScreen
+        final testScreenKey = GlobalKey<TestScreenState>();
+
         /// Contrôleurs et services partagés
         late final DashboardController controller;
         late final MessageService messageService;
@@ -34,7 +37,7 @@ mixin DashboardUtils on State<Home_Screen> {
                 final debugManager = DebugLogUpdater();
                 messageService = MessageService(
                         plugin: widget.plugin,
-                        debugLogManager: debugManager,
+                        debugLogManager: debugManager
                 );
                 controller = DashboardController(
                         plugin: widget.plugin,
@@ -125,10 +128,34 @@ mixin DashboardUtils on State<Home_Screen> {
 
         /// Gère la sélection d’un onglet
         Future<void> onNavItemTapped(int index) async {
+                // Si on est actuellement sur l’onglet Test (index 3) et qu’on veut en sortir…
+                if (selectedIndex == 3 && index != 3) {
+                        final testState = testScreenKey.currentState;
+                        if (testState != null && testState.isTesting) {
+                                // Ne pas changer d’onglet, et prévenir
+                                await showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (_) => CustomPopup(
+                                                title: tr("home.dashboard.test_enabled"),
+                                                content: Text(tr("home.dashboard.stop_test_before_switching")),
+                                                actions: [
+                                                        TextButton(
+                                                                onPressed: () => Navigator.of(context).pop(),
+                                                                child: const Text('OK')
+                                                        )
+                                                ]
+                                        )
+                                );
+                                return;
+                        }
+                }
+
                 if (selectedIndex == 2 && index != 2) {
                         final config = configKey.currentState;
                         if (config != null && !await config.confirmDiscard()) return;
                 }
+
                 setState(() => selectedIndex = index);
         }
 
@@ -247,10 +274,11 @@ mixin DashboardUtils on State<Home_Screen> {
                 ),
 
                 // Environnement contrôlé
-
                 TestScreen(
+                        key: testScreenKey,
                         activeMaskNotifier: controller.activeMaskNotifier,
-                        getSensors: getSensors
+                        getSensors: getSensors,
+                        iterationNotifier: controller.iterationNotifier
                 ),
 
                 // Paramètres

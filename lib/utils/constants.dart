@@ -47,27 +47,27 @@ const communicationMessageStatus = "<status>";
 // Map statique des plages min/max par (sensor, champ)
 const Map<String, Map<String, RangeValues>> minMaxRanges = {
         "bme280_status": {
-                "bme280_temperature": RangeValues(-40, 85),
-                "bme280_pression": RangeValues(300, 1100),
-                "bme280_humidity": RangeValues(0, 100),
-                "bme280_altitude": RangeValues(0, 10000)
+                "bme280_temperature": RangeValues(-40, 85), // Température en °C
+                "bme280_pression": RangeValues(30, 110), // Pression en kPa
+                "bme280_humidity": RangeValues(0, 100), // Humidité en %
+                "bme280_altitude": RangeValues(0, 10000) // Altitude en mètres
         },
         "lsm303_status": {
-                "lsm303_roll": RangeValues(-180, 180),
-                "lsm303_pitch": RangeValues(-180, 180)
+                "lsm303_roll": RangeValues(-180, 180), // Angle en degrés
+                "lsm303_pitch": RangeValues(-180, 180) // Angle en degrés
         },
         "wind_speed_status": {
-                "wind_speed": RangeValues(0, 30)
+                "wind_speed": RangeValues(0, 30) // Vitesse du vent en m/s
         },
         "wind_direction_status": {
-                "wind_direction_angle": RangeValues(0, 360)
+                "wind_direction_angle": RangeValues(0, 360) // Angle en degrés
         },
         "mb_asl20_status": {
-                "mb_asl20": RangeValues(0, 200000)
+                "mb_asl20": RangeValues(0, 200000) // Luminosité en lux
         },
         "mb_bme280_status": {
-                "mb_bme280_temp": RangeValues(-40, 85),
-                "mb_bme280_press": RangeValues(300, 1100),
-                "mb_bme280_hum": RangeValues(0, 100)
+                "mb_bme280_temp": RangeValues(-40, 85), // Température en °C
+                "mb_bme280_press": RangeValues(30, 110), // Pression en kPa
+                "mb_bme280_hum": RangeValues(0, 100) // Humidité en %
         }
 };

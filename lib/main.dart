@@ -86,9 +86,9 @@ class MyApp extends StatelessWidget {
 //TODO: MASSIVE REPO REFACTORING
 
 //TODO: Traduire TestScreen
-//TODO: Button lancer doit être active mais dire que c'est default test si aucun changement de min max
 //TODO: Diviser bien le TestScreen
-//TODO: faire marcher le TEST avec le Log Screen
 //TODO: Uniformiser l'animation de custompopup comme dans TestScreen
-//TODO: telecharger logs.txt à la fin du test
-//TODO: Pendant le test pas de navigation possible
+//TODO: batterie popup + RAM
+//TODO:  iteration count dans settings
+//TODO: skip tutoriel checkbox dans settings et dans testscreen
+//TODO FIX PERMISSION STOCKAGE TEST SCREEN CSV

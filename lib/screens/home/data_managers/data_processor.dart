@@ -45,8 +45,9 @@ void processRawData({
         required String rawData,
         required DebugLogUpdater debugLogManager,
         required List<SensorsData> Function(SensorType) getSensors,
-        required void Function() onDataReceived,
         required ValueNotifier<double?> batteryVoltage,
+        required ValueNotifier<int> iterationNotifier,
+        required void Function() onDataReceived,
         required void Function(RawData idData) onIdReceived,
         required void Function(int mask) onActiveReceived,
         required void Function(String reason) onFatalReceived,
@@ -69,7 +70,8 @@ void processRawData({
                                 },
                                 onActiveReceived: onActiveReceived,
                                 onFatalReceived: onFatalReceived,
-                                onConfigReceived: onConfigReceived
+                                onConfigReceived: onConfigReceived,
+                                iterationNotifier: iterationNotifier
                         );
                 }
                 return;
@@ -110,6 +112,14 @@ void processRawData({
 
         // Parsing CSV standard (status / data)
         final parsed = RawDataParser.parse(rawData);
+
+        // Récupère et notifie la nouvelle itération
+        final idxIter = parsed.headers.indexOf('iteration');
+        if (idxIter >= 0) {
+                final newIt = int.tryParse(parsed.values[idxIter]) ?? 0;
+                iterationNotifier.value = newIt;
+        }
+
         final headers = parsed.headers;
         final values = parsed.values;
         final maxHeaderLength = headers.fold<int>(0, (p, h) => max(p, h.length));

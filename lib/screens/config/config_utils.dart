@@ -164,7 +164,7 @@ Future<bool> submitConfiguration({
         required int newMask,
         required MessageService messageService
 }) async {
-        // 1) Les lignes de différence
+        // Les lignes de différence
         final differences = <Widget>[];
         for (final s in allSensors.where((s) => s.bitIndex != null)) {
                 final bit = s.bitIndex!;
@@ -185,7 +185,7 @@ Future<bool> submitConfiguration({
                 }
         }
 
-        // 2) Popup de confirmation
+        // Popup de confirmation
         final confirmed = await showDialog<bool>(
                 context: context,
                 barrierDismissible: false,

@@ -1,8 +1,11 @@
+import 'package:easy_localization/easy_localization.dart';
+
 import 'bottom_navbar.dart';
 import 'package:flutter/material.dart';
 import 'dashboard/dashboard_utils.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import '../connection/components/disconnection_manager.dart';
+import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/dashboard/dashboard_header.dart';
@@ -51,11 +54,34 @@ class Home_ScreenState extends State<Home_Screen> with DashboardUtils {
                                         actions: [
                                                 IconButton(
                                                         icon: const Icon(Icons.logout),
-                                                        onPressed: () => showDisconnectPopup(
-                                                                context: context,
-                                                                plugin: widget.plugin,
-                                                                requireConfirmation: true
-                                                        )
+                                                        onPressed: () {
+                                                                final testState = testScreenKey.currentState;
+                                                                if (testState != null && testState.isTesting) {
+                                                                        // Si un test est en cours, on bloque et on affiche un avertissement
+                                                                        showDialog(
+                                                                                context: context,
+                                                                                barrierDismissible: false,
+                                                                                builder: (_) => CustomPopup(
+                                                                                        title: tr("home.dashboard.test_enabled"),
+                                                                                        content: Text(tr("home.dashboard.stop_test_before_switching")),
+                                                                                        actions: [
+                                                                                                TextButton(
+                                                                                                        onPressed: () => Navigator.of(context).pop(),
+                                                                                                        child: const Text('OK')
+                                                                                                )
+                                                                                        ]
+                                                                                )
+                                                                        );
+                                                                }
+                                                                else {
+                                                                        // Sinon on fait ce qu’on faisait avant
+                                                                        showDisconnectPopup(
+                                                                                context: context,
+                                                                                plugin: widget.plugin,
+                                                                                requireConfirmation: true
+                                                                        );
+                                                                }
+                                                        }
                                                 )
                                         ]
                                 ),

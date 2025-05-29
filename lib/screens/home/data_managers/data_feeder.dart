@@ -55,10 +55,19 @@ void populateSensorData(
                                 // Enregistrement à chaque fois pour le graphique
                                 if (numeric != null) {
                                         sensor.recordHistory(key, numeric);
+                                        RealValuesHolder().realValues.putIfAbsent(sensor, () => {})[key] = numeric;
                                 }
                         }
                 }
         }
+}
+
+class RealValuesHolder {
+        static final RealValuesHolder instance = RealValuesHolder.internal();
+        factory RealValuesHolder() => instance;
+        RealValuesHolder.internal();
+
+        final Map<SensorsData, Map<DataMap, double>> realValues = {};
 }
 
 // Convertit le code de direction du vent (0–16) en texte localisé.
