@@ -2,7 +2,7 @@ import 'dart:math';
 import 'data_feeder.dart';
 import 'package:flutter/material.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
-import 'package:rev_glacier_sma_mobile/utils/switch_utils.dart';
+import 'package:rev_glacier_sma_mobile/utils/global_utilities.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_status_updater.dart';
 import 'package:rev_glacier_sma_mobile/screens/debug_log/components/debug_log_updater.dart';

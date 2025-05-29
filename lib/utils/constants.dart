@@ -36,13 +36,14 @@ const String windAngle = "assets/icons/wind_angle.svg";
 const String satellite = "assets/icons/satellite.svg";
 
 // Messages utilisés pour communiquer avec Arduino
-// WARNING: Ces messages doivent rester identiques à ceux utilisés dans le firmware Arduino
+// WARNING: CES MESSAGES DOIVENT RESTER IDENTIQUE À CEUX UTILISÉS DANS LE FIRMWARE ARDUINO
 const communicationMessageAndroid = "<android>";
 const communicationMessagePhoneStart = "\n<phone_start>";
 const communicationMessagePhoneEnd = "\n<phone_end>";
 const communicationMessageData = "<data>";
 const communicationMessageStatus = "<status>";
 
+// WARNING: LES VALEURS REPRESENTENT DES PLAGES MIN/MAX POUR CHAQUE CAPTEUR SELON LEUR DATASPEC
 // Map statique des plages min/max par (sensor, champ)
 const Map<String, Map<String, RangeValues>> minMaxRanges = {
         "bme280_status": {

@@ -6,16 +6,14 @@ import 'package:rev_glacier_sma_mobile/screens/debug_log/components/debug_log_up
 class MessageService {
         final FlutterSerialCommunication? plugin;
         final DebugLogUpdater debugLogManager;
-        final String heartbeatPrefix;
 
         MessageService({
                 required this.plugin,
                 required this.debugLogManager,
-                this.heartbeatPrefix = '<android>'
         });
 
         /// Envoie un simple message de type "heartbeat" ou toute autre chaîne.
-        Future<bool> sendHeartbeat(String message) async {
+        Future<bool> sendString(String message) async {
                 try {
                         final ok = await plugin!.write(Uint8List.fromList(message.codeUnits));
                         final sentLog = tr('debug.message_sent', namedArgs: {'log': message});

@@ -208,7 +208,7 @@
 		}
 	},
 
-	"switch_utils": {
+	"global_utilities": {
 		"wind_direction": {
 			"north": "Nord",
 			"north_northeast": "Nord-nord-est",

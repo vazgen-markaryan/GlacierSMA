@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:rev_glacier_sma_mobile/utils/switch_utils.dart';
+import 'package:rev_glacier_sma_mobile/utils/global_utilities.dart';
 import 'package:rev_glacier_sma_mobile/screens/debug_log/components/debug_log_updater.dart';
 
 /// Retourne le libellé traduit correspondant à un code de statut

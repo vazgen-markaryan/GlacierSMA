@@ -80,7 +80,7 @@ Future<bool> sendSeriesConfig({
 
 /// Réinitialise aux valeurs par défaut via heartbeat.
 Future<bool> resetToDefaults(MessageService svc) =>
-svc.sendHeartbeat('<default-settings>');
+svc.sendString('<default-settings>');
 
 /// Affiche un popup “Mot de passe requis”
 Future<bool> showPasswordDialog(

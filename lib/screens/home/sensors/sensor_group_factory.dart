@@ -15,8 +15,7 @@ List<Widget> createAllSensorGroups({
         required bool testMode,
         bool configMode = false,
         ValueNotifier<int>? localMask,
-        bool showInactive = false,
-        bool showDataProcessors = true
+        bool showInactive = false
 }) {
         final sections = [
         {
@@ -50,9 +49,15 @@ List<Widget> createAllSensorGroups({
                                 ];
 
                                 final groups = <String, List<SensorsData>>{
-                                        'data':     all.where((sensor) => sensor.dataProcessor?.toLowerCase() == 'true').toList(),
-                                        'internal': all.where((sensor) => sensor.bus?.toLowerCase() == 'i2c').toList(),
-                                        'modbus':   all.where((sensor) => sensor.bus?.toLowerCase() == 'modbus').toList()
+                                        'data': all.where((sensor) => sensor.dataProcessor?.toLowerCase() == 'true').toList(),
+                                        'internal': all.where((sensor) {
+                                                        final isInternal = sensor.bus?.toLowerCase() == 'i2c';
+                                                        final isGps = sensor.header?.toLowerCase() == 'gps_status';
+                                                        // Exclure GPS si testMode est true
+                                                        return isInternal && (!testMode || !isGps);
+                                                }
+                                        ).toList(),
+                                        'modbus': all.where((sensor) => sensor.bus?.toLowerCase() == 'modbus').toList()
                                 };
 
                                 List<SensorsData> filter(List<SensorsData> list) {
@@ -67,7 +72,7 @@ List<Widget> createAllSensorGroups({
                                 return Column(
                                         children: sections
                                                 .where((section) =>
-                                                        showDataProcessors || section['groupKey'] != 'data'
+                                                        !testMode || section['groupKey'] != 'data'
                                                 )
                                                 .map(
                                                         (section) {

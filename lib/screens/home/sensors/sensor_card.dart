@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/chip_utils.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
-import 'package:rev_glacier_sma_mobile/utils/switch_utils.dart';
+import 'package:rev_glacier_sma_mobile/utils/global_utilities.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_graph_popup.dart';
 
@@ -182,11 +182,11 @@ class SensorCard extends StatelessWidget {
         /// Retourne (couleurIcône, couleurBordure, libelléStatut) selon powerStatus
         (Color, Color, String) getStatusUI(int? status) {
                 switch (status) {
-                        case 1:  return (Colors.green,  Colors.green,  tr('home.sensors.status.operational'));
+                        case 1:  return (Colors.green,  Colors.green, tr('home.sensors.status.operational'));
                         case 2:  return (Colors.yellow, Colors.yellow, tr('home.sensors.status.disconnected'));
-                        case 3:  return (Colors.red,    Colors.red,    tr('home.sensors.status.error'));
-                        case 0:  return (Colors.grey,   Colors.grey,   tr('home.sensors.status.unknown'));
-                        default: return (Colors.black,  Colors.black,  tr('home.sensors.status.disabled'));
+                        case 3:  return (Colors.red,    Colors.red, tr('home.sensors.status.error'));
+                        case 0:  return (Colors.grey,   Colors.grey, tr('home.sensors.status.unknown'));
+                        default: return (Colors.black,  Colors.black, tr('home.sensors.status.disabled'));
                 }
         }
 }

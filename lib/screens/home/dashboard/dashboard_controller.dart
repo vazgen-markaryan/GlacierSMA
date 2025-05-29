@@ -51,7 +51,7 @@ class DashboardController {
                 // Lance la lecture du port série
                 readMessage(
                         messageChannel: messageChannel,
-                        sendAndroidMessage: messageService.sendHeartbeat,
+                        sendAndroidMessage: messageService.sendString,
                         debugLogManager: debugLogManager,
                         getSensors: getSensors,
                         onDataReceived: () {
@@ -71,7 +71,7 @@ class DashboardController {
 
                 // Ping toutes les 2s pour détecter la perte de connexion
                 pingTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
-                                final ok = await messageService.sendHeartbeat(communicationMessageAndroid);
+                                final ok = await messageService.sendString(communicationMessageAndroid);
                                 if (!ok) {
                                         pingTimer?.cancel();
                                         connectionStopwatch.stop();
@@ -81,7 +81,7 @@ class DashboardController {
                 );
 
                 // Demander info ACTIVE des sensors lors de la connexion
-                messageService.sendHeartbeat("<info>");
+                messageService.sendString("<info>");
         }
 
         void dispose() {

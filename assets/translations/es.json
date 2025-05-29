@@ -84,7 +84,7 @@
 			"debug": "Depuración",
 			"config": "Config",
 			"test": "Test",
-			"settings": "Config"
+			"settings": "Ajustes"
 		}
 	},
 
@@ -208,7 +208,7 @@
 		}
 	},
 
-	"switch_utils": {
+	"global_utilities": {
 		"wind_direction": {
 			"north": "Norte",
 			"north_northeast": "Norte-noreste",

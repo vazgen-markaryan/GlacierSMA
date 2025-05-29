@@ -1,4 +1,5 @@
-import 'package:rev_glacier_sma_mobile/utils/switch_utils.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:rev_glacier_sma_mobile/utils/global_utilities.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
 
 /// Analyse une chaîne de données brutes au format texte (>=3 lignes : message, en-têtes CSV, valeurs CSV)
@@ -57,5 +58,29 @@ void populateSensorData(
                                 }
                         }
                 }
+        }
+}
+
+// Convertit le code de direction du vent (0–16) en texte localisé.
+String getWindDirectionFacing(int value) {
+        switch (value) {
+                case 0:  return tr('switch_utils.wind_direction.north');
+                case 1:  return tr('switch_utils.wind_direction.north_northeast');
+                case 2:  return tr('switch_utils.wind_direction.northeast');
+                case 3:  return tr('switch_utils.wind_direction.east_northeast');
+                case 4:  return tr('switch_utils.wind_direction.east');
+                case 5:  return tr('switch_utils.wind_direction.east_southeast');
+                case 6:  return tr('switch_utils.wind_direction.southeast');
+                case 7:  return tr('switch_utils.wind_direction.south_southeast');
+                case 8:  return tr('switch_utils.wind_direction.south');
+                case 9:  return tr('switch_utils.wind_direction.south_southwest');
+                case 10: return tr('switch_utils.wind_direction.southwest');
+                case 11: return tr('switch_utils.wind_direction.west_southwest');
+                case 12: return tr('switch_utils.wind_direction.west');
+                case 13: return tr('switch_utils.wind_direction.west_northwest');
+                case 14: return tr('switch_utils.wind_direction.northwest');
+                case 15: return tr('switch_utils.wind_direction.north_northwest');
+                case 16: return tr('switch_utils.wind_direction.north');
+                default: return tr('switch_utils.wind_direction.unknown');
         }
 }

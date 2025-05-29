@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
-import 'package:rev_glacier_sma_mobile/utils/switch_utils.dart';
+import 'package:rev_glacier_sma_mobile/utils/global_utilities.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_group_factory.dart';
@@ -186,7 +186,6 @@ class TestScreenState extends State<TestScreen> {
                                                 getSensors: widget.getSensors,
                                                 onTap: (ctx, s) => showRangeDialog(s),
                                                 configMode: false,
-                                                showDataProcessors: false,
                                                 testMode: true
                                         ),
 
