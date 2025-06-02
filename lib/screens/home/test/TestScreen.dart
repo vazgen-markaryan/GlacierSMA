@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:csv/csv.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rev_glacier_sma_mobile/utils/global_utilities.dart';
@@ -79,6 +79,41 @@ class TestScreenState extends State<TestScreen> {
         @override
         void initState() {
                 super.initState();
+
+                // (1) Dès que l’écran est monté, on requiert la permission au runtime
+                WidgetsBinding.instance.addPostFrameCallback((_) async {
+                                final granted = await requestAppropriatePermission();
+                                if (!granted) {
+                                        // Permission refusée → on affiche un popup expliquant comment aller dans les Paramètres
+                                        await showDialog(
+                                                context: context,
+                                                barrierDismissible: false,
+                                                builder: (_) => CustomPopup(
+                                                        title: 'Permission requise',
+                                                        content: const Text(
+                                                                'L’accès aux fichiers est nécessaire pour pouvoir enregistrer vos logs.\n'
+                                                                'Allez dans “Paramètres → Applications → Glacier SMA → Permissions” '
+                                                                'et activez “Accès au stockage” ou “Accès à tous les fichiers” selon votre version.',
+                                                                style: TextStyle(color: Colors.white)
+                                                        ),
+                                                        actions: [
+                                                                TextButton(
+                                                                        onPressed: () => Navigator.of(context).pop(), // ferme juste le popup
+                                                                        child: const Text('OK')
+                                                                )
+                                                        ]
+                                                )
+                                        );
+                                        // On ne quitte PAS TestScreen ici, on reste bloqué sur l’écran de config.
+                                        return;
+                                }
+
+                                // (2) Si la permission est accordée, on affiche le tutoriel / intro
+                                showIntroDialog();
+                        }
+                );
+
+                // (3) Initialisation normale des ranges/defaultRanges
                 final mask = widget.activeMaskNotifier.value ?? 0;
                 widget.iterationNotifier.addListener(onNewIteration);
 
@@ -94,7 +129,6 @@ class TestScreenState extends State<TestScreen> {
                         defaultRanges[sensor] = Map.of(dataMap);
                         ranges[sensor] = Map.of(dataMap);
                 }
-                WidgetsBinding.instance.addPostFrameCallback((_) => showIntroDialog());
         }
 
         @override
@@ -193,35 +227,6 @@ class TestScreenState extends State<TestScreen> {
                                 lastIteration = 0;
                         }
                 );
-        }
-
-        void stopTest() async {
-                setState(
-                        () {
-                                isTesting = false;
-                        }
-                );
-                final save = await showDialog<bool>(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (_) => CustomPopup(
-                                title: 'Test terminé',
-                                content: const Text('Exporter les logs du test ?'),
-                                actions: [
-                                        TextButton(
-                                                onPressed: () => Navigator.of(context).pop(false),
-                                                child: const Text('Non')
-                                        ),
-                                        TextButton(
-                                                onPressed: () => Navigator.of(context).pop(true),
-                                                child: const Text('Oui')
-                                        )
-                                ]
-                        )
-                );
-                if (save == true) {
-                        await exportLogs();
-                }
         }
 
         @override
@@ -370,45 +375,186 @@ class TestScreenState extends State<TestScreen> {
                 }
         }
 
-        String generateCsv() {
+        /// 1) Récupère la version SDK Android à l’aide de DeviceInfoPlugin
+        /// 2) Si version ≥ 30 (Android 11+), demande MANAGE_EXTERNAL_STORAGE
+        /// 3) Si version ≤ 29 (Android 10 ou moins), demande STORAGE (READ/WRITE)
+        Future<bool> requestAppropriatePermission() async {
+                if (!Platform.isAndroid) return true;
+
+                // Récupère device info pour connaître l’API level
+                final androidInfo = await DeviceInfoPlugin().androidInfo;
+                final sdkInt = androidInfo.version.sdkInt;
+
+                if (sdkInt >= 30) {
+                        // Sur Android 11+ (API ≥ 30), on doit demander MANAGE_EXTERNAL_STORAGE
+                        if (!await Permission.manageExternalStorage.isGranted) {
+                                final status = await Permission.manageExternalStorage.request();
+                                if (status.isGranted) {
+                                        return true;
+                                }
+                                // Si refusé, on renvoie false et l’utilisateur devra aller manuellement dans les Paramètres
+                                return false;
+                        }
+                        return true;
+                }
+                else {
+                        // Sur Android 10 ou moins (API ≤ 29), on demande STORAGE (l’ensemble READ+WRITE)
+                        if (!await Permission.storage.isGranted) {
+                                final status = await Permission.storage.request();
+                                return status.isGranted;
+                        }
+                        return true;
+                }
+        }
+
+        /// Génère un CSV (List<List<dynamic>> → texte CSV) depuis `anomalyLog`
+        String _generateCsv() {
                 final rows = <List<dynamic>>[
                         ['Timestamp', 'Capteur', 'Propriété', 'Attendu', 'Reçu']
                 ];
                 for (final a in anomalyLog) {
                         final ts = a.timestamp;
-                        final stamp = "${ts.hour.toString().padLeft(2, '0')}:${ts.minute.toString().padLeft(2, '0')}:${ts.second.toString().padLeft(2, '0')} ${ts.day.toString().padLeft(2, '0')}/${ts.month.toString().padLeft(2, '0')}/${ts.year}";
-                        rows.add([stamp, a.sensorName, a.propertyName, a.minMax, a.value]);
+                        final formattedTs =
+                                '${ts.hour.toString().padLeft(2, '0')}:'
+                                '${ts.minute.toString().padLeft(2, '0')}:'
+                                '${ts.second.toString().padLeft(2, '0')} '
+                                '${ts.day.toString().padLeft(2, '0')}/'
+                                '${ts.month.toString().padLeft(2, '0')}/'
+                                '${ts.year}';
+                        rows.add([
+                                        formattedTs,
+                                        a.sensorName,
+                                        a.propertyName,
+                                        a.minMax,
+                                        a.value
+                                ]);
                 }
                 return const ListToCsvConverter().convert(rows);
         }
 
-        Future<File> saveCsvFile(String content) async {
-                if (await Permission.storage.request().isDenied) {
-                        throw 'Permission stockage refusée';
+        /// Retourne un Directory pointant vers le dossier public “Download”
+        /// ou, à défaut, renvoie un dossier temporaire.
+        Future<Directory> _findPublicDownloadDir() async {
+                // Liste de chemins à tester
+                final candidates = <Directory>[
+                        Directory('/storage/emulated/0/Download'),
+                        Directory('/storage/emulated/0/Downloads'),
+                        Directory('/sdcard/Download'),
+                        Directory('/sdcard/Downloads')
+                ];
+
+                for (final d in candidates) {
+                        if (await d.exists()) {
+                                return d;
+                        }
                 }
-                final dir = await getExternalStorageDirectory();
-                final time = DateTime.now();
-                final path = '${dir!.path}/Test_${time.hour.toString().padLeft(2, '0')}${time.minute.toString().padLeft(2, '0')}_${time.day.toString().padLeft(2, '0')}${time.month.toString().padLeft(2, '0')}${time.year}.csv';
-                final file = File(path);
-                return file.writeAsString(content);
+
+                // Si aucun des dossiers publics n’existe, on retombe sur un répertoire temporaire
+                return await getTemporaryDirectory();
         }
 
-        Future<void> exportLogs() async {
-                final csv = generateCsv();
+        Future<void> _saveCsvToDownloads() async {
                 try {
-                        final file = await saveCsvFile(csv);
-                        await SharePlus.instance.share(
-                                ShareParams(
-                                        text: 'Logs d’anomalies du test',
-                                        files: [XFile(file.path)]
+                        final csvText = _generateCsv();
+
+                        // 1) (Re)demander la permission au runtime avant d’écrire
+                        final granted = await requestAppropriatePermission();
+                        if (!granted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text("Permission stockage refusée"))
+                                );
+                                return;
+                        }
+
+                        // 2) Recherche du dossier public “Download” via notre helper
+                        final downloadsDir = await _findPublicDownloadDir();
+
+                        // 3) Construire un nom de fichier unique (sans les “:” interdits)
+                        final now = DateTime.now();
+                        final timestamp =
+                                '${now.year.toString().padLeft(4, '0')}-'
+                                '${now.month.toString().padLeft(2, '0')}-'
+                                '${now.day.toString().padLeft(2, '0')}_'
+                                '${now.hour.toString().padLeft(2, '0')}-'
+                                '${now.minute.toString().padLeft(2, '0')}-'
+                                '${now.second.toString().padLeft(2, '0')}';
+                        final fileName = 'Test_$timestamp.csv';
+
+                        // 4) Écrire le CSV dans “Download”
+                        final fullPath = '${downloadsDir.path}/$fileName';
+                        final file = File(fullPath);
+                        await file.writeAsString(csvText);
+
+                        // 5) Afficher la boîte de confirmation
+                        showDialog(
+                                context: context,
+                                builder: (_) => CustomPopup(
+                                        title: 'Succès',
+                                        content: Text(
+                                                'Fichier enregistré :\n$fullPath',
+                                                style: const TextStyle(color: Colors.white)
+                                        ),
+                                        actions: [
+                                                TextButton(
+                                                        onPressed: () => Navigator.of(context).pop(),
+                                                        child: const Text('OK')
+                                                )
+                                        ]
                                 )
                         );
                 }
                 catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Erreur export : $e'))
+                        showDialog(
+                                context: context,
+                                builder: (_) => CustomPopup(
+                                        title: 'Erreur',
+                                        content: Text(
+                                                'Une erreur est survenue lors de l’enregistrement du fichier :\n$e',
+                                                style: const TextStyle(color: Colors.white)
+                                        ),
+                                        actions: [
+                                                TextButton(
+                                                        onPressed: () => Navigator.of(context).pop(),
+                                                        child: const Text('OK')
+                                                )
+                                        ]
+                                )
                         );
                 }
+        }
+
+        /// Lorsqu’on clique sur “Arrêter Test”, on propose d’exporter les logs
+        void stopTest() {
+                setState(() => isTesting = false);
+                _showExportConfirmation();
+        }
+
+        void _showExportConfirmation() {
+                showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (_) => CustomPopup(
+                                title: 'Exporter les logs',
+                                content: const Text(
+                                        'Voulez-vous enregistrer les logs du test ?\n'
+                                        'Le fichier sera créé dans “Téléchargements”.',
+                                        style: TextStyle(color: Colors.white)
+                                ),
+                                actions: [
+                                        TextButton(
+                                                onPressed: () => Navigator.of(context).pop(), // ferme juste le popup
+                                                child: const Text('Annuler')
+                                        ),
+                                        TextButton(
+                                                onPressed: () {
+                                                        Navigator.of(context).pop();
+                                                        _saveCsvToDownloads();
+                                                },
+                                                child: const Text('Enregistrer')
+                                        )
+                                ]
+                        )
+                );
         }
 
         void detectAnomalies() {
