@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:rev_glacier_sma_mobile/utils/global_utilities.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
+import 'package:rev_glacier_sma_mobile/screens/debug_log/debug_log_updater.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_status_updater.dart';
-import 'package:rev_glacier_sma_mobile/screens/debug_log/components/debug_log_updater.dart';
 
 /// Résultat du parsing CSV : listes d’en-têtes et de valeurs.
 /// Et accès par clé via [asMap].

@@ -4,7 +4,7 @@ import 'bottom_navbar.dart';
 import 'package:flutter/material.dart';
 import 'dashboard/dashboard_utils.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
-import '../connection/components/disconnection_manager.dart';
+import '../connection/disconnection_manager.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';

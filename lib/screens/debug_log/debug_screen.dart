@@ -1,6 +1,6 @@
+import 'debug_log_updater.dart';
+import 'debug_log_processor.dart';
 import 'package:flutter/material.dart';
-import 'components/debug_log_updater.dart';
-import 'components/debug_log_processor.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_popup.dart';

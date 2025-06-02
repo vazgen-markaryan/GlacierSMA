@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
-import 'package:rev_glacier_sma_mobile/screens/debug_log/components/debug_log_updater.dart';
+import 'package:rev_glacier_sma_mobile/screens/debug_log/debug_log_updater.dart';
 
 class MessageService {
         final FlutterSerialCommunication? plugin;

@@ -10,9 +10,9 @@ import 'package:rev_glacier_sma_mobile/screens/home/test/TestScreen.dart';
 import 'package:rev_glacier_sma_mobile/screens/settings/settings_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/debug_log/debug_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
+import 'package:rev_glacier_sma_mobile/screens/debug_log/debug_log_updater.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/dashboard/dashboard_body.dart';
-import 'package:rev_glacier_sma_mobile/screens/debug_log/components/debug_log_updater.dart';
-import 'package:rev_glacier_sma_mobile/screens/connection/components/disconnection_manager.dart';
+import 'package:rev_glacier_sma_mobile/screens/connection/disconnection_manager.dart';
 
 /// Regroupe toutes les fonctions/utilitaires de Home_Screen
 mixin DashboardUtils on State<Home_Screen> {

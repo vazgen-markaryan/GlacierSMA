@@ -1,6 +1,3 @@
-/// Contrôleur pour l'initialisation, la gestion du flux série et le nettoyage du Dashboard.
-/// Inclut un Stopwatch pour mesurer le temps écoulé depuis la connexion initiale.
-
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
@@ -9,10 +6,12 @@ import 'package:rev_glacier_sma_mobile/utils/message_service.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
+import 'package:rev_glacier_sma_mobile/screens/debug_log/debug_log_updater.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_reader.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_processor.dart';
-import 'package:rev_glacier_sma_mobile/screens/debug_log/components/debug_log_updater.dart';
 
+/// Contrôleur pour l'initialisation, la gestion du flux série et le nettoyage du Dashboard.
+/// Inclut un Stopwatch pour mesurer le temps écoulé depuis la connexion initiale.
 class DashboardController {
         final FlutterSerialCommunication? plugin;
         final List<DeviceInfo> connectedDevices;
