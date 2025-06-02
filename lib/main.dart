@@ -86,9 +86,6 @@ class MyApp extends StatelessWidget {
 //TODO: MASSIVE REPO REFACTORING
 
 //TODO: Traduire TestScreen
-//TODO: Diviser bien le TestScreen
-//TODO: Uniformiser l'animation de custompopup comme dans TestScreen
 //TODO: batterie popup + RAM
 //TODO:  iteration count dans settings
 //TODO: skip tutoriel checkbox dans settings et dans testscreen
-//TODO FIX PERMISSION STOCKAGE TEST SCREEN CSV

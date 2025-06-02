@@ -6,7 +6,7 @@ import 'package:rev_glacier_sma_mobile/utils/message_service.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_snackbar.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/home_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/config/config_screen.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/test/TestScreen.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/test/test_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/settings/settings_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/debug_log/debug_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
