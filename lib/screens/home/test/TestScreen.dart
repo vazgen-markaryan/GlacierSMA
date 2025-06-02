@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:csv/csv.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -10,10 +10,10 @@ import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rev_glacier_sma_mobile/utils/global_utilities.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
+import 'package:rev_glacier_sma_mobile/utils/custom_snackbar.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_group_factory.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_feeder.dart';
-
+import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_group_factory.dart';
 
 /// Écran de test en environnement contrôlé
 class TestScreen extends StatefulWidget {
@@ -104,16 +104,13 @@ class TestScreenState extends State<TestScreen> {
         }
 
         RangeValues getMinMax(SensorsData sensor, DataMap key) {
-                return minMaxRanges[sensor.header]?[key.header] ??
-                        const RangeValues(0, 999999);
+                return minMaxRanges[sensor.header]?[key.header] ?? const RangeValues(0, 999999);
         }
 
         bool isActive(SensorsData sensor, int mask) {
                 final header = sensor.header?.toLowerCase();
-                if (header == 'gps_status' || header == 'iridium_status' ||
-                        header == 'sdcard' || sensor.dataProcessor != null) return false;
-                if (sensor.bitIndex != null && (mask & (1 << sensor.bitIndex!)) == 0)
-                        return false;
+                if (header == 'gps_status' || header == 'iridium_status' || header == 'sdcard' || sensor.dataProcessor != null) return false;
+                if (sensor.bitIndex != null && (mask & (1 << sensor.bitIndex!)) == 0) return false;
                 return true;
         }
 
@@ -127,9 +124,7 @@ class TestScreenState extends State<TestScreen> {
                                 content: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: List.generate(
-                                                7,
-                                                (i) =>
+                                        children: List.generate(7, (i) =>
                                                 Padding(
                                                         padding: EdgeInsets.only(bottom: i < 6 ? 8 : 0),
                                                         child: Text(
@@ -190,7 +185,8 @@ class TestScreenState extends State<TestScreen> {
         }
 
         void launchTest() {
-                setState(() {
+                setState(
+                        () {
                                 isTesting = true;
                                 logs.clear();
                                 anomalyLog.clear();
@@ -200,7 +196,8 @@ class TestScreenState extends State<TestScreen> {
         }
 
         void stopTest() async {
-                setState(() {
+                setState(
+                        () {
                                 isTesting = false;
                         }
                 );
@@ -223,7 +220,7 @@ class TestScreenState extends State<TestScreen> {
                         )
                 );
                 if (save == true) {
-                        await _exportLogs();
+                        await exportLogs();
                 }
         }
 
@@ -233,9 +230,13 @@ class TestScreenState extends State<TestScreen> {
                         // On empêche le pop tant que isTesting == true
                         onWillPop: () async {
                                 if (isTesting) {
-                                        // Optionnel : tu peux afficher un petit snack ou popup pour le dire
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                                const SnackBar(content: Text("Arrêtez d’abord le test"))
+                                        showCustomSnackBar(
+                                                context,
+                                                message: "Arrêtez d’abord le test",
+                                                iconData: Icons.warning,
+                                                backgroundColor: Colors.red,
+                                                textColor: Colors.white,
+                                                iconColor: Colors.white
                                         );
                                         return false;
                                 }
@@ -268,13 +269,8 @@ class TestScreenState extends State<TestScreen> {
                                                 child: ElevatedButton.icon(
                                                         onPressed: () => onLaunchTestPressed(context),
                                                         icon: const Icon(Icons.play_arrow, color: Colors.white),
-                                                        label: const Text(
-                                                                'Lancer Test', style: TextStyle(color: Colors.white)),
-                                                        style: ElevatedButton.styleFrom(
-                                                                backgroundColor: Theme
-                                                                        .of(context)
-                                                                        .primaryColor
-                                                        )
+                                                        label: const Text('Lancer Test', style: TextStyle(color: Colors.white)),
+                                                        style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor)
                                                 )
                                         )
                                 ]
@@ -291,7 +287,7 @@ class TestScreenState extends State<TestScreen> {
                                 CustomPopup(
                                         title: 'Confirmation',
                                         content: const Text(
-                                                'Vous runnez le test avec les valeurs par défaut ?',
+                                                'Vous runnez le test avec les valeurs par défaut?',
                                                 style: TextStyle(color: Colors.white, fontSize: 16)
                                         ),
                                         actions: [
@@ -380,12 +376,7 @@ class TestScreenState extends State<TestScreen> {
                 ];
                 for (final a in anomalyLog) {
                         final ts = a.timestamp;
-                        final stamp = '${ts.hour.toString().padLeft(2, '0')}:'
-                                '${ts.minute.toString().padLeft(2, '0')}:'
-                                '${ts.second.toString().padLeft(2, '0')} '
-                                '${ts.day.toString().padLeft(2, '0')}/'
-                                '${ts.month.toString().padLeft(2, '0')}/'
-                                '${ts.year}';
+                        final stamp = "${ts.hour.toString().padLeft(2, '0')}:${ts.minute.toString().padLeft(2, '0')}:${ts.second.toString().padLeft(2, '0')} ${ts.day.toString().padLeft(2, '0')}/${ts.month.toString().padLeft(2, '0')}/${ts.year}";
                         rows.add([stamp, a.sensorName, a.propertyName, a.minMax, a.value]);
                 }
                 return const ListToCsvConverter().convert(rows);
@@ -396,17 +387,16 @@ class TestScreenState extends State<TestScreen> {
                         throw 'Permission stockage refusée';
                 }
                 final dir = await getExternalStorageDirectory();
-                final time = DateTime.now().millisecondsSinceEpoch;
-                final path = '${dir!.path}/Test_$time.csv';
+                final time = DateTime.now();
+                final path = '${dir!.path}/Test_${time.hour.toString().padLeft(2, '0')}${time.minute.toString().padLeft(2, '0')}_${time.day.toString().padLeft(2, '0')}${time.month.toString().padLeft(2, '0')}${time.year}.csv';
                 final file = File(path);
                 return file.writeAsString(content);
         }
 
-        Future<void> _exportLogs() async {
+        Future<void> exportLogs() async {
                 final csv = generateCsv();
                 try {
                         final file = await saveCsvFile(csv);
-                        // Partage des fichiers via le share de SharePlus
                         await SharePlus.instance.share(
                                 ShareParams(
                                         text: 'Logs d’anomalies du test',
@@ -463,7 +453,8 @@ class TestScreenState extends State<TestScreen> {
         Widget anomalyBiosList(List<AnomalyRow> anomalies) {
                 return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: anomalies.map((a) {
+                        children: anomalies.map(
+                                (a) {
                                         final dataMap = findDataMapByName(a.propertyName);
                                         final iconPath = dataMap?.svgLogo ?? microchip;
                                         return AnomalyBiosRow(
@@ -481,12 +472,7 @@ class TestScreenState extends State<TestScreen> {
 
         Widget buildLogScreen() {
                 final now = DateTime.now();
-                final timestampStr = ''
-                        '${now.hour.toString().padLeft(2, '0')}:'
-                        '${now.minute.toString().padLeft(2, '0')} '''
-                        '${now.day.toString().padLeft(2, '0')}/'
-                        '${now.month.toString().padLeft(2, '0')}/'
-                        '${now.year}';
+                final timestampStr = "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')} ${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}";
 
                 return Scaffold(
                         backgroundColor: backgroundColor,
@@ -742,7 +728,8 @@ class RangePopupState extends State<RangePopup> {
                         }
                 }
 
-                final hasChanged = widget.currents.keys.any((key) {
+                final hasChanged = widget.currents.keys.any(
+                        (key) {
                                 final min = int.tryParse(controllersMin[key]!.text) ?? widget.defaults[key]!.start.toInt();
                                 final max = int.tryParse(controllersMax[key]!.text) ?? widget.defaults[key]!.end.toInt();
                                 final value = RangeValues(min.toDouble(), max.toDouble());
@@ -829,7 +816,8 @@ class RangePopupState extends State<RangePopup> {
                                                 ElevatedButton(
                                                         style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                                                         onPressed: () {
-                                                                setState(() {
+                                                                setState(
+                                                                        () {
                                                                                 widget.defaults.forEach((key, value) {
                                                                                                 controllersMin[key]!.text = value.start.toInt().toString();
                                                                                                 controllersMax[key]!.text = value.end.toInt().toString();
@@ -851,7 +839,8 @@ class RangePopupState extends State<RangePopup> {
                                 TextButton(
                                         onPressed: (valid && hasChanged)
                                                 ? () {
-                                                        setState(() {
+                                                        setState(
+                                                                () {
                                                                         for (var key in widget.currents.keys) {
                                                                                 final min = int.tryParse(controllersMin[key]!.text) ?? widget.defaults[key]!.start.toInt();
                                                                                 final max = int.tryParse(controllersMax[key]!.text) ?? widget.defaults[key]!.end.toInt();
