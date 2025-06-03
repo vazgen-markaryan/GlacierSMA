@@ -83,8 +83,7 @@ class MyApp extends StatelessWidget {
         }
 }
 
-//TODO: MASSIVE REPO REFACTORING + FUSIONNAGE DES FICHIERS
+//TODO: MASSIVE REPO REFACTORING + FUSIONNAGE DES FICHIERS + refactor k par key etc
 
 //TODO: batterie popup + RAM
 //TODO:  iteration count dans settings
-//TODO: skip tutoriel checkbox dans settings et dans testscreen

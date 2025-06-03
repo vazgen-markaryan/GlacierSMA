@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_snackbar.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/test/test_utils.dart';
@@ -62,11 +63,18 @@ class TestScreenState extends State<TestScreen> {
         /// Liste des anomalies détectées depuis le début du test
         final List<AnomalyRow> anomalyLog = [];
 
+        /// Permet à l’extérieur de savoir si un test est en cours
+        bool get isTestRunning => isTesting;
+
+        /// Permet à l’extérieur d’accéder à la liste courante des anomalies
+        List<AnomalyRow> get currentAnomalyLog => List.unmodifiable(anomalyLog);
+
         @override
         void initState() {
                 super.initState();
 
-                WidgetsBinding.instance.addPostFrameCallback((_) async {
+                WidgetsBinding.instance.addPostFrameCallback(
+                        (_) async {
                                 // Dès que l’écran est monté, on demande la permission adaptée selon l’API
                                 final granted = await requestAppropriatePermission(context);
                                 if (!granted) {
@@ -92,7 +100,7 @@ class TestScreenState extends State<TestScreen> {
                                         return;
                                 }
                                 // Si la permission est accordée, on affiche le tutoriel / intro
-                                showIntroDialog(context);
+                                maybeShowIntroDialog(context);
                         }
                 );
 
@@ -152,6 +160,14 @@ class TestScreenState extends State<TestScreen> {
                                 child: child
                         )
                 );
+        }
+
+        Future<void> maybeShowIntroDialog(BuildContext context) async {
+                final prefs = await SharedPreferences.getInstance();
+                final skipTutorial = prefs.getBool('skip_test_tutorial') ?? false;
+                if (!skipTutorial) {
+                        showIntroDialog(context);
+                }
         }
 
         /// Retourne `true` s’il y a au moins un paramètre modifié par rapport aux valeurs par défaut

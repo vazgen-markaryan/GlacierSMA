@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:rev_glacier_sma_mobile/screens/settings/sections/about_section.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_processor.dart';
 import 'package:rev_glacier_sma_mobile/screens/settings/sections/language_section.dart';
+import 'package:rev_glacier_sma_mobile/screens/settings/sections/test_tutorial_switch.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_processor.dart';
 
 /// Écran principal des Paramètres
 class SettingsScreen extends StatelessWidget {
@@ -23,10 +25,13 @@ class SettingsScreen extends StatelessWidget {
                                         // Section "Langue"
                                         LanguageSection(),
 
-                                        const SizedBox(height: 16),
+                                        const SizedBox(height: defaultPadding),
 
                                         // Section "À propos"
-                                        AboutSection(firmwareNotifier: firmwareNotifier)
+                                        AboutSection(firmwareNotifier: firmwareNotifier),
+
+                                        const SizedBox(height: defaultPadding * 2),
+                                        TestTutorialSwitch()
                                 ]
                         )
                 );

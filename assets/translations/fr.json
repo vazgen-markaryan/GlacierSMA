@@ -110,8 +110,7 @@
 			"description_3": "Vous pouvez modifier les plages de valeurs des capteurs, créer un environnement défini par vous-même, puis lancer un test pour voir les journaux.",
 			"description_4": "Si une anomalie est détectée, elle sera affichée dans les journaux.",
 			"description_5": "Vous pouvez également réinitialiser les plages de valeurs par défaut pour chaque capteur.",
-			"description_6": "Le test ne peut pas s'exécuter en arrière-plan. Vous devez rester sur cette page.",
-			"description_7": "Une fois que le test est lancé, vous ne pouvez plus naviguer vers d'autres pages avant d'arrêter le test."
+			"description_6": "Le test ne peut pas s'exécuter en arrière-plan. Vous devez rester sur cette page."
 		},
 
 		"csv": {
@@ -150,7 +149,11 @@
 		"confirmation_description": "Aucune valeur n'a été modifiée.\n\nVoulez-vous quand même démarrer le test ?",
 		"continue": "Continuer",
 		"detected_changes": "Modifications détectées",
-		"no_changes": "Aucun changement détecté"
+		"no_changes": "Aucun changement détecté",
+		"save_before_disconnect": "Voulez-vous enregistrer vos données de test avant de vous déconnecter?",
+		"skip_tutorial": "Passer le tutoriel",
+		"skip_tutorial_test_page": "Désactiver Test Page Tutoriel",
+		"skip_tutorial_description": "Peut être réactivé dans les paramètres."
 	},
 
 	"config": {

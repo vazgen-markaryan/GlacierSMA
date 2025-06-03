@@ -6,6 +6,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/test/test_anomaly.dart';
@@ -152,7 +153,7 @@ Future<void> saveCsvToDownloads(
                 await file.writeAsString(csvText);
 
                 // Affiche un popup de succès avec le chemin complet
-                showDialog(
+                await showDialog(
                         context: context,
                         builder: (_) => CustomPopup(
                                 title: tr('test.succes'),
@@ -171,8 +172,9 @@ Future<void> saveCsvToDownloads(
         }
         catch (error) {
                 // En cas d’erreur, on affiche un popup d’erreur avec le message
-                showDialog(
+                await showDialog(
                         context: context,
+                        barrierDismissible: false,
                         builder: (_) => CustomPopup(
                                 title: tr("test.error"),
                                 content: Text(
@@ -187,6 +189,8 @@ Future<void> saveCsvToDownloads(
                                 ]
                         )
                 );
+                // Ensuite, propager l’erreur pour que le caller décide quoi faire.
+                rethrow;
         }
 }
 
@@ -223,38 +227,78 @@ void showExportConfirmation(
 }
 
 /// Affiche le tutoriel / l’introduction au mode Test. Utilisée une seule fois au lancement de l’écran Test, si la permission stockage a été accordée.
-void showIntroDialog(BuildContext context) {
+void showIntroDialog(BuildContext context) async {
+        final prefs = await SharedPreferences.getInstance();
+        bool skipTutorial = prefs.getBool('skip_test_tutorial') ?? false;
+
         showDialog(
                 context: context,
                 barrierDismissible: false,
-                builder: (_) => CustomPopup(
-                        title: tr('test.intro.title'),
-                        content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: List.generate(
-                                        7, (i) {
-                                                return Padding(
-                                                        padding: EdgeInsets.only(bottom: i < 6 ? 8 : 0),
-                                                        child: Text(
-                                                                tr('test.intro.description_${i + 1}'),
-                                                                style: const TextStyle(
-                                                                        color: Colors.white,
-                                                                        fontSize: 16,
-                                                                        height: 1.5,
-                                                                        fontWeight: FontWeight.w400
+                builder: (_) => StatefulBuilder(
+                        builder: (context, setState) {
+                                return CustomPopup(
+                                        title: tr('test.intro.title'),
+                                        content: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                        ...List.generate(
+                                                                6,
+                                                                (i) => Padding(
+                                                                        padding: EdgeInsets.only(bottom: 5),
+                                                                        child: Text(
+                                                                                tr('test.intro.description_${i + 1}'),
+                                                                                style: const TextStyle(
+                                                                                        color: Colors.white,
+                                                                                        fontSize: 16,
+                                                                                        height: 1.5,
+                                                                                        fontWeight: FontWeight.w400
+                                                                                )
+                                                                        )
                                                                 )
+                                                        ),
+                                                        const SizedBox(height: 16),
+                                                        Row(
+                                                                children: [
+                                                                        Checkbox(
+                                                                                value: skipTutorial,
+                                                                                onChanged: (val) async {
+                                                                                        setState(() => skipTutorial = val ?? false);
+                                                                                        await prefs.setBool('skip_test_tutorial', skipTutorial);
+                                                                                }
+                                                                        ),
+                                                                        Expanded(
+                                                                                child: Column(
+                                                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                        children: [
+                                                                                                Text(
+                                                                                                        tr("test.skip_tutorial"),
+                                                                                                        style: const TextStyle(color: Colors.white)
+                                                                                                ),
+                                                                                                Padding(
+                                                                                                        padding: const EdgeInsets.only(right: 18),
+                                                                                                        child: Text(tr("test.skip_tutorial_description"),
+                                                                                                                style: const TextStyle(
+                                                                                                                        color: Colors.white70,
+                                                                                                                        fontSize: 12
+                                                                                                                )
+                                                                                                        )
+                                                                                                )
+                                                                                        ]
+                                                                                )
+                                                                        )
+                                                                ]
                                                         )
-                                                );
-                                        }
-                                )
-                        ),
-                        actions: [
-                                TextButton(
-                                        onPressed: () => Navigator.of(context).pop(),
-                                        child: const Text('OK')
-                                )
-                        ]
+                                                ]
+                                        ),
+                                        actions: [
+                                                TextButton(
+                                                        onPressed: () => Navigator.of(context).pop(),
+                                                        child: const Text('OK')
+                                                )
+                                        ]
+                                );
+                        }
                 )
         );
 }

@@ -110,8 +110,7 @@
 			"description_3": "You can modify the sensor value ranges, create an environment you have defined, and launch a test to view the logs.",
 			"description_4": "If an anomaly is detected, it will be displayed in the logs.",
 			"description_5": "You can also reset the default value ranges for each sensor.",
-			"description_6": "The test cannot run in the background. You must keep this page open.",
-			"description_7": "Once the test is launched, you can not navigate to another page until the test is stopped."
+			"description_6": "The test cannot run in the background. You must keep this page open."
 		},
 
 		"csv": {
@@ -150,7 +149,11 @@
 		"confirmation_description": "No values has been modified.\n\nDo you want to start the test anyway?",
 		"continue": "Continue",
 		"detected_changes": "Detected Changes",
-		"no_changes": "No changes detected"
+		"no_changes": "No changes detected",
+		"save_before_disconnect": "Would you like to save your Test Data before disconnecting?",
+		"skip_tutorial": "Skip Tutorial",
+		"skip_tutorial_test_page": "Skip Test Page Tutorial",
+		"skip_tutorial_description": "Can be reactivated in the settings."
 	},
 
 	"config": {

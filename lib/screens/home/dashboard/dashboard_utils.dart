@@ -1,3 +1,6 @@
+import '../../../utils/constants.dart';
+import '../../connection/connection_screen.dart';
+import '../test/test_utils.dart';
 import 'dashboard_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -53,14 +56,94 @@ mixin DashboardUtils on State<Home_Screen> {
                         ));
         }
 
-        /// Affiche un popup si la connexion est perdue
         Future<void> handleConnectionLost(Duration elapsed) async {
                 if (!mounted) return;
                 setState(() => isConnected = false);
-                await showLostConnectionPopup(
+
+                // Formate le temps écoulé
+                final formatted = "${elapsed.inHours}h ${elapsed.inMinutes.remainder(60)}m ${elapsed.inSeconds.remainder(60)}s";
+
+                // Vérifier si TestScreen est en train de tourner un test
+                final testState = testScreenKey.currentState;
+                final testEnCours = testState?.isTestRunning == true;
+
+                // Afficher un CustomPopup offrant deux boutons, selon le cas
+                await showDialog(
                         context: context,
-                        plugin: widget.plugin,
-                        elapsedTime: elapsed
+                        barrierDismissible: false,
+                        builder: (_) {
+                                return CustomPopup(
+                                        title: tr("connection.disconnect"),
+                                        content: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                        Text(
+                                                                tr('connection.lost_connection', namedArgs: {'time': formatted}),
+                                                                style: const TextStyle(color: Colors.white70)
+                                                        ),
+                                                        if (testEnCours) ...[
+                                                                const SizedBox(height: 12),
+                                                                Text(
+                                                                        tr('test.save_before_disconnect'),
+                                                                        style: const TextStyle(color: Colors.white70)
+                                                                )
+                                                        ]
+                                                ]
+                                        ),
+                                        actions: [
+                                                if (testEnCours) ...[
+                                                        TextButton(
+                                                                onPressed: () {
+                                                                        Navigator.of(context).pop();
+                                                                        // Lancer la sauvegarde CSV, puis la déconnexion
+                                                                        saveLogsThenDisconnect(testState!);
+                                                                },
+                                                                child: Text(tr('yes'))
+                                                        ),
+                                                        TextButton(
+                                                                onPressed: () {
+                                                                        Navigator.of(context).pop();
+                                                                        doDisconnectAndNavigate();
+                                                                },
+                                                                child: Text(tr('no'))
+                                                        )
+                                                ] else ...[
+                                                        TextButton(
+                                                                onPressed: () {
+                                                                        Navigator.of(context).pop();
+                                                                        doDisconnectAndNavigate();
+                                                                },
+                                                                child: const Text('OK', style: TextStyle(color: primaryColor))
+                                                        )
+                                                ]
+                                        ]
+                                );
+                        }
+                );
+        }
+
+        /// Sauvegarde les logs puis déconnecte (seulement après que l’utilisateur ait fermé la popup)
+        Future<void> saveLogsThenDisconnect(TestScreenState testState) async {
+                final anomalies = testState.currentAnomalyLog;
+                try {
+                        // Cet await n’appellera doDisconnectAndNavigate() qu’après la fermeture de la popup de succès/erreur
+                        await saveCsvToDownloads(context, anomalies);
+                }
+                catch (_) {
+                        // Si l’utilisateur a annulé la sauvegarde, on disconnecte quand même
+                        doDisconnectAndNavigate();
+                }
+
+                // Si la sauvegarde a réussi, on déconnecte et revient à l’écran de connexion
+                doDisconnectAndNavigate();
+        }
+
+        /// Déconnecte et revient à l’écran de connexion
+        void doDisconnectAndNavigate() async {
+                await widget.plugin?.disconnect();
+                Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const ConnectionScreen())
                 );
         }
 

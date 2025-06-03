@@ -110,8 +110,7 @@
 			"description_3": "Puede modificar los rangos de valores de los sensores, crear un entorno definido por usted y luego iniciar una prueba para ver los registros.",
 			"description_4": "Si se detecta una anomalía, se mostrará en los registros.",
 			"description_5": "También puede restablecer los rangos de valores predeterminados para cada sensor.",
-			"description_6": "La prueba no puede ejecutarse en segundo plano. Debe mantener esta página abierta.",
-			"description_7": "Una vez iniciada la prueba, no puede navegar a otra página hasta que la prueba se detenga."
+			"description_6": "La prueba no puede ejecutarse en segundo plano. Debe mantener esta página abierta."
 		},
 
 		"csv": {
@@ -150,7 +149,10 @@
 		"confirmation_description": "No se ha modificado ningún valor.\n\nDesea iniciar la prueba de todos modos?",
 		"continue": "Continuar",
 		"detected_changes": "Cambios detectados",
-		"no_changes": "No se detectaron cambios"
+		"no_changes": "No se detectaron cambios",
+		"skip_tutorial": "Omitir tutorial",
+		"skip_tutorial_test_page": "Desactivar Test Page Tutorial",
+		"skip_tutorial_description": "Puede reactivarse en la configuración."
 	},
 
 	"config": {
@@ -177,7 +179,8 @@
 		"error": "Error",
 		"confirm_reset": "Confirmar reinicio",
 		"reset_default_title": "Desea restaurar los ajustes predeterminados?",
-		"reset_default": "Restablecer"
+		"reset_default": "Restablecer",
+		"save_before_disconnect": "Desea guardar sus datos de prueba antes de desconectarse?"
 	},
 
 	"settings": {
