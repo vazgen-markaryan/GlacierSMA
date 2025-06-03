@@ -112,7 +112,45 @@
 			"description_5": "Vous pouvez également réinitialiser les plages de valeurs par défaut pour chaque capteur.",
 			"description_6": "Le test ne peut pas s'exécuter en arrière-plan. Vous devez rester sur cette page.",
 			"description_7": "Une fois que le test est lancé, vous ne pouvez plus naviguer vers d'autres pages avant d'arrêter le test."
-		}
+		},
+
+		"csv": {
+			"timestamp": "Horodatage",
+			"sensor": "Capteur",
+			"property": "Propriété",
+			"expected": "Attendu",
+			"received": "Reçu"
+		},
+
+		"succes": "Succès",
+		"file_saved": "Fichier \"{file}\" est enregistré à :",
+		"error": "Erreur",
+		"file_error": "Le fichier n'a pas été enregistré :",
+		"export_logs": "Exporter les journaux",
+		"export_logs_description": "Voulez-vous exporter les journaux au format CSV ?",
+		"cancel": "Annuler",
+		"save": "Enregistrer",
+		"default": "Par défaut",
+		"after": "Après",
+		"min_max_constraint": "Les valeurs min/max ne sont pas respectées",
+		"min": "Min",
+		"max": "Max",
+		"reset_default": "Réinitialiser par défaut",
+		"apply": "Appliquer",
+		"selected": "Sélectionné",
+		"received": "Reçu",
+		"permission_needed": "Permission requise",
+		"permission_needed_description": "L'application a besoin d'une permission pour écrire des fichiers sur votre appareil. \n Rendez-vous dans les paramètres de votre appareil et autorisez l'application à écrire des fichiers.",
+		"stop_test_warning": "Arrêtez le test avant de passer à une autre page.",
+		"test_started": "Test démarré",
+		"anomalies_detected": "Anomalies détectées",
+		"stop_test": "Arrêter le test",
+		"start_test": "Démarrer le test",
+		"confirmation": "Confirmation",
+		"confirmation_description": "Aucune valeur n'a été modifiée.\n\nVoulez-vous quand même démarrer le test ?",
+		"continue": "Continuer",
+		"detected_changes": "Modifications détectées",
+		"no_changes": "Aucun changement détecté"
 	},
 
 	"config": {
@@ -140,7 +178,7 @@
 		"error": "Échec",
 		"confirm_reset": "Confirmer la réinitialisation",
 		"reset_default_title": "Voulez-vous restaurer les paramètres par défaut ?",
-		"reset_default": "Reset default"
+		"reset_default": "Réinitialiser"
 	},
 
 	"settings": {
@@ -169,8 +207,8 @@
 
 	"sensor-data": {
 		"title": {
-			"thermo_barometer": "Thermo-Baromètre",
-			"accel_magnetometer": "Accéléro-Magnétomètre",
+			"thermo_barometer": "Thermomètre",
+			"accel_magnetometer": "Accéléromètre",
 			"gps": "GPS",
 			"sd_card": "Carte SD",
 			"iridium": "Iridium",

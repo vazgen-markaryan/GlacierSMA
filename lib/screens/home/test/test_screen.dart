@@ -2,21 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
-import 'package:rev_glacier_sma_mobile/utils/global_utilities.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_snackbar.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/test/test_utils.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/test/test_anomaly.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/test/test_anomaly_row.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/test/test_sensor_diff_row.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_feeder.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/test/test_range_setup_popup.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_group_factory.dart';
 
 /// Écran de test en environnement contrôlé
+/// - Gestion des permissions stockage au démarrage
+/// - Préparation des plages (min/max) pour chaque DataMap de chaque capteur actif
+/// - Passage en mode “test” : écoute des itérations et détection d’anomalies
+/// - Affichage des anomalies en temps réel (10 dernières)
+/// - Option d’export CSV à l’arrêt du test
+
 class TestScreen extends StatefulWidget {
+        /// Notifier du masque `<active>` pour savoir quels capteurs sont actifs
         final ValueListenable<int?> activeMaskNotifier;
+
+        /// Fonction pour récupérer dynamiquement la liste des capteurs (internal ou modbus)
         final List<SensorsData> Function(SensorType) getSensors;
+
+        /// Notifier de l’itération courante reçue (incrémentée à chaque nouvelle trame `<data>`)
         final ValueNotifier<int> iterationNotifier;
 
         const TestScreen({
@@ -31,47 +41,44 @@ class TestScreen extends StatefulWidget {
 }
 
 class TestScreenState extends State<TestScreen> {
-        // Map pour stocker les plages de valeurs par DataMap
+        /// Pour chaque capteur, pour chaque DataMap, on stocke la plage min/max choisie
         final Map<SensorsData, Map<DataMap, RangeValues>> ranges = {};
 
-        // Map pour les valeurs par défaut
+        /// Valeurs “par défaut” de chaque plage (issues de `minMaxRanges` dans constants.dart)
         final Map<SensorsData, Map<DataMap, RangeValues>> defaultRanges = {};
 
-        // Map pour stocker les min/max par capteur et son DataMap
+        /// Mêmes données, mais conservées en local : `dataMapMinMax` sert uniquement au calcul initial
         final Map<SensorsData, Map<DataMap, RangeValues>> dataMapMinMax = {};
 
-        // Liste des logs pour le test
+        /// Liste des logs “bruts” reçus (non utilisée directement ici, mais conservée)
         final List<String> logs = [];
 
-        // Indicateur pour savoir si le test est en cours
+        /// Indique si le “test” est en cours (true) ou si l’on est en mode configuration (false)
         bool isTesting = false;
 
-        // La dernière itération du test
+        /// Récupère la dernière itération traitée pour éviter de retraiter la même
         int lastIteration = 0;
 
-        // Liste des anomalies détectées
+        /// Liste des anomalies détectées depuis le début du test
         final List<AnomalyRow> anomalyLog = [];
 
         @override
         void initState() {
                 super.initState();
 
-                // (1) Dès que l’écran est monté, on requiert la permission au runtime
-                WidgetsBinding.instance.addPostFrameCallback(
-                        (_) async {
+                WidgetsBinding.instance.addPostFrameCallback((_) async {
+                                // Dès que l’écran est monté, on demande la permission adaptée selon l’API
                                 final granted = await requestAppropriatePermission(context);
                                 if (!granted) {
-                                        // Permission refusée → on affiche un popup expliquant comment aller dans les Paramètres
+                                        // Si permission refusée, on affiche un popup expliquant comment l’activer manuellement
                                         await showDialog(
                                                 context: context,
                                                 barrierDismissible: false,
                                                 builder: (_) => CustomPopup(
-                                                        title: 'Permission requise',
-                                                        content: const Text(
-                                                                'L’accès aux fichiers est nécessaire pour pouvoir enregistrer vos logs.\n'
-                                                                'Allez dans “Paramètres → Applications → Glacier SMA → Permissions” '
-                                                                'et activez “Accès au stockage” ou “Accès à tous les fichiers” selon votre version Android.',
-                                                                style: TextStyle(color: Colors.white)
+                                                        title: tr("test.permission_needed"),
+                                                        content: Text(
+                                                                tr("test.permission_needed_description"),
+                                                                style: const TextStyle(color: Colors.white)
                                                         ),
                                                         actions: [
                                                                 TextButton(
@@ -81,27 +88,38 @@ class TestScreenState extends State<TestScreen> {
                                                         ]
                                                 )
                                         );
-                                        // On ne quitte PAS TestScreen ici, on reste bloqué sur l’écran de config.
+                                        // On ne quitte pas TestScreen, on reste bloqué en mode config
                                         return;
                                 }
-
-                                // (2) Si la permission est accordée, on affiche le tutoriel / intro
+                                // Si la permission est accordée, on affiche le tutoriel / intro
                                 showIntroDialog(context);
                         }
                 );
 
-                // (3) Initialisation normale des ranges/defaultRanges
+                // Initialise les plages min/max pour chaque capteur actif
                 final mask = widget.activeMaskNotifier.value ?? 0;
+
+                // On s’abonne à l’itération pour détecter les anomalies plus tard
                 widget.iterationNotifier.addListener(onNewIteration);
 
+                // Parcourt tous les capteurs internes + modbus
                 for (var sensor in widget.getSensors(SensorType.internal) +
                         widget.getSensors(SensorType.modbus)) {
+
+                        // Exclut les capteurs non actifs ou à exclure
                         if (!shouldIncludeSensor(sensor, mask)) continue;
+
+                        // Prépare une map DataMap → RangeValues pour ce capteur
                         final dataMap = <DataMap, RangeValues>{};
+
                         for (var key in sensor.data.keys) {
+                                // Exclut certains champs via `shouldIncludeDataMap`
                                 if (!shouldIncludeDataMap(sensor, key)) continue;
+
+                                // Valeurs par défaut extraites de `minMaxRanges[sensor.header]![key.header]`
                                 dataMap[key] = getMinMax(sensor, key);
                         }
+
                         dataMapMinMax[sensor] = dataMap;
                         defaultRanges[sensor] = Map.of(dataMap);
                         ranges[sensor] = Map.of(dataMap);
@@ -114,6 +132,7 @@ class TestScreenState extends State<TestScreen> {
                 super.dispose();
         }
 
+        /// Ouvre le popup pour configurer la plage (min/max) d’un DataMap pour le [sensor]
         void showRangeDialog(SensorsData sensor) {
                 showGeneralDialog(
                         context: context,
@@ -121,13 +140,11 @@ class TestScreenState extends State<TestScreen> {
                         barrierLabel: '',
                         barrierColor: Colors.black54,
                         transitionDuration: const Duration(milliseconds: 200),
-                        pageBuilder: (_, __, ___) =>
-                        TestRangeSetupPopup(
+                        pageBuilder: (_, __, ___) => TestRangeSetupPopup(
                                 sensor: sensor,
                                 defaults: defaultRanges[sensor]!,
                                 currents: ranges[sensor]!,
-                                onApply: (updated) =>
-                                setState(() => ranges[sensor] = Map.of(updated))
+                                onApply: (updated) => setState(() => ranges[sensor] = Map.of(updated))
                         ),
                         transitionBuilder: (context, animation, _, child) =>
                         Transform.scale(
@@ -137,6 +154,7 @@ class TestScreenState extends State<TestScreen> {
                 );
         }
 
+        /// Retourne `true` s’il y a au moins un paramètre modifié par rapport aux valeurs par défaut
         bool get hasChanges {
                 for (var sensor in ranges.keys) {
                         final current = ranges[sensor]!;
@@ -149,6 +167,7 @@ class TestScreenState extends State<TestScreen> {
                 return false;
         }
 
+        /// Passe en mode “test”, réinitialise les logs et anomalies
         void launchTest() {
                 setState(
                         () {
@@ -160,6 +179,7 @@ class TestScreenState extends State<TestScreen> {
                 );
         }
 
+        /// Arrête le test et propose d’exporter les logs d’anomalie
         void stopTest() {
                 setState(() => isTesting = false);
                 showExportConfirmation(context, anomalyLog);
@@ -168,12 +188,12 @@ class TestScreenState extends State<TestScreen> {
         @override
         Widget build(BuildContext context) {
                 return WillPopScope(
-                        // On empêche la navigation si le test est en cours
+                        // Empêche le “retour” si le test est en cours
                         onWillPop: () async {
                                 if (isTesting) {
                                         showCustomSnackBar(
                                                 context,
-                                                message: "Arrêtez d’abord le test",
+                                                message: tr("test.stop_test_warning"),
                                                 iconData: Icons.warning,
                                                 backgroundColor: Colors.red,
                                                 textColor: Colors.white,
@@ -184,71 +204,142 @@ class TestScreenState extends State<TestScreen> {
                                 return true;
                         },
                         child: Scaffold(
-                                body: isTesting ? buildLogScreen() : buildConfigScreen()
+                                // Affiche soit l’écran de log, soit la config selon [isTesting]
+                                body: isTesting ? buildLogScreen(anomalyLog, ranges, stopTest, backgroundColor) : buildConfigScreen()
                         )
                 );
         }
 
-        Widget buildLogScreen() {
+        /// Construit l’écran affichant l’heure de début, le nombre d’anomalies,
+        /// la liste des dernières anomalies (sans scroll interne), puis le bouton “Arrêter Test”.
+        /// Le scroll global est géré par SingleChildScrollView.
+        Widget buildLogScreen(
+                List<AnomalyRow> anomalyLog,
+                Map<SensorsData, Map<DataMap, RangeValues>> ranges,
+                VoidCallback stopTest,
+                Color backgroundColor
+        ) {
                 final now = DateTime.now();
-                final timestampStr = "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')} ${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}";
+                final timestampStr =
+                        "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')} "
+                        "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}";
+
+                // On affiche au plus les 8 dernières anomalies
+                final toShow = anomalyLog.length > 8
+                        ? anomalyLog.sublist(anomalyLog.length - 8)
+                        : anomalyLog;
 
                 return Scaffold(
                         backgroundColor: backgroundColor,
                         body: SafeArea(
-                                child: Column(
-                                        children: [
-                                                const SizedBox(height: defaultPadding / 2),
-                                                Text('TEST STARTED', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-                                                const SizedBox(height: defaultPadding / 2),
-                                                Text(timestampStr, style: const TextStyle(fontSize: 16, color: Colors.white70), textAlign: TextAlign.center),
-                                                const SizedBox(height: defaultPadding / 2),
+                                child: SingleChildScrollView(
+                                        padding: const EdgeInsets.symmetric(horizontal: defaultPadding),
+                                        child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                                children: [
+                                                        const SizedBox(height: defaultPadding / 4),
 
-                                                if (anomalyLog.isNotEmpty) ...[
+                                                        // 1) Titre “TEST STARTED”
                                                         Text(
-                                                                'ANOMALIES DÉTECTÉES [${anomalyLog.length}]',
+                                                                tr("test.test_started"),
                                                                 style: const TextStyle(
-                                                                        fontSize: 18, color: Colors.red, fontWeight: FontWeight.bold),
+                                                                        fontSize: 22,
+                                                                        fontWeight: FontWeight.bold
+                                                                ),
                                                                 textAlign: TextAlign.center
                                                         ),
 
-                                                        const SizedBox(height: defaultPadding / 2)
-                                                ],
-                                                Expanded(
-                                                        child: SingleChildScrollView(
-                                                                padding: const EdgeInsets.symmetric(horizontal: defaultPadding),
-                                                                child: anomalyBIOSList(
-                                                                        anomalyLog.length > 10
-                                                                                ? anomalyLog.sublist(anomalyLog.length - 10)
-                                                                                : anomalyLog
+                                                        const SizedBox(height: defaultPadding / 4),
+
+                                                        // 2) Horodatage
+                                                        Text(
+                                                                timestampStr,
+                                                                style: const TextStyle(
+                                                                        fontSize: 16,
+                                                                        color: Colors.white70
+                                                                ),
+                                                                textAlign: TextAlign.center
+                                                        ),
+
+                                                        const SizedBox(height: defaultPadding / 4),
+
+                                                        // 3) Si on a des anomalies, on affiche “ANOMALIES DÉTECTÉES [n]”
+                                                        if (toShow.isNotEmpty) ...[
+                                                                Text(
+                                                                        tr("test.anomalies_detected") + ' [${anomalyLog.length}]',
+                                                                        style: const TextStyle(
+                                                                                fontSize: 18,
+                                                                                color: Colors.red,
+                                                                                fontWeight: FontWeight.bold
+                                                                        ),
+                                                                        textAlign: TextAlign.center
+                                                                ),
+                                                                const SizedBox(height: defaultPadding / 2)
+                                                        ],
+
+                                                        // 4) Liste des anomalies sans scroll interne
+                                                        for (final anomaly in toShow) ...[
+                                                                        AnomalyBIOSRow(
+                                                                                iconPath: findDataMapByName(anomaly.propertyName, ranges)?.svgLogo ?? microchip,
+                                                                                sensorName: anomaly.sensorName,
+                                                                                propertyName: anomaly.propertyName,
+                                                                                expected: anomaly.minMax,
+                                                                                actual: anomaly.value,
+                                                                                timestamp: anomaly.timestamp
+                                                                        )
+                                                                ],
+
+                                                        const SizedBox(height: defaultPadding / 2),
+
+                                                        // 5) Bouton “Arrêter Test” en bas de la page
+                                                        Padding(
+                                                                padding: const EdgeInsets.only(bottom: defaultPadding),
+                                                                child: SizedBox(
+                                                                        width: double.infinity,
+                                                                        height: 48,
+                                                                        child: ElevatedButton.icon(
+                                                                                onPressed: stopTest,
+                                                                                icon: const Icon(Icons.stop, color: Colors.white),
+                                                                                label: Text(
+                                                                                        tr("test.stop_test"),
+                                                                                        style: const TextStyle(color: Colors.white)
+                                                                                ),
+                                                                                style: ElevatedButton.styleFrom(backgroundColor: Colors.red)
+                                                                        )
                                                                 )
                                                         )
-                                                ),
-                                                Padding(
-                                                        padding: const EdgeInsets.all(defaultPadding),
-                                                        child: SizedBox(
-                                                                width: double.infinity,
-                                                                height: 48,
-                                                                child: ElevatedButton.icon(
-                                                                        onPressed: stopTest,
-                                                                        icon: const Icon(Icons.stop, color: Colors.white),
-                                                                        label: const Text(
-                                                                                'Arrêter Test', style: TextStyle(color: Colors.white)),
-                                                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red)
-                                                                )
-                                                        )
-                                                )
-                                        ]
+                                                ]
+                                        )
                                 )
                         )
                 );
         }
 
+        // Fonction interne pour retrouver l’objet DataMap correspondant à `propertyName`
+        DataMap? findDataMapByName(
+                String propertyName,
+                Map<SensorsData, Map<DataMap, RangeValues>> ranges
+        ) {
+                for (final sensor in ranges.keys) {
+                        for (final key in sensor.data.keys) {
+                                // Compare le nom localisé (tr(key.name)) ou le header brut
+                                if (tr(key.name) == propertyName || key.name == propertyName) {
+                                        return key;
+                                }
+                        }
+                }
+                return null;
+        }
+
+        /// Construit l’écran de configuration :
+        /// - Affiche tous les capteurs actifs (via createAllSensorGroups), en “testMode”
+        /// - Un bouton “Lancer Test” en bas
         Widget buildConfigScreen() {
                 return SingleChildScrollView(
                         padding: const EdgeInsets.all(defaultPadding),
                         child: Column(
                                 children: [
+                                        // Reprend les mêmes cartes que sur HomeScreen, mais en cache le graphique (testMode: true)
                                         ...createAllSensorGroups(
                                                 maskNotifier: widget.activeMaskNotifier,
                                                 getSensors: widget.getSensors,
@@ -259,14 +350,20 @@ class TestScreenState extends State<TestScreen> {
 
                                         const SizedBox(height: defaultPadding),
 
+                                        // Bouton “Lancer Test”
                                         SizedBox(
                                                 width: double.infinity,
                                                 height: 48,
                                                 child: ElevatedButton.icon(
                                                         onPressed: () => onLaunchTestPressed(context),
                                                         icon: const Icon(Icons.play_arrow, color: Colors.white),
-                                                        label: const Text('Lancer Test', style: TextStyle(color: Colors.white)),
-                                                        style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor)
+                                                        label: Text(
+                                                                tr("test.start_test"),
+                                                                style: const TextStyle(color: Colors.white)
+                                                        ),
+                                                        style: ElevatedButton.styleFrom(
+                                                                backgroundColor: Theme.of(context).primaryColor
+                                                        )
                                                 )
                                         )
                                 ]
@@ -274,153 +371,97 @@ class TestScreenState extends State<TestScreen> {
                 );
         }
 
+        /// Gère la logique avant de lancer le test :
+        /// - Si aucune plage n’a été modifiée (hasChanges==false), on confirme qu’on lance “avec défauts”
+        /// - Sinon, on affiche d’abord les différences (TestSensorDiffRow) avant de lancer
         void onLaunchTestPressed(BuildContext context) {
                 if (!hasChanges) {
-                        showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (_) =>
-                                CustomPopup(
-                                        title: 'Confirmation',
-                                        content: const Text(
-                                                'Vous runnez le test avec les valeurs par défaut?',
-                                                style: TextStyle(color: Colors.white, fontSize: 16)
-                                        ),
-                                        actions: [
-                                                TextButton(
-                                                        onPressed: () => Navigator.of(context).pop(),
-                                                        child: const Text('Annuler')
-                                                ),
-                                                TextButton(
-                                                        onPressed: () {
-                                                                Navigator.of(context).pop();
-                                                                launchTest();
-                                                        },
-                                                        child: const Text('Continuer')
-                                                )
-                                        ]
-                                )
-                        );
+                        showConfirmationDialog(context);
                         return;
                 }
+                showDiffDialog(context);
+        }
 
-                // BIOS-style : liste des différences avec icône, nom, propriété, avant/après
-                final List<Widget> diffs = [];
-                for (var sensor in ranges.keys) {
-                        final current = ranges[sensor]!;
-                        final defaults = defaultRanges[sensor]!;
-                        for (var k in current.keys) {
-                                final def = defaults[k]!;
-                                final cur = current[k]!;
-                                if (def != cur) {
-                                        diffs.add(
-                                                TestSensorDiffRow(
-                                                        iconPath: k.svgLogo,
-                                                        propertyName: '${tr(k.name)} (${getUnitForHeader(k.header)})',
-                                                        sensorName: tr(sensor.title ?? ''),
-                                                        before: '${def.start.toInt()} / ${def.end.toInt()}',
-                                                        after: '${cur.start.toInt()} / ${cur.end.toInt()}'
-                                                )
-                                        );
-                                }
-                        }
-                }
-
+        /// Affiche un popup de confirmation simple :
+        /// “Vous lancez le test avec les valeurs par défaut ?”
+        void showConfirmationDialog(BuildContext context) {
                 showDialog(
                         context: context,
                         barrierDismissible: false,
-                        builder: (_) =>
-                        CustomPopup(
-                                title: 'Changements détectés',
-                                content: diffs.isEmpty
-                                        ? const Text(
-                                                'Aucun changement', style: TextStyle(color: Colors.white))
-                                        : Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                        ...diffs
-                                                ]
-                                        ),
+                        builder: (_) => CustomPopup(
+                                title: tr("test.confirmation"),
+                                content: Text(
+                                        tr("test.confirmation_description"),
+                                        style: const TextStyle(color: Colors.white, fontSize: 16)
+                                ),
                                 actions: [
                                         TextButton(
                                                 onPressed: () => Navigator.of(context).pop(),
-                                                child: const Text('Annuler')
+                                                child: Text(tr("test.cancel"))
                                         ),
                                         TextButton(
                                                 onPressed: () {
                                                         Navigator.of(context).pop();
                                                         launchTest();
                                                 },
-                                                child: const Text('Continuer')
+                                                child: Text(tr("test.continue"))
                                         )
                                 ]
                         )
                 );
         }
 
+        /// Affiche un popup listant toutes les différences entre plages par défaut
+        /// et plages modifiées, en utilisant `buildDiffs()` de test_utils.dart
+        void showDiffDialog(BuildContext context) {
+                final List<Widget> diffs = buildDiffs(ranges, defaultRanges);
+
+                showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (_) => CustomPopup(
+                                title: tr("test.detected_changes"),
+                                content: diffs.isEmpty
+                                        ? Text(
+                                                tr("test.no_changes"),
+                                                style: const TextStyle(color: Colors.white)
+                                        )
+                                        : Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: diffs
+                                        ),
+                                actions: [
+                                        TextButton(
+                                                onPressed: () => Navigator.of(context).pop(),
+                                                child: Text(tr("test.cancel"))
+                                        ),
+                                        TextButton(
+                                                onPressed: () {
+                                                        Navigator.of(context).pop();
+                                                        launchTest();
+                                                },
+                                                child: Text(tr("test.continue"))
+                                        )
+                                ]
+                        )
+                );
+        }
+
+        /// Appelé à chaque nouvelle valeur de `iterationNotifier`.
+        /// Si l’itération a augmenté, on déclenche `detectAnomalies()`
+        /// (qui renvoie une liste d’`AnomalyRow` à ajouter à [anomalyLog]).
         void onNewIteration() {
                 final newIt = widget.iterationNotifier.value;
                 if (newIt > lastIteration) {
                         lastIteration = newIt;
-                        detectAnomalies();
-                }
-        }
-
-        void detectAnomalies() {
-                for (var sensor in ranges.keys) {
-                        final currentRanges = ranges[sensor]!;
-                        final realVals = RealValuesHolder().realValues[sensor] ?? {};
-                        for (var k in currentRanges.keys) {
-                                final range = currentRanges[k]!;
-                                final real = realVals[k];
-                                if (real != null && (real < range.start || real > range.end)) {
-                                        setState(
-                                                () {
-                                                        anomalyLog.add(
-                                                                AnomalyRow(
-                                                                        sensorName: '${tr(sensor.title ?? '')} (${tr(sensor.placement ?? '')})',
-                                                                        propertyName: tr(k.name),
-                                                                        value: '${real.toStringAsFixed(1)} ${getUnitForHeader(k.header)}',
-                                                                        minMax: '(${range.start.toInt()} : ${range.end.toInt()})',
-                                                                        timestamp: DateTime.now()
-                                                                )
-                                                        );
-                                                }
-                                        );
-                                }
+                        final newAnomalies =
+                                detectAnomalies(ranges, RealValuesHolder().realValues);
+                        if (newAnomalies.isNotEmpty) {
+                                setState(() {
+                                                anomalyLog.addAll(newAnomalies);
+                                        }
+                                );
                         }
                 }
-        }
-
-        // Ajoute une méthode utilitaire pour retrouver le DataMap à partir du nom de propriété
-        DataMap? findDataMapByName(String propertyName) {
-                for (final sensor in ranges.keys) {
-                        for (final key in sensor.data.keys) {
-                                if (tr(key.name) == propertyName || key.name == propertyName) {
-                                        return key;
-                                }
-                        }
-                }
-                return null;
-        }
-
-        Widget anomalyBIOSList(List<AnomalyRow> anomalies) {
-                return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: anomalies.map(
-                                (anomaly) {
-                                        final dataMap = findDataMapByName(anomaly.propertyName);
-                                        final iconPath = dataMap?.svgLogo ?? microchip;
-                                        return AnomalyBIOSRow(
-                                                iconPath: iconPath,
-                                                sensorName: anomaly.sensorName,
-                                                propertyName: anomaly.propertyName,
-                                                expected: anomaly.minMax,
-                                                actual: anomaly.value,
-                                                timestamp: anomaly.timestamp
-                                        );
-                                }
-                        ).toList()
-                );
         }
 }

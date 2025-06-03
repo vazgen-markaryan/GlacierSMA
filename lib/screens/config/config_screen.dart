@@ -204,7 +204,7 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                         children: [
                                                                 // Bouton “Envoyer les paramètres”
                                                                 Expanded(
-                                                                        flex: 2,
+                                                                        flex: 1,
                                                                         child: ConfigButton(
                                                                                 action: () => sendSeriesConfig(
                                                                                         svc: widget.messageService,

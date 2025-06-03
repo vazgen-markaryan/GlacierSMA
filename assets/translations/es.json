@@ -112,7 +112,45 @@
 			"description_5": "También puede restablecer los rangos de valores predeterminados para cada sensor.",
 			"description_6": "La prueba no puede ejecutarse en segundo plano. Debe mantener esta página abierta.",
 			"description_7": "Una vez iniciada la prueba, no puede navegar a otra página hasta que la prueba se detenga."
-		}
+		},
+
+		"csv": {
+			"timestamp": "Marca de tiempo",
+			"sensor": "Sensor",
+			"property": "Propiedad",
+			"expected": "Esperado",
+			"received": "Recibido"
+		},
+
+		"succes": "Éxito",
+		"file_saved": "Archivo \"{file}\" guardado en:",
+		"error": "Error",
+		"file_error": "El archivo no se ha guardado:",
+		"export_logs": "Exportar registros",
+		"export_logs_description": "Desea exportar los registros a un archivo CSV?",
+		"cancel": "Cancelar",
+		"save": "Guardar",
+		"default": "Por defecto",
+		"after": "Después",
+		"min_max_constraint": "Los valores mín/máx no se respetan",
+		"min": "Mín",
+		"max": "Máx",
+		"reset_default": "Restablecer por defecto",
+		"apply": "Aplicar",
+		"selected": "Seleccionado",
+		"received": "Recibido",
+		"permission_needed": "Permiso necesario",
+		"permission_needed_description": "La aplicación necesita permiso para escribir archivos en su dispositivo. \nVaya a la configuración de su dispositivo y permita que la aplicación escriba archivos.",
+		"stop_test_warning": "Detenga la prueba antes de cambiar a otra página.",
+		"test_started": "Prueba iniciada",
+		"anomalies_detected": "Anomalías detectadas",
+		"stop_test": "Detener prueba",
+		"start_test": "Iniciar prueba",
+		"confirmation": "Confirmación",
+		"confirmation_description": "No se ha modificado ningún valor.\n\nDesea iniciar la prueba de todos modos?",
+		"continue": "Continuar",
+		"detected_changes": "Cambios detectados",
+		"no_changes": "No se detectaron cambios"
 	},
 
 	"config": {
@@ -132,14 +170,14 @@
 		"sea_level_pressure": "Presión al nivel del mar (hPa)",
 		"number_of_captures": "Número de capturas (0–255)",
 		"confirm_send": "Confirmar envío",
-		"new_parameters_send": "¿Desea enviar los nuevos parámetros?",
+		"new_parameters_send": "Desea enviar los nuevos parámetros?",
 		"send": "Enviar",
 		"sending": "Enviando…",
 		"success": "Éxito",
 		"error": "Error",
 		"confirm_reset": "Confirmar reinicio",
-		"reset_default_title": "¿Desea restaurar los ajustes predeterminados?",
-		"reset_default": "Restablecer valores predeterminados"
+		"reset_default_title": "Desea restaurar los ajustes predeterminados?",
+		"reset_default": "Restablecer"
 	},
 
 	"settings": {
@@ -169,8 +207,8 @@
 
 	"sensor-data": {
 		"title": {
-			"thermo_barometer": "Termo-Barómetro",
-			"accel_magnetometer": "Aceleró-Magnetómetro",
+			"thermo_barometer": "Termometro",
+			"accel_magnetometer": "Acelerómetro",
 			"gps": "GPS",
 			"sd_card": "Tarjeta SD",
 			"iridium": "Iridium",

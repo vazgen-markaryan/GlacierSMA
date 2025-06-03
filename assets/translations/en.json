@@ -112,7 +112,45 @@
 			"description_5": "You can also reset the default value ranges for each sensor.",
 			"description_6": "The test cannot run in the background. You must keep this page open.",
 			"description_7": "Once the test is launched, you can not navigate to another page until the test is stopped."
-		}
+		},
+
+		"csv": {
+			"timestamp": "Timestamp",
+			"sensor": "Sensor",
+			"property": "Property",
+			"expected": "Expected",
+			"received": "Received"
+		},
+
+		"succes" : "Success",
+		"file_saved": "File \"{file}\" has been saved to:",
+		"error" : "Error",
+		"file_error": "File has not been saved:",
+		"export_logs": "Export Logs",
+		"export_logs_description": "Do you want to export the logs to a CSV file?",
+		"cancel": "Cancel",
+		"save": "Save",
+		"default" : "Default",
+		"after" : "After",
+		"min_max_constraint": "Min/Max values are not respected",
+		"min" : "Min",
+		"max" : "Max",
+		"reset_default": "Reset Default",
+		"apply": "Apply",
+		"selected": "Selected",
+		"received": "Received",
+		"permission_needed": "Permission needed",
+		"permission_needed_description": "The app needs permission to write files on your device. \nGo to your device settings and allow the app to write files.",
+		"stop_test_warning": "Stop the test before switching to another page.",
+		"test_started": "Test Started",
+		"anomalies_detected": "Anomalies Detected",
+		"stop_test": "Stop Test",
+		"start_test": "Start Test",
+		"confirmation": "Confirmation",
+		"confirmation_description": "No values has been modified.\n\nDo you want to start the test anyway?",
+		"continue": "Continue",
+		"detected_changes": "Detected Changes",
+		"no_changes": "No changes detected"
 	},
 
 	"config": {
@@ -169,8 +207,8 @@
 
 	"sensor-data": {
 		"title": {
-			"thermo_barometer": "Thermo-Barometer",
-			"accel_magnetometer": "Accelero-Magnetometer",
+			"thermo_barometer": "Thermometer",
+			"accel_magnetometer": "Accelerometer",
 			"gps": "GPS",
 			"sd_card": "SD Card",
 			"iridium": "Iridium",

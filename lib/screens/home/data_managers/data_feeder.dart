@@ -73,23 +73,23 @@ class RealValuesHolder {
 // Convertit le code de direction du vent (0–16) en texte localisé.
 String getWindDirectionFacing(int value) {
         switch (value) {
-                case 0:  return tr('switch_utils.wind_direction.north');
-                case 1:  return tr('switch_utils.wind_direction.north_northeast');
-                case 2:  return tr('switch_utils.wind_direction.northeast');
-                case 3:  return tr('switch_utils.wind_direction.east_northeast');
-                case 4:  return tr('switch_utils.wind_direction.east');
-                case 5:  return tr('switch_utils.wind_direction.east_southeast');
-                case 6:  return tr('switch_utils.wind_direction.southeast');
-                case 7:  return tr('switch_utils.wind_direction.south_southeast');
-                case 8:  return tr('switch_utils.wind_direction.south');
-                case 9:  return tr('switch_utils.wind_direction.south_southwest');
-                case 10: return tr('switch_utils.wind_direction.southwest');
-                case 11: return tr('switch_utils.wind_direction.west_southwest');
-                case 12: return tr('switch_utils.wind_direction.west');
-                case 13: return tr('switch_utils.wind_direction.west_northwest');
-                case 14: return tr('switch_utils.wind_direction.northwest');
-                case 15: return tr('switch_utils.wind_direction.north_northwest');
-                case 16: return tr('switch_utils.wind_direction.north');
-                default: return tr('switch_utils.wind_direction.unknown');
+                case 0:  return tr('global_utilities.wind_direction.north');
+                case 1:  return tr('global_utilities.wind_direction.north_northeast');
+                case 2:  return tr('global_utilities.wind_direction.northeast');
+                case 3:  return tr('global_utilities.wind_direction.east_northeast');
+                case 4:  return tr('global_utilities.wind_direction.east');
+                case 5:  return tr('global_utilities.wind_direction.east_southeast');
+                case 6:  return tr('global_utilities.wind_direction.southeast');
+                case 7:  return tr('global_utilities.wind_direction.south_southeast');
+                case 8:  return tr('global_utilities.wind_direction.south');
+                case 9:  return tr('global_utilities.wind_direction.south_southwest');
+                case 10: return tr('global_utilities.wind_direction.southwest');
+                case 11: return tr('global_utilities.wind_direction.west_southwest');
+                case 12: return tr('global_utilities.wind_direction.west');
+                case 13: return tr('global_utilities.wind_direction.west_northwest');
+                case 14: return tr('global_utilities.wind_direction.northwest');
+                case 15: return tr('global_utilities.wind_direction.north_northwest');
+                case 16: return tr('global_utilities.wind_direction.north');
+                default: return tr('global_utilities.wind_direction.unknown');
         }
 }

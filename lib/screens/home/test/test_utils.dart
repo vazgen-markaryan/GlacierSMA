@@ -8,9 +8,9 @@ import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/test/test_anomaly_row.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/test/test_anomaly.dart';
 
-// Map des champs à exclure par capteur
+/// Map des champs à exclure par capteur
 final Map<String, Set<String>> bannedFields = {
         "lsm303_status": {
                 "lsm303_accel_x",
@@ -23,13 +23,19 @@ final Map<String, Set<String>> bannedFields = {
         }
 };
 
+/// Demande la permission d’accès au stockage adaptée à la version Android.
+/// - Pour Android 11+ (API ≥ 30), on demande MANAGE_EXTERNAL_STORAGE.
+/// - Pour Android 10 et moins (API ≤ 29), on demande READ/WRITE_EXTERNAL_STORAGE.
+/// Retourne `true` si la permission est accordée, `false` sinon.
 Future<bool> requestAppropriatePermission(BuildContext context) async {
         if (!Platform.isAndroid) return true;
 
+        // Récupère le niveau d’API Android du périphérique
         final androidInfo = await DeviceInfoPlugin().androidInfo;
         final sdkInt = androidInfo.version.sdkInt;
 
         if (sdkInt >= 30) {
+                // Sur Android 11+ : MANAGE_EXTERNAL_STORAGE
                 if (!await Permission.manageExternalStorage.isGranted) {
                         final status = await Permission.manageExternalStorage.request();
                         return status.isGranted;
@@ -37,6 +43,7 @@ Future<bool> requestAppropriatePermission(BuildContext context) async {
                 return true;
         }
         else {
+                // Sur Android 10 et moins : permissions READ/WRITE_EXTERNAL_STORAGE
                 if (!await Permission.storage.isGranted) {
                         final status = await Permission.storage.request();
                         return status.isGranted;
@@ -45,8 +52,21 @@ Future<bool> requestAppropriatePermission(BuildContext context) async {
         }
 }
 
+/// Génère une chaîne CSV à partir d’une liste d’`AnomalyRow`.
+/// La première ligne contient les en-têtes localisés, puis chaque anomalie est transformée en une ligne CSV :
+/// [Timestamp, Capteur, Propriété, Attendu, Reçu].
 String generateCsv(List<AnomalyRow> anomalyLog) {
-        final rows = <List<dynamic>>[['Timestamp', 'Capteur', 'Propriété', 'Attendu', 'Reçu']];
+        // Première ligne : en-têtes localisées
+        final rows = <List<dynamic>>[
+                [
+                        tr('test.csv.timestamp'),
+                        tr('test.csv.sensor'),
+                        tr('test.csv.property'),
+                        tr('test.csv.expected'),
+                        tr('test.csv.received')
+                ]
+        ];
+
         for (final anomaly in anomalyLog) {
                 final ts = anomaly.timestamp;
                 final formattedTs =
@@ -56,18 +76,26 @@ String generateCsv(List<AnomalyRow> anomalyLog) {
                         '${ts.day.toString().padLeft(2, '0')}/'
                         '${ts.month.toString().padLeft(2, '0')}/'
                         '${ts.year}';
-                rows.add([
+
+                rows.add(
+                        [
                                 formattedTs,
                                 anomaly.sensorName,
                                 anomaly.propertyName,
                                 anomaly.minMax,
                                 anomaly.value
-                        ]);
+                        ]
+                );
         }
+
         return const ListToCsvConverter().convert(rows);
 }
 
+/// Tente de retrouver un dossier public “Download” sur l’appareil Android.
+/// Si aucun n’existe, on écrit dans le dossier externe de l’application :
+///   /Android/data/<package>/files
 Future<Directory> findPublicDownloadDir() async {
+        // Liste de chemins “standard” pour le dossier Downloads sur Android
         final candidates = <Directory>[
                 Directory('/storage/emulated/0/Download'),
                 Directory('/storage/emulated/0/Downloads'),
@@ -75,18 +103,36 @@ Future<Directory> findPublicDownloadDir() async {
                 Directory('/sdcard/Downloads')
         ];
 
-        for (final directory in candidates) {
-                if (await directory.exists()) {
-                        return directory;
+        for (final dir in candidates) {
+                if (await dir.exists()) {
+                        return dir;
                 }
         }
+
+        // Si aucun dossier public n’est trouvé, on utilise le répertoire externe de l’app : /Android/data/<package>/files
+        final externalAppDir = await getExternalStorageDirectory();
+        if (externalAppDir != null) {
+                return externalAppDir;
+        }
+
+        // En tout dernier recours (normalement ne devrait pas arriver), on retombe sur le répertoire temporaire
         return await getTemporaryDirectory();
 }
 
-Future<void> saveCsvToDownloads(BuildContext context, List<AnomalyRow> anomalyLog) async {
+/// Sauvegarde le contenu CSV dans le répertoire public “Download”.
+/// Affiche ensuite un `CustomPopup` indiquant le chemin complet du fichier ou une erreur en cas d’échec.
+Future<void> saveCsvToDownloads(
+        BuildContext context,
+        List<AnomalyRow> anomalyLog
+) async {
         try {
+                // Génère le texte CSV
                 final csvText = generateCsv(anomalyLog);
+
+                // Trouve (ou crée) un dossier “Download” accessible (ou fallback dossier /Android/data/.../files)
                 final downloadsDir = await findPublicDownloadDir();
+
+                // Construit un nom de fichier unique basé sur l’horodatage
                 final now = DateTime.now();
                 final timestamp =
                         '${now.year.toString().padLeft(4, '0')}-'
@@ -96,16 +142,22 @@ Future<void> saveCsvToDownloads(BuildContext context, List<AnomalyRow> anomalyLo
                         '${now.minute.toString().padLeft(2, '0')}-'
                         '${now.second.toString().padLeft(2, '0')}';
                 final fileName = 'Test_$timestamp.csv';
-                final fullPath = '${downloadsDir.path}/$fileName';
-                final file = File(fullPath);
+
+                // Construit le chemin complet incluant le nom de fichier
+                final filePath = '${downloadsDir.path}/';
+                final fullFilePath = '${downloadsDir.path}/$fileName';
+                final file = File(fullFilePath);
+
+                // Écrit le CSV à l’emplacement choisi
                 await file.writeAsString(csvText);
 
+                // Affiche un popup de succès avec le chemin complet
                 showDialog(
                         context: context,
                         builder: (_) => CustomPopup(
-                                title: 'Succès',
+                                title: tr('test.succes'),
                                 content: Text(
-                                        'Fichier enregistré :\n$fullPath',
+                                        tr('test.file_saved', namedArgs: {'file': fileName}) + '\n$filePath',
                                         style: const TextStyle(color: Colors.white)
                                 ),
                                 actions: [
@@ -118,12 +170,13 @@ Future<void> saveCsvToDownloads(BuildContext context, List<AnomalyRow> anomalyLo
                 );
         }
         catch (error) {
+                // En cas d’erreur, on affiche un popup d’erreur avec le message
                 showDialog(
                         context: context,
                         builder: (_) => CustomPopup(
-                                title: 'Erreur',
+                                title: tr("test.error"),
                                 content: Text(
-                                        'Une erreur est survenue lors de l’enregistrement du fichier :\n$error',
+                                        tr('test.file_error') + '\n$error',
                                         style: const TextStyle(color: Colors.white)
                                 ),
                                 actions: [
@@ -137,57 +190,63 @@ Future<void> saveCsvToDownloads(BuildContext context, List<AnomalyRow> anomalyLo
         }
 }
 
-void showExportConfirmation(BuildContext context, List<AnomalyRow> anomalyLog) {
+/// Affiche une boîte de dialogue demandant à l’utilisateur s’il souhaite exporter les logs.
+/// Si l’utilisateur confirme, on appelle `saveCsvToDownloads(...)`.
+void showExportConfirmation(
+        BuildContext context,
+        List<AnomalyRow> anomalyLog
+) {
         showDialog(
                 context: context,
                 barrierDismissible: false,
                 builder: (_) => CustomPopup(
-                        title: 'Exporter les logs',
-                        content: const Text(
-                                'Voulez-vous enregistrer les logs du test ?\n'
-                                'Le fichier sera créé dans “Téléchargements”.',
-                                style: TextStyle(color: Colors.white)
+                        title: tr('test.export_logs'),
+                        content: Text(
+                                tr('test.export_logs_description'),
+                                style: const TextStyle(color: Colors.white)
                         ),
                         actions: [
                                 TextButton(
                                         onPressed: () => Navigator.of(context).pop(),
-                                        child: const Text('Annuler')
+                                        child: Text(tr('test.cancel'))
                                 ),
                                 TextButton(
                                         onPressed: () {
                                                 Navigator.of(context).pop();
                                                 saveCsvToDownloads(context, anomalyLog);
                                         },
-                                        child: const Text('Enregistrer')
+                                        child: Text(tr('test.save'))
                                 )
                         ]
                 )
         );
 }
 
+/// Affiche le tutoriel / l’introduction au mode Test. Utilisée une seule fois au lancement de l’écran Test, si la permission stockage a été accordée.
 void showIntroDialog(BuildContext context) {
         showDialog(
                 context: context,
                 barrierDismissible: false,
-                builder: (_) =>
-                CustomPopup(
+                builder: (_) => CustomPopup(
                         title: tr('test.intro.title'),
                         content: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: List.generate(7, (i) =>
-                                        Padding(
-                                                padding: EdgeInsets.only(bottom: i < 6 ? 8 : 0),
-                                                child: Text(
-                                                        tr('test.intro.description_${i + 1}'),
-                                                        style: const TextStyle(
-                                                                color: Colors.white,
-                                                                fontSize: 16,
-                                                                height: 1.5,
-                                                                fontWeight: FontWeight.w400
+                                children: List.generate(
+                                        7, (i) {
+                                                return Padding(
+                                                        padding: EdgeInsets.only(bottom: i < 6 ? 8 : 0),
+                                                        child: Text(
+                                                                tr('test.intro.description_${i + 1}'),
+                                                                style: const TextStyle(
+                                                                        color: Colors.white,
+                                                                        fontSize: 16,
+                                                                        height: 1.5,
+                                                                        fontWeight: FontWeight.w400
+                                                                )
                                                         )
-                                                )
-                                        )
+                                                );
+                                        }
                                 )
                         ),
                         actions: [
@@ -200,25 +259,36 @@ void showIntroDialog(BuildContext context) {
         );
 }
 
+/// Vérifie si un capteur doit être inclus dans la liste Test.
+/// On exclut automatiquement les capteurs IVI (GPS, IRIDIUM, SDCARD) et ceux marqués comme dataProcessor.
+/// On exclut également les capteurs inactifs selon le mask.
 bool shouldIncludeSensor(SensorsData sensor, int mask) {
         final header = sensor.header?.toLowerCase();
-        // Exclut certains capteurs et ceux avec un dataProcessor
-        if (header == 'gps_status' || header == 'iridium_status' || header == 'sdcard' || sensor.dataProcessor != null) return false;
-        // Exclut les capteurs inactifs selon le mask
-        if (sensor.bitIndex != null && (mask & (1 << sensor.bitIndex!)) == 0) return false;
+        // Exclut GPS, IRIDIUM, SDCARD ou tout capteur “dataProcessor”
+        if (header == 'gps_status' ||
+                header == 'iridium_status' ||
+                header == 'sdcard' ||
+                sensor.dataProcessor != null) return false;
+
+        // Si le bitIndex existe et que le bit correspondant n’est pas dans le mask, on considère que le capteur est inactif
+        if (sensor.bitIndex != null && (mask & (1 << sensor.bitIndex!)) == 0)
+                return false;
+
         return true;
 }
 
-// Methode utilitaire pour vérifier si un DataMap doit être inclus
+/// Vérifie si un DataMap (champ d’un capteur) doit être inclus.
+/// Consulte [bannedFields] pour éventuellement exclure certains sous-champs.
 bool shouldIncludeDataMap(SensorsData sensor, DataMap key) {
         final banned = bannedFields[sensor.header];
-
         if (banned != null) {
                 return !banned.contains(key.header);
         }
-        return true; // Par défaut, inclure tout
+        return true; // Par défaut, on inclut tous les autres champs
 }
 
+/// Renvoie la plage “min–max” par défaut pour un DataMap donné, à partir de la table `minMaxRanges` définie dans constants.dart.
+/// Si aucune plage n’est renseignée, on retourne [0, 999999].
 RangeValues getMinMax(SensorsData sensor, DataMap key) {
         return minMaxRanges[sensor.header]?[key.header] ?? const RangeValues(0, 999999);
 }
