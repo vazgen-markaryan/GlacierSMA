@@ -150,8 +150,9 @@
 		"continue": "Continuar",
 		"detected_changes": "Cambios detectados",
 		"no_changes": "No se detectaron cambios",
-		"skip_tutorial": "Omitir tutorial",
-		"skip_tutorial_test_page": "Desactivar Test Page Tutorial",
+		"save_before_disconnect": "Desea guardar sus datos de prueba antes de desconectarse?",
+		"skip_tutorial": "Desactivar tutorial",
+		"skip_tutorial_subtitle": "Ocultar tutorial de test",
 		"skip_tutorial_description": "Puede reactivarse en la configuración."
 	},
 
@@ -167,6 +168,7 @@
 		"modified_sensors": "Sensores modificados:",
 		"cancel": "Cancelar",
 		"confirm": "Confirmar",
+		"apply": "Aplicar",
 		"collection_settings": "Parámetros de recopilación",
 		"sleep_minutes": "Minutos de espera (0–1440)",
 		"sea_level_pressure": "Presión al nivel del mar (hPa)",
@@ -179,8 +181,7 @@
 		"error": "Error",
 		"confirm_reset": "Confirmar reinicio",
 		"reset_default_title": "Desea restaurar los ajustes predeterminados?",
-		"reset_default": "Restablecer",
-		"save_before_disconnect": "Desea guardar sus datos de prueba antes de desconectarse?"
+		"reset_default": "Restablecer"
 	},
 
 	"settings": {

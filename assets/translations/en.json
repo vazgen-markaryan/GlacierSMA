@@ -152,7 +152,7 @@
 		"no_changes": "No changes detected",
 		"save_before_disconnect": "Would you like to save your Test Data before disconnecting?",
 		"skip_tutorial": "Skip Tutorial",
-		"skip_tutorial_test_page": "Skip Test Page Tutorial",
+		"skip_tutorial_subtitle": "Skip the tutorial for the Test Page",
 		"skip_tutorial_description": "Can be reactivated in the settings."
 	},
 
@@ -167,7 +167,8 @@
 		"confirm_title": "Confirm application",
 		"modified_sensors": "Modified sensors:",
 		"cancel": "Cancel",
-		"confirm": "Apply",
+		"confirm": "Confirm",
+		"apply": "Apply",
 		"collection_settings": "Collection Settings",
 		"sleep_minutes": "Sleep Minutes (0–1440)",
 		"sea_level_pressure": "Sea Level Pressure (hPa)",

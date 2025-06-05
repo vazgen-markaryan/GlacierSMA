@@ -3,21 +3,26 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_snackbar.dart';
 import 'package:rev_glacier_sma_mobile/screens/settings/settings_section.dart';
 import 'package:rev_glacier_sma_mobile/screens/settings/settings_widgets.dart';
+import 'package:rev_glacier_sma_mobile/screens/settings/sections/test_tutorial_switch.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_processor.dart';
 
-/// Section "Autres" qui contient uniquement la partie "À propos"
+/// Section "Autres" qui contient toutes les options additionnelles
 /// Affiche un ExpansionTile détaillant les informations du firmware
-class AboutSection extends StatelessWidget {
+class OtherSection extends StatelessWidget {
         /// Notifier contenant les données RawData reçues depuis le bloc `<id>`
         final ValueNotifier<RawData?> firmwareNotifier;
 
-        const AboutSection({Key? key, required this.firmwareNotifier}) : super(key: key);
+        const OtherSection({Key? key, required this.firmwareNotifier}) : super(key: key);
 
         @override
         Widget build(BuildContext context) {
                 return SettingsSection(
                         title: tr('settings.others'),
                         children: [
+
+                                // Affiche un switch pour activer/désactiver le tutoriel de test
+                                TestTutorialSwitch(),
+
                                 // Écoute les changements sur firmwareNotifier
                                 ValueListenableBuilder<RawData?>(
                                         valueListenable: firmwareNotifier,

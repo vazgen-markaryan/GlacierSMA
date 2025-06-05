@@ -151,8 +151,8 @@
 		"detected_changes": "Modifications détectées",
 		"no_changes": "Aucun changement détecté",
 		"save_before_disconnect": "Voulez-vous enregistrer vos données de test avant de vous déconnecter?",
-		"skip_tutorial": "Passer le tutoriel",
-		"skip_tutorial_test_page": "Désactiver Test Page Tutoriel",
+		"skip_tutorial": "Désactiver le tutoriel",
+		"skip_tutorial_subtitle": "Désactiver le tutoriel Test Page",
 		"skip_tutorial_description": "Peut être réactivé dans les paramètres."
 	},
 
@@ -186,6 +186,7 @@
 
 	"settings": {
 		"others": "Autres",
+
 		"about": {
 			"title": "À propos",
 			"station_name": "Nom de la station",

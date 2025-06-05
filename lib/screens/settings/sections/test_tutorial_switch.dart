@@ -1,5 +1,5 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TestTutorialSwitch extends StatefulWidget {
@@ -38,7 +38,9 @@ class TestTutorialSwitchState extends State<TestTutorialSwitch> {
                 return CheckboxListTile(
                         value: skipTutorial,
                         onChanged: onChanged,
-                        title: Text(tr("test.skip_tutorial_test_page"))
+                        title: Text(tr("test.skip_tutorial")),
+                        subtitle: Text(tr("test.skip_tutorial_subtitle")),
+                        secondary: const Icon(Icons.school)
                 );
         }
 }
