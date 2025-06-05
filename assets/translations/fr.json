@@ -186,6 +186,7 @@
 
 	"settings": {
 		"others": "Autres",
+		"iteration_count": "Cycle de captures sans redémarrage: {iteration}",
 
 		"about": {
 			"title": "À propos",

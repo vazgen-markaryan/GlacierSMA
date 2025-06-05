@@ -186,6 +186,7 @@
 
 	"settings": {
 		"others": "Other",
+		"iteration_count": "Cycle count without restart: {iteration}",
 
 		"about": {
 			"title": "About",

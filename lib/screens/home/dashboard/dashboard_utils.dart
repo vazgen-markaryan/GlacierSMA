@@ -365,6 +365,9 @@ mixin DashboardUtils on State<Home_Screen> {
                 ),
 
                 // Paramètres
-                SettingsScreen(firmwareNotifier: controller.firmwareNotifier)
+                SettingsScreen(
+                        firmwareNotifier: controller.firmwareNotifier,
+                        iterationNotifier: controller.iterationNotifier
+                )
         ];
 }
