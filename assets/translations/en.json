@@ -181,7 +181,13 @@
 		"error": "Error",
 		"confirm_reset": "Confirm Reset",
 		"reset_default_title": "Do you want to restore default settings?",
-		"reset_default": "Reset default"
+		"reset_default": "Reset default",
+		"iridium_mode": "Iridium verification mode",
+		"iridium_none": "None",
+		"iridium_netav": "Fast (0/5)",
+		"iridium_netav2": "NetAv",
+		"iridium_quality": "Accurate (0-5)",
+		"iridium_quality2": "Automatic"
 	},
 
 	"settings": {

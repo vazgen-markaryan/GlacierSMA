@@ -72,13 +72,16 @@ class DebugLogProcessor extends StatelessWidget {
                                         else {
                                                 // VALEURS → override Iridium ou brut
                                                 if (key.toLowerCase() == 'iridium_signal_quality') {
-                                                        final quality = int.tryParse(rawValue) ?? -1;
-                                                        final map = getIridiumSvgLogoAndColor(quality);
-                                                        final label = map['value'] as String;
-                                                        valueWidget = Text(
-                                                                '$quality ($label)',
-                                                                style: const TextStyle(fontSize: 12)
-                                                        );
+                                                        final cleaned = rawValue.trim();
+                                                        final quality = double.tryParse(cleaned)?.round();
+                                                        if (quality != null) {
+                                                                final map = getIridiumSvgLogoAndColor(quality);
+                                                                final label = map['value'] as String;
+                                                                valueWidget = Text('$quality ($label)', style: const TextStyle(fontSize: 12));
+                                                        }
+                                                        else {
+                                                                valueWidget = Text('RAW: [$rawValue]', style: const TextStyle(fontSize: 12, color: Colors.red));
+                                                        }
                                                 }
                                                 else {
                                                         valueWidget = Text(

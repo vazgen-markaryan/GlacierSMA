@@ -15,7 +15,8 @@ class SeriesParams {
         final int sleep;
         final double seaPressure;
         final int capture;
-        SeriesParams(this.sleep, this.seaPressure, this.capture);
+        final int iridiumMode;
+        SeriesParams(this.sleep, this.seaPressure, this.capture, this.iridiumMode);
 }
 
 /// Parse les champs « sleep_minutes », « sea_level_pressure », « capture_amount ».
@@ -24,7 +25,8 @@ SeriesParams parseSeriesParams(RawData raw) {
         return SeriesParams(
                 int.tryParse(m['sleep_minutes'] ?? '') ?? 0,
                 double.tryParse(m['sea_level_pressure'] ?? '') ?? 0,
-                int.tryParse(m['capture_amount'] ?? '') ?? 0
+                int.tryParse(m['capture_amount'] ?? '') ?? 0,
+                int.tryParse(m['iridium_signalcheck'] ?? '') ?? 0
         );
 }
 
@@ -49,7 +51,7 @@ Future<bool> sendMaskConfig({
         );
 }
 
-/// Envoie les paramètres série S, P, C si modifiés.
+/// Envoie les paramètres série S, P, C, I si modifiés.
 /// Met à jour les init* par callbacks et renvoie true si tous OK.
 Future<bool> sendSeriesConfig({
         required MessageService svc,
@@ -61,7 +63,10 @@ Future<bool> sendSeriesConfig({
         required void Function(double) updateInitSea,
         required int capture,
         required int initCapture,
-        required void Function(int) updateInitCapture
+        required void Function(int) updateInitCapture,
+        required int iridiumMode,
+        required int initIridiumMode,
+        required void Function(int) updateInitIridiumMode
 }) async {
         if (sleep != initSleep) {
                 if (!await svc.sendConfigInteger('S', sleep)) return false;
@@ -74,6 +79,10 @@ Future<bool> sendSeriesConfig({
         if (capture != initCapture) {
                 if (!await svc.sendConfigInteger('C', capture)) return false;
                 updateInitCapture(capture);
+        }
+        if (iridiumMode != initIridiumMode) {
+                if (!await svc.sendConfigInteger('I', iridiumMode)) return false;
+                updateInitIridiumMode(iridiumMode);
         }
         return true;
 }

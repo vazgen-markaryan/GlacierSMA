@@ -181,7 +181,13 @@
 		"error": "Error",
 		"confirm_reset": "Confirmar reinicio",
 		"reset_default_title": "Desea restaurar los ajustes predeterminados?",
-		"reset_default": "Restablecer"
+		"reset_default": "Restablecer",
+		"iridium_mode": "Modo de verificación de Iridium",
+		"iridium_none": "Ninguno",
+		"iridium_netav": "Rápido (0/5)",
+		"iridium_netav2": "NetAv",
+		"iridium_quality": "Preciso (0-5)",
+		"iridium_quality2": "Automático"
 	},
 
 	"settings": {

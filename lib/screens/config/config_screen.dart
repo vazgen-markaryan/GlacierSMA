@@ -28,14 +28,18 @@ class ConfigScreen extends StatefulWidget {
 }
 
 class ConfigScreenState extends State<ConfigScreen> {
-        late int initialMask;
-        late ValueNotifier<int> localMaskNotifier;
         bool authenticated = false;
 
+        late int initialMask;
         late TextEditingController sleepCtrl, seaCtrl, captureCtrl;
+
+        late ValueNotifier<int> localMaskNotifier;
+        late ValueNotifier<int> iridiumModeNotifier;
+
         int initSleep = 0, sleep = 0;
         double initSea = 0, sea = 0;
         int initCapture = 0, cap = 0;
+        int initIridiumMode = 0, iridiumMode = 0;
         bool invalidSleep = false, invalidCap = false;
 
         @override
@@ -43,6 +47,7 @@ class ConfigScreenState extends State<ConfigScreen> {
                 super.initState();
                 initialMask = widget.activeMaskNotifier.value ?? 0;
                 localMaskNotifier = ValueNotifier(initialMask);
+                iridiumModeNotifier = ValueNotifier(0);
 
                 sleepCtrl = TextEditingController();
                 seaCtrl = TextEditingController();
@@ -61,6 +66,9 @@ class ConfigScreenState extends State<ConfigScreen> {
                                 initSleep = p.sleep;  sleep = p.sleep;   sleepCtrl.text = p.sleep.toString();
                                 initSea = p.seaPressure; sea = p.seaPressure; seaCtrl.text = p.seaPressure.toString();
                                 initCapture = p.capture;    cap = p.capture; captureCtrl.text = p.capture.toString();
+                                initIridiumMode = p.iridiumMode;
+                                iridiumMode = p.iridiumMode;
+                                iridiumModeNotifier.value = p.iridiumMode;
                         }
                 );
         }
@@ -74,12 +82,18 @@ class ConfigScreenState extends State<ConfigScreen> {
         void dispose() {
                 widget.configNotifier.removeListener(reload);
                 localMaskNotifier.dispose();
-                sleepCtrl.dispose(); seaCtrl.dispose(); captureCtrl.dispose();
+                sleepCtrl.dispose();
+                seaCtrl.dispose();
+                captureCtrl.dispose();
+                iridiumModeNotifier.dispose();
                 super.dispose();
         }
 
         bool get maskChanged => localMaskNotifier.value != initialMask;
-        bool get seriesChanged => (sleep != initSleep && !invalidSleep) || (sea != initSea) || (cap != initCapture && !invalidCap);
+        bool get seriesChanged => (sleep != initSleep && !invalidSleep) ||
+                (sea != initSea) || 
+                (cap != initCapture && !invalidCap) || 
+                (iridiumMode != initIridiumMode);
 
         Future<bool> confirmDiscard() async {
                 if (maskChanged || seriesChanged) return showDiscardDialog(context);
@@ -98,7 +112,8 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                 ...createAllSensorGroups(
                                                         maskNotifier: localMaskNotifier,
                                                         getSensors: getSensors,
-                                                        onTap: (_, __) {},
+                                                        onTap: (_, __) {
+                                                        },
                                                         configMode: true,
                                                         testMode: false,
                                                         localMask: localMaskNotifier
@@ -192,6 +207,45 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                                                                 invalidCap = isCaptureInvalid(int.tryParse(v) ?? 0);
                                                                                                 setState(() => cap = x);
                                                                                         }
+                                                                                ),
+
+                                                                                const SizedBox(height: defaultPadding / 2),
+
+                                                                                Card(
+                                                                                        color: Colors.grey[700],
+                                                                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                                                                        child: Column(
+                                                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                                children: [
+                                                                                                        Padding(
+                                                                                                                padding: const EdgeInsets.all(8.0),
+                                                                                                                child: Text(
+                                                                                                                        tr('config.iridium_mode'),
+                                                                                                                        style: const TextStyle(fontWeight: FontWeight.bold)
+                                                                                                                )
+                                                                                                        ),
+                                                                                                        RadioListTile<int>(
+                                                                                                                value: 0,
+                                                                                                                groupValue: iridiumMode,
+                                                                                                                onChanged: (v) => setState(() => iridiumMode = v ?? 0),
+                                                                                                                title: Text(tr('config.iridium_none'))
+                                                                                                        ),
+                                                                                                        RadioListTile<int>(
+                                                                                                                value: 1,
+                                                                                                                groupValue: iridiumMode,
+                                                                                                                onChanged: (v) => setState(() => iridiumMode = v ?? 0),
+                                                                                                                title: Text(tr('config.iridium_netav')),
+                                                                                                                subtitle: Text(tr('config.iridium_netav2'))
+                                                                                                        ),
+                                                                                                        RadioListTile<int>(
+                                                                                                                value: 2,
+                                                                                                                groupValue: iridiumMode,
+                                                                                                                onChanged: (v) => setState(() => iridiumMode = v ?? 0),
+                                                                                                                title: Text(tr('config.iridium_quality')),
+                                                                                                                subtitle: Text(tr('config.iridium_quality2'))
+                                                                                                        )
+                                                                                                ]
+                                                                                        )
                                                                                 )
                                                                         ]
                                                                 )
@@ -216,7 +270,10 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                                                         updateInitSea: (v) => initSea = v,
                                                                                         capture: cap,
                                                                                         initCapture: initCapture,
-                                                                                        updateInitCapture: (v) => initCapture = v
+                                                                                        updateInitCapture: (v) => initCapture = v,
+                                                                                        iridiumMode: iridiumMode,
+                                                                                        initIridiumMode: initIridiumMode,
+                                                                                        updateInitIridiumMode: (v) => initIridiumMode = v
                                                                                 ),
                                                                                 confirmTitle: tr('config.confirm_send'),
                                                                                 confirmContent: tr('config.new_parameters_send'),
