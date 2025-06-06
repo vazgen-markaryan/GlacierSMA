@@ -18,8 +18,8 @@
 
 	"home": {
 		"battery": {
-			"voltage": "Tension : {value} V",
-			"voltage_unknown": "Tension : Inconnue",
+			"voltage": "Tension: {value} V",
+			"voltage_unknown": "Tension: Inconnue",
 			"state": "État : {percent} %"
 		},
 

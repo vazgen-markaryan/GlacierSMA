@@ -21,6 +21,7 @@ class DashboardController {
         final void Function(String reason) onFatalReceived;
         late final ValueNotifier<bool> isInitialLoading;
         final ValueNotifier<double?> batteryVoltage = ValueNotifier(null);
+        final ValueNotifier<Map<String, double?>> ramNotifier = ValueNotifier({'ram_stack': null, 'ram_heap': null});
         final ValueNotifier<RawData?> firmwareNotifier = ValueNotifier(null);
         final ValueNotifier<int?> activeMaskNotifier = ValueNotifier(null);
         final ValueNotifier<RawData?> configNotifier = ValueNotifier(null);
@@ -67,7 +68,8 @@ class DashboardController {
                         onActiveReceived: (mask) => activeMaskNotifier.value = mask,
                         onFatalReceived: (reason) => onFatalReceived(reason),
                         onConfigReceived: (config) {configNotifier.value = config;},
-                        iterationNotifier: iterationNotifier
+                        iterationNotifier: iterationNotifier,
+                        ramNotifier: ramNotifier
                 );
 
                 // Ping toutes les 2s pour détecter la perte de connexion
@@ -92,5 +94,6 @@ class DashboardController {
                 firmwareNotifier.dispose();
                 activeMaskNotifier.dispose();
                 configNotifier.dispose();
+                ramNotifier.dispose();
         }
 }

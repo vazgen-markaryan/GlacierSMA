@@ -12,6 +12,7 @@ void readMessage({
         required DebugLogUpdater debugLogManager,
         required List<SensorsData> Function(SensorType) getSensors,
         required ValueNotifier<double?> batteryVoltage,
+        required ValueNotifier<Map<String, double?>> ramNotifier,
         required ValueNotifier<int> iterationNotifier,
         required void Function() onDataReceived,
         required void Function(RawData idData) onIdReceived,
@@ -51,7 +52,8 @@ void readMessage({
                                                 onActiveReceived: onActiveReceived,
                                                 onFatalReceived: onFatalReceived,
                                                 onConfigReceived: onConfigReceived,
-                                                iterationNotifier: iterationNotifier
+                                                iterationNotifier: iterationNotifier,
+                                                ramNotifier: ramNotifier
                                         );
 
                                         buffer = '';

@@ -49,6 +49,7 @@ class Home_ScreenState extends State<Home_Screen> with DashboardUtils {
                                                 connectedDevices: widget.connectedDevices,
                                                 batteryVoltageNotifier: controller.batteryVoltage,
                                                 firmwareNotifier: controller.firmwareNotifier,
+                                                ramNotifier: controller.ramNotifier,
                                                 onRename: showRenameDialog
                                         ),
                                         actions: [

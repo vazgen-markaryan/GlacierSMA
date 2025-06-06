@@ -47,6 +47,7 @@ void processRawData({
         required List<SensorsData> Function(SensorType) getSensors,
         required ValueNotifier<double?> batteryVoltage,
         required ValueNotifier<int> iterationNotifier,
+        required ValueNotifier<Map<String, double?>> ramNotifier,
         required void Function() onDataReceived,
         required void Function(RawData idData) onIdReceived,
         required void Function(int mask) onActiveReceived,
@@ -71,7 +72,8 @@ void processRawData({
                                 onActiveReceived: onActiveReceived,
                                 onFatalReceived: onFatalReceived,
                                 onConfigReceived: onConfigReceived,
-                                iterationNotifier: iterationNotifier
+                                iterationNotifier: iterationNotifier,
+                                ramNotifier: ramNotifier
                         );
                 }
                 return;
@@ -136,12 +138,21 @@ void processRawData({
                 debugLogManager.setLogChunk(1, statusLog);
         }
 
-        // Data + Batterie
+        // Data + Batterie + RAM
         if (rawData.contains('<data>')) {
                 final batteryIndex = headers.indexWhere((h) => h.toLowerCase() == 'battery_voltage');
                 if (batteryIndex != -1) {
                         final voltage = double.tryParse(values[batteryIndex]);
                         if (voltage != null) batteryVoltage.value = voltage;
+                }
+
+                // RAM
+                final ramStackIndex = headers.indexWhere((h) => h.toLowerCase() == 'ram_stack');
+                final ramHeapIndex = headers.indexWhere((h) => h.toLowerCase() == 'ram_heap');
+                if (ramStackIndex != -1 && ramHeapIndex != -1) {
+                        final ramStack = double.tryParse(values[ramStackIndex]);
+                        final ramHeap = double.tryParse(values[ramHeapIndex]);
+                        ramNotifier.value = {'ram_stack': ramStack, 'ram_heap': ramHeap};
                 }
 
                 final dataLog = '\nValeurs:\n' +

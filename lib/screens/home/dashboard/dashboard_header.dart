@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/battery/battery_indicator.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/battery/hardware_indicator.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_processor.dart';
 
 /// En-tête du Dashboard : statut USB + nom + icône “éditer” + indicateur batterie.
@@ -11,6 +11,7 @@ class DashboardHeader extends StatelessWidget {
         final List<DeviceInfo> connectedDevices;
         final ValueNotifier<double?> batteryVoltageNotifier;
         final ValueNotifier<RawData?> firmwareNotifier;
+        final ValueNotifier<Map<String, double?>> ramNotifier;
         final VoidCallback onRename;
 
         const DashboardHeader({
@@ -18,6 +19,7 @@ class DashboardHeader extends StatelessWidget {
                 required this.isConnected,
                 required this.connectedDevices,
                 required this.batteryVoltageNotifier,
+                required this.ramNotifier,
                 required this.firmwareNotifier,
                 required this.onRename
         });
@@ -75,8 +77,11 @@ class DashboardHeader extends StatelessWidget {
                                                         )
                                                 ),
 
-                                                // Indicateur de batterie
-                                                BatteryIndicator(voltageNotifier: batteryVoltageNotifier)
+                                                // Indicateur de batterie et RAM
+                                                HardwareIndicator(
+                                                        voltageNotifier: batteryVoltageNotifier,
+                                                        ramNotifier: ramNotifier
+                                                )
                                         ]
                                 );
                         }

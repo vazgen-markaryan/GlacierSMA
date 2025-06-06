@@ -82,6 +82,3 @@ class MyApp extends StatelessWidget {
                 );
         }
 }
-
-//TODO: MASSIVE REPO REFACTORING + FUSIONNAGE DES FICHIERS + refactor k par key etc
-//TODO: batterie popup + RAM
