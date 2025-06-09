@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 
+/// Widget pour afficher un popup personnalisé avec un titre, du contenu et des actions
+///  Utilisé pour afficher des informations détaillées ou des options supplémentaires dans l'application.
 class CustomPopup extends StatelessWidget {
         final String title;
         final Widget content;

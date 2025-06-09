@@ -37,16 +37,16 @@ class SensorCard extends StatelessWidget {
                 // Cas particulier : override pour le statut Iridium
                 if (sensor.header?.toLowerCase() == 'iridium_status') {
                         final entry = sensor.data.entries.firstWhere(
-                                (e) => e.key.header.toLowerCase() == 'iridium_signal_quality',
+                                (entry) => entry.key.header.toLowerCase() == 'iridium_signal_quality',
                                 orElse: () => MapEntry(
                                         DataMap(name: '', header: '', svgLogo: sensor.svgIcon!),
                                         '0'
                                 )
                         );
                         final quality = int.tryParse(entry.value.toString()) ?? -1;
-                        final cfg = getIridiumSvgLogoAndColor(quality);
-                        assetPath = cfg['icon'] as String;
-                        svgTint = cfg['color'] as Color;
+                        final config = getIridiumSvgLogoAndColor(quality);
+                        assetPath = config['icon'] as String;
+                        svgTint = config['color'] as Color;
                 }
 
                 // Génère une ligne de "chips" (code, bus, emplacement)
@@ -81,7 +81,7 @@ class SensorCard extends StatelessWidget {
                                                                         width: 3
                                                                 )
                                                         ),
-                                                        padding: const EdgeInsets.all(defaultPadding),
+                                                        padding: const EdgeInsets.all(16),
                                                         child: Row(
                                                                 children: [
                                                                         // Icône du capteur
@@ -90,7 +90,7 @@ class SensorCard extends StatelessWidget {
                                                                                 height: 50, width: 50,
                                                                                 colorFilter: ColorFilter.mode(svgTint, BlendMode.srcIn)
                                                                         ),
-                                                                        const SizedBox(width: defaultPadding),
+                                                                        const SizedBox(width: 16),
 
                                                                         // Informations principales
                                                                         Expanded(
@@ -104,8 +104,11 @@ class SensorCard extends StatelessWidget {
                                                                                                         style: Theme.of(context).textTheme.bodyLarge,
                                                                                                         overflow: TextOverflow.ellipsis
                                                                                                 ),
+
                                                                                                 const SizedBox(height: 4),
-                                                                                                buildChipRow() // Ligne de chips
+
+                                                                                                // Ligne de chips
+                                                                                                buildChipRow()
                                                                                         ]
                                                                                 )
                                                                         ),
@@ -129,7 +132,7 @@ class SensorCard extends StatelessWidget {
                                                                                 !testMode && sensor.powerStatus == 1
                                                                         ) ...[
                                                                                 Padding(
-                                                                                        padding: const EdgeInsets.only(left: defaultPadding),
+                                                                                        padding: const EdgeInsets.only(left: 16),
                                                                                         child: GestureDetector(
                                                                                                 onTap: () => showDialog(
                                                                                                         context: context,

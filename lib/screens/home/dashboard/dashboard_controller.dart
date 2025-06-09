@@ -19,16 +19,16 @@ class DashboardController {
         final MessageService messageService;
         final void Function(Duration elapsed) onConnectionLost;
         final void Function(String reason) onFatalReceived;
-        late final ValueNotifier<bool> isInitialLoading;
         final ValueNotifier<double?> batteryVoltage = ValueNotifier(null);
         final ValueNotifier<Map<String, double?>> ramNotifier = ValueNotifier({'ram_stack': null, 'ram_heap': null});
         final ValueNotifier<RawData?> firmwareNotifier = ValueNotifier(null);
         final ValueNotifier<int?> activeMaskNotifier = ValueNotifier(null);
         final ValueNotifier<RawData?> configNotifier = ValueNotifier(null);
         final ValueNotifier<int> iterationNotifier = ValueNotifier(0);
+        late final ValueNotifier<bool> isInitialLoading;
+        late final Stopwatch connectionStopwatch;
         Timer? pingTimer;
         EventChannel? messageChannel;
-        late final Stopwatch connectionStopwatch;
 
         DashboardController({
                 required this.plugin,
@@ -59,7 +59,7 @@ class DashboardController {
                                 final hasData = [
                                         ...getSensors(SensorType.internal),
                                         ...getSensors(SensorType.modbus)
-                                ].any((s) => s.powerStatus != null);
+                                ].any((sensor) => sensor.powerStatus != null);
                                 if (hasData) isInitialLoading.value = false;
                                 onDataReceived();
                         },

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/battery/hardware_indicator.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/hardware_info/hardware_svg.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_processor.dart';
 
 /// En-tête du Dashboard : statut USB + nom + icône “éditer” + indicateur batterie.
@@ -78,7 +78,7 @@ class DashboardHeader extends StatelessWidget {
                                                 ),
 
                                                 // Indicateur de batterie et RAM
-                                                HardwareIndicator(
+                                                HardwareSVG(
                                                         voltageNotifier: batteryVoltageNotifier,
                                                         ramNotifier: ramNotifier
                                                 )

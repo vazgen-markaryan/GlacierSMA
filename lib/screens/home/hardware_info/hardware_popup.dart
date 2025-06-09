@@ -1,17 +1,16 @@
 import 'dart:async';
 import 'dart:ui' as ui;
-import 'battery_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-class BatteryPopup extends StatefulWidget {
+class HardwarePopup extends StatefulWidget {
         final ValueNotifier<double?> voltageNotifier;
         final Color color;
         final Offset position;
         final ValueNotifier<Map<String, double?>> ramNotifier;
 
-        const BatteryPopup({
+        const HardwarePopup({
                 super.key,
                 required this.voltageNotifier,
                 required this.color,
@@ -20,7 +19,7 @@ class BatteryPopup extends StatefulWidget {
         });
 
         @override
-        State<BatteryPopup> createState() => BatteryPopupState();
+        State<HardwarePopup> createState() => HardwarePopupState();
 
         static void show({
                 required BuildContext context,
@@ -42,7 +41,7 @@ class BatteryPopup extends StatefulWidget {
                                 onTap: () => entry.remove(),
                                 child: Stack(
                                         children: [
-                                                BatteryPopup(
+                                                HardwarePopup(
                                                         voltageNotifier: voltageNotifier,
                                                         ramNotifier: ramNotifier,
                                                         position: position,
@@ -57,7 +56,7 @@ class BatteryPopup extends StatefulWidget {
         }
 }
 
-class BatteryPopupState extends State<BatteryPopup> with SingleTickerProviderStateMixin {
+class HardwarePopupState extends State<HardwarePopup> with SingleTickerProviderStateMixin {
         late final AnimationController controller;
         late final Animation<double> fade;
         late final Animation<double> scale;
@@ -81,8 +80,10 @@ class BatteryPopupState extends State<BatteryPopup> with SingleTickerProviderSta
                 showStackUsageText = true;
                 showHeapUsageText = true;
 
-                toggleTimer = Timer.periodic(const Duration(seconds: 2), (_) {
-                                setState(() {
+                toggleTimer = Timer.periodic(
+                        const Duration(seconds: 2), (_) {
+                                setState(
+                                        () {
                                                 showStackUsageText = !showStackUsageText;
                                                 showHeapUsageText = !showHeapUsageText;
                                         }
@@ -100,19 +101,19 @@ class BatteryPopupState extends State<BatteryPopup> with SingleTickerProviderSta
 
         @override
         Widget build(BuildContext context) {
-                final pos = widget.position;
+                final position = widget.position;
                 final screenWidth = MediaQuery.of(context).size.width;
 
                 const iconSize = 30.0;
                 const arrowWidth = 16.0;
                 const arrowRightOffset = 10.0;
 
-                final iconCenterX = pos.dx + iconSize / 2;
+                final iconCenterX = position.dx + iconSize / 2;
                 final arrowCenterInPopup = arrowRightOffset + arrowWidth / 2;
                 final right = screenWidth - iconCenterX - arrowCenterInPopup;
 
                 return Positioned(
-                        top: pos.dy + iconSize + 15,
+                        top: position.dy + iconSize + 15,
                         right: right,
                         child: Material(
                                 color: Colors.transparent,
@@ -141,36 +142,33 @@ class BatteryPopupState extends State<BatteryPopup> with SingleTickerProviderSta
                                                                                                         BoxShadow(
                                                                                                                 color: Colors.black45,
                                                                                                                 blurRadius: 10,
-                                                                                                                offset: Offset(0, 4))
+                                                                                                                offset: Offset(0, 4)
+                                                                                                        )
                                                                                                 ]
                                                                                         ),
                                                                                         child: Column(
                                                                                                 mainAxisSize: MainAxisSize.min,
                                                                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                                                                 children: [
-
                                                                                                         // Ligne voltage
                                                                                                         Row(
                                                                                                                 children: [
                                                                                                                         SvgPicture.asset(iconPath,
                                                                                                                                 height: 18,
                                                                                                                                 colorFilter: ColorFilter.mode(
-                                                                                                                                        isLow
-                                                                                                                                                ? const Color.fromRGBO(255, 0, 0, 1)
-                                                                                                                                                : color,
-                                                                                                                                        BlendMode.srcIn)),
+                                                                                                                                        isLow ? const Color.fromRGBO(255, 0, 0, 1) : color,
+                                                                                                                                        BlendMode.srcIn
+                                                                                                                                )
+                                                                                                                        ),
+
                                                                                                                         const SizedBox(width: 8),
+
                                                                                                                         Text(
                                                                                                                                 voltage != null
-                                                                                                                                        ? tr('home.battery.voltage', namedArgs: {
-                                                                                                                                                        'value': voltage.toStringAsFixed(2)
-                                                                                                                                                }
-                                                                                                                                        )
-                                                                                                                                        : tr('home.battery.voltage_unknown'),
+                                                                                                                                        ? tr('home.hardware_info.voltage', namedArgs: {'value': voltage.toStringAsFixed(2)})
+                                                                                                                                        : tr('home.hardware_info.voltage_unknown'),
                                                                                                                                 style: TextStyle(
-                                                                                                                                        color: isLow
-                                                                                                                                                ? const Color.fromRGBO(255, 0, 0, 1)
-                                                                                                                                                : color,
+                                                                                                                                        color: isLow ? const Color.fromRGBO(255, 0, 0, 1) : color,
                                                                                                                                         fontWeight: FontWeight.bold)
                                                                                                                         )
                                                                                                                 ]
@@ -184,43 +182,33 @@ class BatteryPopupState extends State<BatteryPopup> with SingleTickerProviderSta
                                                                                                                         SvgPicture.asset(iconPath,
                                                                                                                                 height: 18,
                                                                                                                                 colorFilter: ColorFilter.mode(
-                                                                                                                                        isLow
-                                                                                                                                                ? const Color.fromRGBO(255, 0, 0, 1)
-                                                                                                                                                : color,
-                                                                                                                                        BlendMode.srcIn)),
+                                                                                                                                        isLow ? const Color.fromRGBO(255, 0, 0, 1) : color,
+                                                                                                                                        BlendMode.srcIn)
+                                                                                                                        ),
+
                                                                                                                         const SizedBox(width: 8),
+
                                                                                                                         Text(
-                                                                                                                                tr('home.battery.state',
-                                                                                                                                        namedArgs: {
-                                                                                                                                                'percent': (percent * 100).round().toString()
-                                                                                                                                        }
-                                                                                                                                ),
+                                                                                                                                tr('home.hardware_info.state', namedArgs: {'percent': (percent * 100).round().toString()}),
                                                                                                                                 style: TextStyle(
-                                                                                                                                        color: isLow
-                                                                                                                                                ? const Color.fromRGBO(255, 0, 0, 1)
-                                                                                                                                                : color,
+                                                                                                                                        color: isLow ? const Color.fromRGBO(255, 0, 0, 1) : color,
                                                                                                                                         fontWeight: FontWeight.bold)
                                                                                                                         )
                                                                                                                 ]
                                                                                                         ),
 
-                                                                                                        const SizedBox(height: 10),
+                                                                                                        const SizedBox(height: 4),
 
                                                                                                         // RAM utilisé
                                                                                                         Builder(
                                                                                                                 builder: (context) {
+                                                                                                                        final formatter = NumberFormat.decimalPattern('fr_FR');
                                                                                                                         final ramFree = (ram['ram_stack'] ?? 0) + (ram['ram_heap'] ?? 0);
                                                                                                                         final ramUsed = (32768.0 - ramFree).clamp(0.0, 32768.0);
-                                                                                                                        final usedPct = ramUsed / 32768.0;
-
-                                                                                                                        final color = usedPct < 0.5
-                                                                                                                                ? Colors.green
-                                                                                                                                : usedPct < 0.8
-                                                                                                                                        ? Colors.orange
-                                                                                                                                        : Colors.red;
-
-                                                                                                                        final ramLabel =
-                                                                                                                                '${ramUsed.toStringAsFixed(0)} / 32768 bytes (${(usedPct * 100).round()}%)';
+                                                                                                                        final usedPercentage = ramUsed / 32768.0;
+                                                                                                                        final color = usedPercentage < 0.5 ? Colors.green : usedPercentage < 0.8 ? Colors.orange : Colors.red;
+                                                                                                                        final ramLabel = '${formatter.format(ramUsed)} / ${formatter.format(32768)} ${tr('home.hardware_info.bytes')}';
+                                                                                                                        final ramPercentage = '(${(usedPercentage * 100).round()}%)';
 
                                                                                                                         // Mesure exacte de la largeur du texte
                                                                                                                         final textPainter = TextPainter(
@@ -229,7 +217,6 @@ class BatteryPopupState extends State<BatteryPopup> with SingleTickerProviderSta
                                                                                                                                         style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)
                                                                                                                                 ),
                                                                                                                                 textDirection: ui.TextDirection.ltr
-
                                                                                                                         )..layout();
 
                                                                                                                         final barWidth = textPainter.size.width;
@@ -239,11 +226,10 @@ class BatteryPopupState extends State<BatteryPopup> with SingleTickerProviderSta
                                                                                                                                 children: [
                                                                                                                                         Row(
                                                                                                                                                 children: [
-                                                                                                                                                        SvgPicture.asset('assets/icons/ram.svg',
-                                                                                                                                                                height: 16, colorFilter: ColorFilter.mode(color, BlendMode.srcIn)),
+                                                                                                                                                        SvgPicture.asset('assets/icons/ram.svg', height: 16, colorFilter: ColorFilter.mode(color, BlendMode.srcIn)),
                                                                                                                                                         const SizedBox(width: 6),
                                                                                                                                                         Text(
-                                                                                                                                                                'RAM Utilisé',
+                                                                                                                                                                tr('home.hardware_info.ram_used', namedArgs: {'ramPercentage': ramPercentage.toString()}),
                                                                                                                                                                 style: TextStyle(
                                                                                                                                                                         color: color,
                                                                                                                                                                         fontWeight: FontWeight.bold,
@@ -252,7 +238,9 @@ class BatteryPopupState extends State<BatteryPopup> with SingleTickerProviderSta
                                                                                                                                                         )
                                                                                                                                                 ]
                                                                                                                                         ),
+
                                                                                                                                         const SizedBox(height: 4),
+
                                                                                                                                         // Barre exactement aussi large que le texte
                                                                                                                                         SizedBox(
                                                                                                                                                 width: barWidth,
@@ -263,13 +251,15 @@ class BatteryPopupState extends State<BatteryPopup> with SingleTickerProviderSta
                                                                                                                                                                 color: Colors.grey.shade700,
                                                                                                                                                                 child: FractionallySizedBox(
                                                                                                                                                                         alignment: Alignment.centerLeft,
-                                                                                                                                                                        widthFactor: usedPct,
+                                                                                                                                                                        widthFactor: usedPercentage,
                                                                                                                                                                         child: Container(color: color)
                                                                                                                                                                 )
                                                                                                                                                         )
                                                                                                                                                 )
                                                                                                                                         ),
+
                                                                                                                                         const SizedBox(height: 4),
+
                                                                                                                                         Text(
                                                                                                                                                 ramLabel,
                                                                                                                                                 style: TextStyle(
@@ -285,6 +275,7 @@ class BatteryPopupState extends State<BatteryPopup> with SingleTickerProviderSta
                                                                                                 ]
                                                                                         )
                                                                                 ),
+
                                                                                 Positioned(
                                                                                         top: -8,
                                                                                         right: arrowRightOffset,
@@ -321,4 +312,12 @@ class TriangleClipper extends CustomClipper<Path> {
 
         @override
         bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+/// Fournit la fonction getBatteryInfo pour convertir une tension en pourcentage, chemin d'icône et couleur correspondants.
+(double, String, Color) getBatteryInfo(double? voltage) {
+        final percent = (((voltage ?? 11.0).clamp(11.0, 12.7) - 11.0) / 1.7).clamp(0.0, 1.0);
+        if (percent >= 0.66) return (percent, "assets/icons/battery-full.svg", Colors.green);
+        if (percent >= 0.33) return (percent, "assets/icons/battery-mid.svg", Colors.orange);
+        return (percent, "assets/icons/battery-low.svg", Colors.red);
 }

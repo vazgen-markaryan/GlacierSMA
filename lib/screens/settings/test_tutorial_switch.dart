@@ -39,7 +39,6 @@ class TestTutorialSwitchState extends State<TestTutorialSwitch> {
                         value: skipTutorial,
                         onChanged: onChanged,
                         title: Text(tr("test.skip_tutorial")),
-                        subtitle: Text(tr("test.skip_tutorial_subtitle")),
                         secondary: const Icon(Icons.school)
                 );
         }

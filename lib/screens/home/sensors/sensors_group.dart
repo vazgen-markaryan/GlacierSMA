@@ -1,7 +1,6 @@
 import 'sensors_data.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 
 typedef SensorItemBuilder = Widget Function(BuildContext context, SensorsData sensor);
 
@@ -37,14 +36,14 @@ class SensorsGroup extends StatelessWidget {
                                         )
                                 ),
 
-                                const SizedBox(height: defaultPadding),
+                                const SizedBox(height: 16),
 
                                 // Soit la grille, soit le message "vide"
                                 if (sensors.isNotEmpty)
                                 Wrap(
-                                        spacing: defaultPadding,
-                                        runSpacing: defaultPadding,
-                                        children: sensors.map((s) => itemBuilder(context, s)).toList()
+                                        spacing: 16,
+                                        runSpacing: 16,
+                                        children: sensors.map((sensor) => itemBuilder(context, sensor)).toList()
                                 )
                                 else
                                 Text(
@@ -53,7 +52,7 @@ class SensorsGroup extends StatelessWidget {
                                         style: Theme.of(context).textTheme.bodyMedium
                                 ),
 
-                                const SizedBox(height: defaultPadding)
+                                const SizedBox(height: 16)
                         ]
                 );
         }

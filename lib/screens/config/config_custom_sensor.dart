@@ -21,13 +21,14 @@ class ConfigCustomSensor extends StatelessWidget {
         }) : super(key: key);
 
         @override
-        Widget build(BuildContext ctx) {
+        Widget build(BuildContext context) {
                 // Couleur du chip selon le bus
                 final busColor = switch (bus?.toLowerCase()) {
                         'modbus' => Colors.teal.shade700,
                         'i2c'    => Colors.blueGrey.shade700,
                         _        => Colors.grey.shade800
                 };
+
                 // Préparation des puces (bus, code, place)
                 final chips = <ChipData>[];
                 if (bus != null) chips.add(ChipData(bus!, busColor));
@@ -65,6 +66,7 @@ class ConfigCustomSensor extends StatelessWidget {
                                                         )
                                                 ]
                                         ),
+
                                         // Icônes ON → OFF
                                         Row(
                                                 children: [

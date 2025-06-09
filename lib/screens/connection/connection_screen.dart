@@ -40,7 +40,8 @@ class ConnectionScreenState extends State<ConnectionScreen> {
                                 title: Text(tr("connection.appTitle")),
                                 actions: [
                                         // L’icône drapeau à droite
-                                        Builder(builder: (context) {
+                                        Builder(builder: 
+                                                (context) {
                                                         return GestureDetector(
                                                                 onTap: () => toggleLangPopup(context),
                                                                 child: Padding(
@@ -58,29 +59,22 @@ class ConnectionScreenState extends State<ConnectionScreen> {
                         ),
                         body: LayoutBuilder(
                                 builder: (context, constraints) {
-                                        final isHorizontal = constraints.maxWidth > 700;
                                         return Container(
-                                                padding: const EdgeInsets.all(defaultPadding),
+                                                padding: const EdgeInsets.all(16),
                                                 color: backgroundColor,
-                                                child: isHorizontal
-                                                        // Mode paysage : Bluetooth / câble côte à côte
-                                                        ? Row(
-                                                                children: [
-                                                                        Expanded(child: buildBluetoothSection(context)),
-                                                                        const SizedBox(width: defaultPadding),
-                                                                        Expanded(child: buildCableSection(context, onCable))
-                                                                ]
-                                                        )
-                                                        // Mode portrait : Bluetooth, instructions, câble
-                                                        : Column(
-                                                                children: [
-                                                                        Expanded(child: buildBluetoothSection(context)),
-                                                                        const SizedBox(height: defaultPadding * 0.75),
-                                                                        buildArrowInstruction(),
-                                                                        const SizedBox(height: defaultPadding * 0.75),
-                                                                        Expanded(child: buildCableSection(context, onCable))
-                                                                ]
-                                                        )
+                                                child: Column(
+                                                        children: [
+                                                                Expanded(child: buildBluetoothSection(context)),
+
+                                                                const SizedBox(height: 12),
+
+                                                                buildArrowInstruction(),
+
+                                                                const SizedBox(height: 12),
+
+                                                                Expanded(child: buildCableSection(context, onCable))
+                                                        ]
+                                                )
                                         );
                                 }
                         )
@@ -89,19 +83,21 @@ class ConnectionScreenState extends State<ConnectionScreen> {
 
         /// Launch la détection et la sélection d’un device câble
         Future<void> onCable() async {
-                // 1) Récupère la liste des devices USB
+                // Récupère la liste des devices USB
                 await getAllCableConnectedDevices(
                         plugin,
-                        (devs) => setState(() => connectedDevices = devs)
+                        (devices) => setState(() => connectedDevices = devices)
                 );
-                // 2) Ouvre le dialog de sélection
+
+                // Ouvre le dialog de sélection
                 await showDeviceSelectionDialog(context, connectedDevices, plugin);
-                // 3) Vide la liste après fermeture
+
+                // Vide la liste après fermeture
                 setState(() => connectedDevices.clear());
         }
 
         /// Ouvre / ferme le popup de sélection de langue
-        void toggleLangPopup(BuildContext targetCtx) {
+        void toggleLangPopup(BuildContext targetContext) {
                 if (langPopupVisible) {
                         // Si déjà visible, on ferme
                         langOverlay?.remove();
@@ -111,18 +107,18 @@ class ConnectionScreenState extends State<ConnectionScreen> {
                 langPopupVisible = true;
 
                 // On récupère la position et la taille de l’icône drapeau
-                final render = targetCtx.findRenderObject();
+                final render = targetContext.findRenderObject();
                 if (render is! RenderBox) return;
                 final box = render;
-                final pos = box.localToGlobal(Offset.zero);
+                final position = box.localToGlobal(Offset.zero);
                 final iconSize = box.size.width;
                 final screen = MediaQuery.of(context).size;
 
                 langOverlay = OverlayEntry(
                         builder: (_) {
                                 // Calcul pour que le popup s’aligne à gauche du SVG
-                                final right = screen.width - pos.dx - iconSize;
-                                final top = pos.dy + box.size.height + 5.0; // 5px d’écart sous le drapeau
+                                final right = screen.width - position.dx - iconSize;
+                                final top = position.dy + box.size.height + 5.0; // 5px d’écart sous le drapeau
 
                                 return GestureDetector(
                                         behavior: HitTestBehavior.translucent,
@@ -140,9 +136,9 @@ class ConnectionScreenState extends State<ConnectionScreen> {
                                                                 child: LanguagePopup(
                                                                         // Position de la flèche : moitié de la largeur du SVG
                                                                         iconCenterOffset: iconSize - 25,
-                                                                        onSelect: (loc) {
+                                                                        onSelect: (locale) {
                                                                                 // Lorsqu’on choisit une langue
-                                                                                context.setLocale(loc);
+                                                                                context.setLocale(locale);
                                                                                 langOverlay?.remove();
                                                                                 langPopupVisible = false;
                                                                         }

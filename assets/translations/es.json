@@ -17,10 +17,12 @@
 	},
 
 	"home": {
-		"battery": {
+		"hardware_info": {
 			"voltage": "Voltaje: {value} V",
 			"voltage_unknown": "Voltaje: Desconocido",
-			"state": "Estado: {percent}%"
+			"state": "Estado: {percent}%",
+			"ram_used": "RAM Usada {ramPercentage}",
+			"bytes": "bytes"
 		},
 
 		"dashboard": {
@@ -151,8 +153,7 @@
 		"detected_changes": "Cambios detectados",
 		"no_changes": "No se detectaron cambios",
 		"save_before_disconnect": "Desea guardar sus datos de prueba antes de desconectarse?",
-		"skip_tutorial": "Desactivar tutorial",
-		"skip_tutorial_subtitle": "Ocultar tutorial de test",
+		"skip_tutorial": "Desactivar Test Tutorial",
 		"skip_tutorial_description": "Puede reactivarse en la configuración."
 	},
 
@@ -192,7 +193,14 @@
 
 	"settings": {
 		"others": "Otros",
-		"iteration_count": "Ciclos de captura sin reinicio: {iteration}",
+		"iteration_count": "Ciclos de captura sin reinicio",
+
+		"dev_credits": {
+			"title": "Créditos de Desarrolladores",
+			"frontend_developer": "Desarrollador Front-End",
+			"backend_developer": "Desarrollador Back-End",
+			"cant_open": "No se puede abrir"
+		},
 
 		"about": {
 			"title": "Acerca de",

@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 
-// Construit un SnackBar stylisé avec un [message] et une icône [iconData].
+/// Construit un SnackBar stylisé avec un [message] et une icône [iconData].
 SnackBar buildCustomSnackBar({
         required String message,
         IconData iconData = Icons.error,

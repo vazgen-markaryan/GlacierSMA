@@ -23,13 +23,13 @@ class DashboardBody extends StatelessWidget {
                         valueListenable: activeMaskNotifier,
                         builder: (context, mask, _) {
                                 return SingleChildScrollView(
-                                        padding: const EdgeInsets.all(defaultPadding),
+                                        padding: const EdgeInsets.all(16),
                                         child: Column(
                                                 children: [
                                                         ...createAllSensorGroups(
                                                                 maskNotifier: activeMaskNotifier,
                                                                 getSensors: getSensors,
-                                                                onTap: (ctx, s) => showPopup(ctx, s),
+                                                                onTap: (context, sensor) => showPopup(context, sensor),
                                                                 configMode: false,
                                                                 showInactive: false,
                                                                 testMode: false

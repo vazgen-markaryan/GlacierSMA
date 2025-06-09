@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 /// Regroupe un titre de section et sa liste de widgets enfants
-class SettingsSection extends StatelessWidget {
+class SettingsDiv extends StatelessWidget {
         final String title;
         final List<Widget> children;
 
-        const SettingsSection({
+        const SettingsDiv({
                 Key? key,
                 required this.title,
                 required this.children

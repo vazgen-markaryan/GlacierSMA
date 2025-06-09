@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/battery/battery_popup.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/hardware_info/hardware_popup.dart';
 
-class HardwareIndicator extends StatelessWidget {
+class HardwareSVG extends StatelessWidget {
         /// Notifier qui contient la tension actuelle de la batterie
         final ValueNotifier<double?> voltageNotifier;
 
@@ -12,7 +12,7 @@ class HardwareIndicator extends StatelessWidget {
         /// Notifier pour les données RAM, utilisé dans le popup
         final ValueNotifier<Map<String, double?>> ramNotifier;
 
-        const HardwareIndicator({
+        const HardwareSVG({
                 super.key,
                 required this.voltageNotifier,
                 required this.ramNotifier,
@@ -25,7 +25,7 @@ class HardwareIndicator extends StatelessWidget {
                         builder: (targetContext) {
                                 return GestureDetector(
                                         onTap: () {
-                                                BatteryPopup.show(
+                                                HardwarePopup.show(
                                                         context: context,
                                                         iconKey: targetContext,
                                                         voltageNotifier: voltageNotifier,

@@ -8,8 +8,8 @@ import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
+import 'package:rev_glacier_sma_mobile/screens/test/test_anomaly.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/test/test_anomaly.dart';
 
 /// Map des champs à exclure par capteur
 final Map<String, Set<String>> bannedFields = {

@@ -1,7 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:rev_glacier_sma_mobile/utils/message_service.dart';
 import 'package:rev_glacier_sma_mobile/screens/config/config_utils.dart';
 import 'package:rev_glacier_sma_mobile/screens/config/config_button.dart';
@@ -31,16 +30,16 @@ class ConfigScreenState extends State<ConfigScreen> {
         bool authenticated = false;
 
         late int initialMask;
-        late TextEditingController sleepCtrl, seaCtrl, captureCtrl;
+        late TextEditingController sleepController, seaController, captureController;
 
         late ValueNotifier<int> localMaskNotifier;
         late ValueNotifier<int> iridiumModeNotifier;
 
-        int initSleep = 0, sleep = 0;
-        double initSea = 0, sea = 0;
-        int initCapture = 0, cap = 0;
+        int initSleepTime = 0, sleepTime = 0;
+        double initSeaPressure = 0, seaPressure = 0;
+        int initCaptureAmount = 0, captureAmount = 0;
         int initIridiumMode = 0, iridiumMode = 0;
-        bool invalidSleep = false, invalidCap = false;
+        bool invalidSleepTime = false, invalidCaptureAmount = false;
 
         @override
         void initState() {
@@ -49,31 +48,38 @@ class ConfigScreenState extends State<ConfigScreen> {
                 localMaskNotifier = ValueNotifier(initialMask);
                 iridiumModeNotifier = ValueNotifier(0);
 
-                sleepCtrl = TextEditingController();
-                seaCtrl = TextEditingController();
-                captureCtrl = TextEditingController();
+                sleepController = TextEditingController();
+                seaController = TextEditingController();
+                captureController = TextEditingController();
 
                 widget.configNotifier.addListener(reload);
                 reload();
-                WidgetsBinding.instance.addPostFrameCallback((_) => askPass());
+                WidgetsBinding.instance.addPostFrameCallback((_) => askPassword());
         }
 
         void reload() {
                 final raw = widget.configNotifier.value;
                 if (raw == null) return;
-                final p = parseSeriesParams(raw);
+                final params = parseSeriesParams(raw);
                 setState(() {
-                                initSleep = p.sleep;  sleep = p.sleep;   sleepCtrl.text = p.sleep.toString();
-                                initSea = p.seaPressure; sea = p.seaPressure; seaCtrl.text = p.seaPressure.toString();
-                                initCapture = p.capture;    cap = p.capture; captureCtrl.text = p.capture.toString();
-                                initIridiumMode = p.iridiumMode;
-                                iridiumMode = p.iridiumMode;
-                                iridiumModeNotifier.value = p.iridiumMode;
+                                initSleepTime = params.sleepTime;
+                                sleepTime = params.sleepTime;
+                                sleepController.text = params.sleepTime.toString();
+                                initSeaPressure = params.seaPressure;
+                                seaPressure = params.seaPressure;
+                                seaController.text = params.seaPressure.toString();
+                                initCaptureAmount = params.capture;
+                                captureAmount = params.capture;
+                                captureController.text = params.capture.toString();
+                                initIridiumMode = params.iridiumMode;
+                                iridiumMode = params.iridiumMode; 
+                                iridiumModeNotifier.value = params.iridiumMode;
                         }
                 );
         }
 
-        Future<void> askPass() async {
+        // La place où on demande le mot de passe pour accéder à la config
+        Future<void> askPassword() async {
                 final ok = await showPasswordDialog(context, motDePasse: '');
                 if (!ok) widget.onCancel(); else setState(() => authenticated = true);
         }
@@ -82,17 +88,17 @@ class ConfigScreenState extends State<ConfigScreen> {
         void dispose() {
                 widget.configNotifier.removeListener(reload);
                 localMaskNotifier.dispose();
-                sleepCtrl.dispose();
-                seaCtrl.dispose();
-                captureCtrl.dispose();
+                sleepController.dispose();
+                seaController.dispose();
+                captureController.dispose();
                 iridiumModeNotifier.dispose();
                 super.dispose();
         }
 
         bool get maskChanged => localMaskNotifier.value != initialMask;
-        bool get seriesChanged => (sleep != initSleep && !invalidSleep) ||
-                (sea != initSea) || 
-                (cap != initCapture && !invalidCap) || 
+        bool get seriesChanged => (sleepTime != initSleepTime && !invalidSleepTime) ||
+                (seaPressure != initSeaPressure) ||
+                (captureAmount != initCaptureAmount && !invalidCaptureAmount) ||
                 (iridiumMode != initIridiumMode);
 
         Future<bool> confirmDiscard() async {
@@ -101,12 +107,12 @@ class ConfigScreenState extends State<ConfigScreen> {
         }
 
         @override
-        Widget build(BuildContext ctx) {
+        Widget build(BuildContext context) {
                 if (!authenticated) return const SizedBox.shrink();
                 return WillPopScope(
                         onWillPop: confirmDiscard,
                         child: SingleChildScrollView(
-                                padding: const EdgeInsets.all(defaultPadding),
+                                padding: const EdgeInsets.all(16),
                                 child: Column(
                                         children: [
                                                 ...createAllSensorGroups(
@@ -119,16 +125,16 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                         localMask: localMaskNotifier
                                                 ),
 
-                                                const SizedBox(height: defaultPadding),
+                                                const SizedBox(height: 16),
 
                                                 // Appliquer masque
                                                 ConfigButton(
                                                         skipConfirmation: true,
                                                         action: () => sendMaskConfig(
-                                                                context: ctx,
+                                                                context: context,
                                                                 initialMask: initialMask,
                                                                 newMask: localMaskNotifier.value,
-                                                                svc: widget.messageService
+                                                                messageService: widget.messageService
                                                         ).then(
                                                                         (ok) {
                                                                                 if (ok) {
@@ -147,69 +153,69 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                         idleIcon: Icons.send,
                                                         successIcon: Icons.check,
                                                         failureIcon: Icons.error,
-                                                        idleColor: Theme.of(ctx).primaryColor,
+                                                        idleColor: Theme.of(context).primaryColor,
                                                         successColor: Colors.green,
                                                         failureColor: Colors.red,
                                                         enabled: maskChanged
                                                 ),
 
-                                                const SizedBox(height: defaultPadding * 1.5),
+                                                const SizedBox(height: 24),
 
-                                                Center(child: Text(tr('config.collection_settings'), style: Theme.of(ctx).textTheme.titleMedium)),
+                                                Center(child: Text(tr('config.collection_settings'), style: Theme.of(context).textTheme.titleMedium)),
 
-                                                const SizedBox(height: defaultPadding / 2),
+                                                const SizedBox(height: 8),
 
                                                 Card(
                                                         elevation: 2,
                                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                                         child: Padding(
-                                                                padding: const EdgeInsets.all(defaultPadding),
+                                                                padding: const EdgeInsets.all(16),
                                                                 child: Column(
                                                                         children: [
                                                                                 TextFormField(
-                                                                                        controller: sleepCtrl,
+                                                                                        controller: sleepController,
                                                                                         decoration: InputDecoration(
                                                                                                 labelText: tr('config.sleep_minutes'),
-                                                                                                labelStyle: TextStyle(color: invalidSleep ? Colors.red : null, fontWeight: FontWeight.bold)
+                                                                                                labelStyle: TextStyle(color: invalidSleepTime ? Colors.red : null, fontWeight: FontWeight.bold)
                                                                                         ),
                                                                                         keyboardType: TextInputType.number,
                                                                                         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                                                                        onChanged: (v) {
-                                                                                                final x = validateSleep(int.tryParse(v) ?? 0);
-                                                                                                invalidSleep = isSleepInvalid(int.tryParse(v) ?? 0);
-                                                                                                setState(() => sleep = x.toInt());
+                                                                                        onChanged: (value) {
+                                                                                                final x = validateSleep(int.tryParse(value) ?? 0);
+                                                                                                invalidSleepTime = isSleepInvalid(int.tryParse(value) ?? 0);
+                                                                                                setState(() => sleepTime = x.toInt());
                                                                                         }
                                                                                 ),
 
-                                                                                const SizedBox(height: defaultPadding / 2),
+                                                                                const SizedBox(height: 8),
 
                                                                                 TextFormField(
-                                                                                        controller: seaCtrl,
+                                                                                        controller: seaController,
                                                                                         decoration: InputDecoration(
                                                                                                 labelText: tr('config.sea_level_pressure')
                                                                                         ),
                                                                                         keyboardType: TextInputType.numberWithOptions(decimal: true),
-                                                                                        onChanged: (v) => setState(() => sea = double.tryParse(v) ?? sea)
+                                                                                        onChanged: (value) => setState(() => seaPressure = double.tryParse(value) ?? seaPressure)
                                                                                 ),
 
-                                                                                const SizedBox(height: defaultPadding / 2),
+                                                                                const SizedBox(height: 8),
 
                                                                                 TextFormField(
-                                                                                        controller: captureCtrl,
+                                                                                        controller: captureController,
                                                                                         decoration: InputDecoration(
                                                                                                 labelText: tr('config.number_of_captures'),
-                                                                                                labelStyle: TextStyle(color: invalidCap ? Colors.red : null, fontWeight: FontWeight.bold)
+                                                                                                labelStyle: TextStyle(color: invalidCaptureAmount ? Colors.red : null, fontWeight: FontWeight.bold)
                                                                                         ),
                                                                                         keyboardType: TextInputType.number,
                                                                                         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                                                                        onChanged: (v) {
-                                                                                                final x = validateCapture(int.tryParse(v) ?? 0);
-                                                                                                invalidCap = isCaptureInvalid(int.tryParse(v) ?? 0);
-                                                                                                setState(() => cap = x);
+                                                                                        onChanged: (value) {
+                                                                                                final x = validateCapture(int.tryParse(value) ?? 0);
+                                                                                                invalidCaptureAmount = isCaptureInvalid(int.tryParse(value) ?? 0);
+                                                                                                setState(() => captureAmount = x);
                                                                                         }
                                                                                 ),
 
-                                                                                const SizedBox(height: defaultPadding / 2),
+                                                                                const SizedBox(height: 8),
 
                                                                                 Card(
                                                                                         color: Colors.grey[700],
@@ -227,20 +233,20 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                                                                         RadioListTile<int>(
                                                                                                                 value: 0,
                                                                                                                 groupValue: iridiumMode,
-                                                                                                                onChanged: (v) => setState(() => iridiumMode = v ?? 0),
+                                                                                                                onChanged: (value) => setState(() => iridiumMode = value ?? 0),
                                                                                                                 title: Text(tr('config.iridium_none'))
                                                                                                         ),
                                                                                                         RadioListTile<int>(
                                                                                                                 value: 1,
                                                                                                                 groupValue: iridiumMode,
-                                                                                                                onChanged: (v) => setState(() => iridiumMode = v ?? 0),
+                                                                                                                onChanged: (value) => setState(() => iridiumMode = value ?? 0),
                                                                                                                 title: Text(tr('config.iridium_netav')),
                                                                                                                 subtitle: Text(tr('config.iridium_netav2'))
                                                                                                         ),
                                                                                                         RadioListTile<int>(
                                                                                                                 value: 2,
                                                                                                                 groupValue: iridiumMode,
-                                                                                                                onChanged: (v) => setState(() => iridiumMode = v ?? 0),
+                                                                                                                onChanged: (value) => setState(() => iridiumMode = value ?? 0),
                                                                                                                 title: Text(tr('config.iridium_quality')),
                                                                                                                 subtitle: Text(tr('config.iridium_quality2'))
                                                                                                         )
@@ -252,7 +258,7 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                         )
                                                 ),
 
-                                                const SizedBox(height: defaultPadding),
+                                                const SizedBox(height: 8),
 
                                                 Row(
                                                         children: [
@@ -261,19 +267,19 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                                         flex: 1,
                                                                         child: ConfigButton(
                                                                                 action: () => sendSeriesConfig(
-                                                                                        svc: widget.messageService,
-                                                                                        sleep: sleep,
-                                                                                        initSleep: initSleep,
-                                                                                        updateInitSleep: (v) => initSleep = v,
-                                                                                        sea: sea,
-                                                                                        initSea: initSea,
-                                                                                        updateInitSea: (v) => initSea = v,
-                                                                                        capture: cap,
-                                                                                        initCapture: initCapture,
-                                                                                        updateInitCapture: (v) => initCapture = v,
+                                                                                        messageService: widget.messageService,
+                                                                                        sleep: sleepTime,
+                                                                                        initSleep: initSleepTime,
+                                                                                        updateInitSleep: (value) => initSleepTime = value,
+                                                                                        seaPressure: seaPressure,
+                                                                                        initSeaPressure: initSeaPressure,
+                                                                                        updateInitSeaPressure: (value) => initSeaPressure = value,
+                                                                                        captureAmount: captureAmount,
+                                                                                        initCaptureAmount: initCaptureAmount,
+                                                                                        updateInitCaptureAmount: (value) => initCaptureAmount = value,
                                                                                         iridiumMode: iridiumMode,
                                                                                         initIridiumMode: initIridiumMode,
-                                                                                        updateInitIridiumMode: (v) => initIridiumMode = v
+                                                                                        updateInitIridiumMode: (value) => initIridiumMode = value
                                                                                 ),
                                                                                 confirmTitle: tr('config.confirm_send'),
                                                                                 confirmContent: tr('config.new_parameters_send'),
@@ -287,11 +293,11 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                                                 idleColor: Theme.of(context).primaryColor,
                                                                                 successColor: Colors.green,
                                                                                 failureColor: Colors.red,
-                                                                                enabled: seriesChanged && !invalidSleep && !invalidCap
+                                                                                enabled: seriesChanged && !invalidSleepTime && !invalidCaptureAmount
                                                                         )
                                                                 ),
 
-                                                                const SizedBox(width: defaultPadding / 2),
+                                                                const SizedBox(width: 8),
 
                                                                 // Bouton “Reset default”
                                                                 Expanded(

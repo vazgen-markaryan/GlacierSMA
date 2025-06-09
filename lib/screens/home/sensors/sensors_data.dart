@@ -72,11 +72,11 @@ List<SensorsData> getSensors(SensorType type) {
         switch (type) {
                 case SensorType.internal:
                         return allSensors
-                                .where((s) => s.bus == 'I2C' || s.bus == 'SPI' || s.dataProcessor == 'true')
+                                .where((sensor) => sensor.bus == 'I2C' || sensor.bus == 'SPI' || sensor.dataProcessor == 'true')
                                 .toList();
                 case SensorType.modbus:
                         return allSensors
-                                .where((s) => s.bus == 'ModBus')
+                                .where((sensor) => sensor.bus == 'ModBus')
                                 .toList();
         }
 }

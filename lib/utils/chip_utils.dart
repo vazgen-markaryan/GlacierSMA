@@ -4,14 +4,14 @@ import 'package:easy_localization/easy_localization.dart';
 /// Données pour générer un chip
 class ChipData {
         final String text;
-        final Color bgColor;
-        const ChipData(this.text, this.bgColor);
+        final Color backgroundColor;
+        const ChipData(this.text, this.backgroundColor);
 }
 
 /// Construit un Chip unique, avec contrôles de dimension/font
 Widget buildChip(
         String text, {
-                required Color bgColor,
+                required Color backgroundColor,
                 double fontSize = 10,
                 EdgeInsets padding = EdgeInsets.zero,
                 EdgeInsets labelPadding = const EdgeInsets.symmetric(horizontal: 4),
@@ -20,7 +20,7 @@ Widget buildChip(
         }) {
         return Chip(
                 label: Text(tr(text), style: TextStyle(fontSize: fontSize, color: Colors.white)),
-                backgroundColor: bgColor,
+                backgroundColor: backgroundColor,
                 padding: padding,
                 labelPadding: labelPadding,
                 visualDensity: visualDensity,
@@ -39,11 +39,12 @@ Widget buildChips(
                 spacing: spacing,
                 runSpacing: runSpacing,
                 children: chips
-                        .map((c) => buildChip(
-                                        c.text,
-                                        bgColor: c.bgColor,
+                        .map(
+                                (chip) => buildChip(
+                                        chip.text,
+                                        backgroundColor: chip.backgroundColor,
                                         fontSize: fontSize
-                                ))
-                        .toList()
+                                )
+                        ).toList()
         );
 }

@@ -1,21 +1,21 @@
-import '../../../utils/constants.dart';
-import '../../connection/connection_screen.dart';
-import '../test/test_utils.dart';
 import 'dashboard_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 import 'package:rev_glacier_sma_mobile/utils/message_service.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_snackbar.dart';
+import 'package:rev_glacier_sma_mobile/screens/test/test_utils.dart';
+import 'package:rev_glacier_sma_mobile/screens/test/test_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/home_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/config/config_screen.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/test/test_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/settings/settings_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/debug_log/debug_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
+import 'package:rev_glacier_sma_mobile/screens/connection/connection_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/debug_log/debug_log_updater.dart';
+import 'package:rev_glacier_sma_mobile/screens/connection/connection_manager.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/dashboard/dashboard_body.dart';
-import 'package:rev_glacier_sma_mobile/screens/connection/disconnection_manager.dart';
 
 /// Regroupe toutes les fonctions/utilitaires de Home_Screen
 mixin DashboardUtils on State<Home_Screen> {
@@ -42,6 +42,7 @@ mixin DashboardUtils on State<Home_Screen> {
                         plugin: widget.plugin,
                         debugLogManager: debugManager
                 );
+
                 controller = DashboardController(
                         plugin: widget.plugin,
                         connectedDevices: widget.connectedDevices,
@@ -67,59 +68,68 @@ mixin DashboardUtils on State<Home_Screen> {
                 final testState = testScreenKey.currentState;
                 final testEnCours = testState?.isTestRunning == true;
 
-                // Afficher un CustomPopup offrant deux boutons, selon le cas
-                await showDialog(
+                final result = await showDialog<bool>(
                         context: context,
                         barrierDismissible: false,
                         builder: (_) {
-                                return CustomPopup(
-                                        title: tr("connection.disconnect"),
-                                        content: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                        Text(
-                                                                tr('connection.lost_connection', namedArgs: {'time': formatted}),
-                                                                style: const TextStyle(color: Colors.white70)
-                                                        ),
-                                                        if (testEnCours) ...[
-                                                                const SizedBox(height: 12),
+                                return WillPopScope(
+                                        onWillPop: () async {
+                                                doDisconnectAndNavigate();
+                                                return true;
+                                        },
+                                        child: CustomPopup(
+                                                title: tr("connection.disconnect"),
+                                                content: Column(
+                                                        mainAxisSize: MainAxisSize.min,
+                                                        children: [
                                                                 Text(
-                                                                        tr('test.save_before_disconnect'),
+                                                                        tr('connection.lost_connection', namedArgs: {'time': formatted}),
                                                                         style: const TextStyle(color: Colors.white70)
+                                                                ),
+                                                                if (testEnCours) ...[
+                                                                        const SizedBox(height: 12),
+                                                                        Text(
+                                                                                tr('test.save_before_disconnect'),
+                                                                                style: const TextStyle(color: Colors.white70)
+                                                                        )
+                                                                ]
+                                                        ]
+                                                ),
+                                                actions: [
+                                                        if (testEnCours) ...[
+                                                                TextButton(
+                                                                        onPressed: () {
+                                                                                Navigator.of(context).pop(true);
+                                                                                saveLogsThenDisconnect(testState!);
+                                                                        },
+                                                                        child: Text(tr('yes'))
+                                                                ),
+                                                                TextButton(
+                                                                        onPressed: () {
+                                                                                Navigator.of(context).pop(false);
+                                                                                doDisconnectAndNavigate();
+                                                                        },
+                                                                        child: Text(tr('no'))
+                                                                )
+                                                        ] else ...[
+                                                                TextButton(
+                                                                        onPressed: () {
+                                                                                Navigator.of(context).pop(false);
+                                                                                doDisconnectAndNavigate();
+                                                                        },
+                                                                        child: const Text('OK', style: TextStyle(color: primaryColor))
                                                                 )
                                                         ]
                                                 ]
-                                        ),
-                                        actions: [
-                                                if (testEnCours) ...[
-                                                        TextButton(
-                                                                onPressed: () {
-                                                                        Navigator.of(context).pop();
-                                                                        // Lancer la sauvegarde CSV, puis la déconnexion
-                                                                        saveLogsThenDisconnect(testState!);
-                                                                },
-                                                                child: Text(tr('yes'))
-                                                        ),
-                                                        TextButton(
-                                                                onPressed: () {
-                                                                        Navigator.of(context).pop();
-                                                                        doDisconnectAndNavigate();
-                                                                },
-                                                                child: Text(tr('no'))
-                                                        )
-                                                ] else ...[
-                                                        TextButton(
-                                                                onPressed: () {
-                                                                        Navigator.of(context).pop();
-                                                                        doDisconnectAndNavigate();
-                                                                },
-                                                                child: const Text('OK', style: TextStyle(color: primaryColor))
-                                                        )
-                                                ]
-                                        ]
+                                        )
                                 );
                         }
                 );
+
+                // Si la popup est fermée autrement (ex: bouton X), on déconnecte aussi
+                if (result == null) {
+                        doDisconnectAndNavigate();
+                }
         }
 
         /// Sauvegarde les logs puis déconnecte (seulement après que l’utilisateur ait fermé la popup)
@@ -164,7 +174,7 @@ mixin DashboardUtils on State<Home_Screen> {
 
                 // Message humain des erreurs fatales du BackEnd
                 final key = fatalMessages[reason] ?? 'home.dashboard.fatal_unknown';
-                final human = tr(key, namedArgs: {'reason': reason});
+                final humanText = tr(key, namedArgs: {'reason': reason});
 
                 // Durée formatée HH:MM:SS
                 final elapsed = controller.connectionStopwatch.elapsed;
@@ -176,14 +186,14 @@ mixin DashboardUtils on State<Home_Screen> {
                 await showDialog(
                         context: context,
                         barrierDismissible: false,
-                        builder: (ctx) => CustomPopup(
+                        builder: (context) => CustomPopup(
                                 title: tr('home.dashboard.fatal_title'),
                                 content: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
                                                 Text(
-                                                        human,
+                                                        humanText,
                                                         textAlign: TextAlign.center,
                                                         style: const TextStyle(color: Colors.white, fontSize: 16)
                                                 ),
@@ -198,7 +208,7 @@ mixin DashboardUtils on State<Home_Screen> {
                                 actions: [
                                         TextButton(
                                                 onPressed: () {
-                                                        Navigator.of(ctx).pop();
+                                                        Navigator.of(context).pop();
                                                         widget.plugin?.disconnect();
                                                         Navigator.of(context).pop();
                                                 },
@@ -279,9 +289,10 @@ mixin DashboardUtils on State<Home_Screen> {
                                                                 labelText: tr('home.dashboard.rename_label'),
                                                                 errorText: errorText
                                                         ),
-                                                        onChanged: (v) {
-                                                                setState(() {
-                                                                                errorText = regex.hasMatch(v) ? null : tr('home.dashboard.rename_error');
+                                                        onChanged: (value) {
+                                                                setState(
+                                                                        () {
+                                                                                errorText = regex.hasMatch(value) ? null : tr('home.dashboard.rename_error');
                                                                         }
                                                                 );
                                                         }
@@ -311,6 +322,7 @@ mixin DashboardUtils on State<Home_Screen> {
                 }
 
                 final ok = await messageService.sendStationName(name);
+
                 showCustomSnackBar(
                         context,
                         message: ok ? tr('home.dashboard.snack_rename_success') : tr('home.dashboard.snack_rename_error'),
@@ -319,16 +331,18 @@ mixin DashboardUtils on State<Home_Screen> {
                         textColor: Colors.white,
                         iconColor: Colors.white
                 );
+
                 if (ok) {
-                        final u = controller.firmwareNotifier.value!;
-                        final idx = u.headers.indexOf('name');
-                        u.values[idx] = textController.text;
-                        controller.firmwareNotifier.value = u;
+                        final value = controller.firmwareNotifier.value!;
+                        final idx = value.headers.indexOf('name');
+                        value.values[idx] = textController.text;
+                        controller.firmwareNotifier.value = value;
                 }
         }
 
         /// Les 4 pages de la BottomNavBar
         List<Widget> get pages => [
+
                 // Tableau de bord
                 ValueListenableBuilder<bool>(
                         valueListenable: controller.isInitialLoading,

@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-/// Popup identique au BatteryPopup, mais pour choisir la langue.
-/// Affiché via Positioned(left:…, top:…) par ConnectionScreen.
-/// Ne gère pas la position lui-même.
+/// Popup pour sélectionner la langue de l'application.
 class LanguagePopup extends StatefulWidget {
 
         final double iconCenterOffset;
@@ -82,7 +80,7 @@ class LanguagePopupState extends State<LanguagePopup>
                                                         child: Row(
                                                                 mainAxisSize: MainAxisSize.min,
                                                                 children: supported.map((locale) {
-                                                                                final isSel = locale == current;
+                                                                                final isSelected = locale == current;
                                                                                 return GestureDetector(
                                                                                         onTap: () => widget.onSelect(locale),
                                                                                         child: Padding(
@@ -99,9 +97,9 @@ class LanguagePopupState extends State<LanguagePopup>
                                                                                                                 Text(
                                                                                                                         tr('settings.language.${locale.languageCode}'),
                                                                                                                         style: TextStyle(
-                                                                                                                                color: isSel ? Colors.green : Colors.grey,
+                                                                                                                                color: isSelected ? Colors.green : Colors.grey,
                                                                                                                                 fontWeight:
-                                                                                                                                isSel ? FontWeight.bold : FontWeight.normal,
+                                                                                                                                isSelected ? FontWeight.bold : FontWeight.normal,
                                                                                                                                 fontSize: 12,
                                                                                                                                 decoration: TextDecoration.none
                                                                                                                         )

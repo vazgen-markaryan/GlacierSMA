@@ -95,19 +95,16 @@ List<Widget> createAllSensorGroups({
                                                                                                 configMode: true,
                                                                                                 isOn: on,
                                                                                                 onToggle: (value) {
-                                                                                                        localMask.value = value
-                                                                                                                ? (localMask.value | (1 << bit))
-                                                                                                                : (localMask.value & ~(1 << bit));
+                                                                                                        localMask.value = value ? (localMask.value | (1 << bit)) : (localMask.value & ~(1 << bit));
                                                                                                 }
                                                                                         );
                                                                                 }
+
                                                                                 else {
                                                                                         return SensorCard(
                                                                                                 sensor: sensor,
                                                                                                 testMode: testMode,
-                                                                                                onTap: (sensor.data.isNotEmpty && sensor.title != "sensor-data.title.sd_card")
-                                                                                                        ? () => onTap(context, sensor)
-                                                                                                        : null
+                                                                                                onTap: (sensor.data.isNotEmpty && sensor.title != "sensor-data.title.sd_card") ? () => onTap(context, sensor) : null
                                                                                         );
                                                                                 }
                                                                         }

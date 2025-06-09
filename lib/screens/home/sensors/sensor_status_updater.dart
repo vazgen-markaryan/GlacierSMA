@@ -1,8 +1,7 @@
-/// Analyse le bloc de <status> pour mettre à jour "powerStatus"
-
 import 'sensors_data.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 
+/// Analyse le bloc de <status> pour mettre à jour "powerStatus"
 void updateSensorsData(
         String rawData,
         List<SensorsData> Function(SensorType) getSensors,
@@ -13,16 +12,17 @@ void updateSensorsData(
 
         // Extraire headers et valeurs numériques
         final lines = rawData.split('\n');
-        final headers = lines[1].split(',').map((h) => h.trim().toLowerCase()).toList();
-        final values = lines[2].split(',').map((v) => int.tryParse(v.trim()) ?? 0).toList();
+        final headers = lines[1].split(',').map((header) => header.trim().toLowerCase()).toList();
+        final values = lines[2].split(',').map((value) => int.tryParse(value.trim()) ?? 0).toList();
 
         // Fonction interne pour mettre à jour chaque liste de capteurs
         void updateSensorStatus(List<SensorsData> sensors) {
                 for (var sensor in sensors) {
                         if (sensor.header == null) continue;
-                        final idx = headers.indexOf(sensor.header!.toLowerCase());
-                        sensor.powerStatus = (idx != -1) ? values[idx] : null;
-                        // Forcer la notif même si valeur inchangée
+                        final index = headers.indexOf(sensor.header!.toLowerCase());
+                        sensor.powerStatus = (index != -1) ? values[index] : null;
+
+                        // Forcer la notification même si valeur inchangée
                         sensor.dataNotifier.value = sensor.dataNotifier.value;
                 }
         }

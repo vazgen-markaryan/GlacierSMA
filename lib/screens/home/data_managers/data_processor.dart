@@ -28,12 +28,12 @@ class RawDataParser {
 
                 final headers = lines[1]
                         .split(',')
-                        .map((h) => h.trim().toLowerCase())
+                        .map((header) => header.trim().toLowerCase())
                         .toList();
 
                 final values = lines[2]
                         .split(',')
-                        .map((v) => v.trim().replaceAll('\u0007', ','))
+                        .map((value) => value.trim().replaceAll('\u0007', ',')) // Remplace par BELL caractère pour Arduino
                         .toList();
 
                 return RawData(headers, values);
@@ -100,9 +100,7 @@ void processRawData({
                 if (lines.length >= 2) {
                         final maskString = lines[1].trim();
                         try {
-                                final hex = maskString.startsWith('0x')
-                                        ? maskString.substring(2)
-                                        : maskString;
+                                final hex = maskString.startsWith('0x') ? maskString.substring(2) : maskString;
                                 final mask = int.parse(hex, radix: 16);
                                 onActiveReceived(mask);
                         }
@@ -116,22 +114,23 @@ void processRawData({
         final parsed = RawDataParser.parse(rawData);
 
         // Récupère et notifie la nouvelle itération
-        final idxIter = parsed.headers.indexOf('iteration');
-        if (idxIter >= 0) {
-                final newIt = int.tryParse(parsed.values[idxIter]) ?? 0;
-                iterationNotifier.value = newIt;
+        final iteration = parsed.headers.indexOf('iteration');
+        if (iteration >= 0) {
+                final newIteration = int.tryParse(parsed.values[iteration]) ?? 0;
+                iterationNotifier.value = newIteration;
         }
 
         final headers = parsed.headers;
         final values = parsed.values;
-        final maxHeaderLength = headers.fold<int>(0, (p, h) => max(p, h.length));
+        final maxHeaderLength = headers.fold<int>(0, (currentMax, header) => max(currentMax, header.length));
 
         // Status
         if (rawData.contains('<status>')) {
                 final statusLog = 'Status:\n' +
-                        headers.asMap().entries.map((e) {
-                                        final header = e.value.toUpperCase().padRight(maxHeaderLength);
-                                        final value = values[e.key];
+                        headers.asMap().entries.map(
+                                (event) {
+                                        final header = event.value.toUpperCase().padRight(maxHeaderLength);
+                                        final value = values[event.key];
                                         return '$header : $value';
                                 }
                         ).join('\n');
@@ -140,15 +139,16 @@ void processRawData({
 
         // Data + Batterie + RAM
         if (rawData.contains('<data>')) {
-                final batteryIndex = headers.indexWhere((h) => h.toLowerCase() == 'battery_voltage');
+                final batteryIndex = headers.indexWhere((header) => header.toLowerCase() == 'battery_voltage');
                 if (batteryIndex != -1) {
                         final voltage = double.tryParse(values[batteryIndex]);
                         if (voltage != null) batteryVoltage.value = voltage;
                 }
 
                 // RAM
-                final ramStackIndex = headers.indexWhere((h) => h.toLowerCase() == 'ram_stack');
-                final ramHeapIndex = headers.indexWhere((h) => h.toLowerCase() == 'ram_heap');
+                final ramStackIndex = headers.indexWhere((header) => header.toLowerCase() == 'ram_stack');
+                final ramHeapIndex = headers.indexWhere((header) => header.toLowerCase() == 'ram_heap');
+
                 if (ramStackIndex != -1 && ramHeapIndex != -1) {
                         final ramStack = double.tryParse(values[ramStackIndex]);
                         final ramHeap = double.tryParse(values[ramHeapIndex]);
@@ -156,12 +156,12 @@ void processRawData({
                 }
 
                 final dataLog = '\nValeurs:\n' +
-                        headers.asMap().entries.map((e) {
-                                        final header = e.value.toUpperCase().padRight(maxHeaderLength);
-                                        final raw = values[e.key];
+                        headers.asMap().entries.map((event) {
+                                        final header = event.value.toUpperCase().padRight(maxHeaderLength);
+                                        final raw = values[event.key];
                                         final formatted = double.tryParse(raw) != null
                                                 ? '${double.parse(raw).toStringAsFixed(2)}'
-                                                '${getUnitForHeader(e.value.toLowerCase())}'
+                                                '${getUnitForHeader(event.value.toLowerCase())}'
                                                 : raw;
                                         return '$header : $formatted';
                                 }
@@ -190,6 +190,7 @@ void processRawData({
         final hasData = [
                 ...getSensors(SensorType.internal),
                 ...getSensors(SensorType.modbus)
-        ].any((s) => s.powerStatus != null);
+        ].any((sensor) => sensor.powerStatus != null);
+
         if (hasData) onDataReceived();
 }

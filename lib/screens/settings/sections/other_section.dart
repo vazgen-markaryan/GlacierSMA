@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_snackbar.dart';
-import 'package:rev_glacier_sma_mobile/screens/settings/settings_section.dart';
+import 'package:rev_glacier_sma_mobile/screens/settings/dev_credits.dart';
+import 'package:rev_glacier_sma_mobile/screens/settings/settings_div.dart';
 import 'package:rev_glacier_sma_mobile/screens/settings/settings_widgets.dart';
-import 'package:rev_glacier_sma_mobile/screens/settings/sections/test_tutorial_switch.dart';
+import 'package:rev_glacier_sma_mobile/screens/settings/test_tutorial_switch.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_processor.dart';
 
 /// Section "Autres" qui contient toutes les options additionnelles
@@ -12,18 +13,22 @@ class OtherSection extends StatelessWidget {
         /// Notifier contenant les données RawData reçues depuis le bloc `<id>`
         final ValueNotifier<RawData?> firmwareNotifier;
 
-        const OtherSection({Key? key, required this.firmwareNotifier}) : super(key: key);
+        /// Notifier pour l'itération actuelle, utilisé pour afficher le nombre d'itérations
+        final ValueNotifier<int> iterationNotifier;
+
+        const OtherSection({
+                Key? key, 
+                required this.firmwareNotifier,
+                required this.iterationNotifier
+        }) : super(key: key);
 
         @override
         Widget build(BuildContext context) {
-                return SettingsSection(
+                return SettingsDiv(
                         title: tr('settings.others'),
                         children: [
-
-                                // Affiche un switch pour activer/désactiver le tutoriel de test
                                 TestTutorialSwitch(),
 
-                                // Écoute les changements sur firmwareNotifier
                                 ValueListenableBuilder<RawData?>(
                                         valueListenable: firmwareNotifier,
                                         builder: (ctx, data, _) {
@@ -35,8 +40,8 @@ class OtherSection extends StatelessWidget {
                                                 final repo = info?['url'] ?? '';
                                                 final hash = info?['hash'] ?? '';
                                                 final dirty = info?['dirty'] == '1';
-                                                final ts = int.tryParse(info?['date'] ?? '') ?? 0;
-                                                final buildD = DateTime.fromMillisecondsSinceEpoch(ts * 1000);
+                                                final timeSeconds = int.tryParse(info?['date'] ?? '') ?? 0;
+                                                final buildDate = DateTime.fromMillisecondsSinceEpoch(timeSeconds * 1000);
                                                 final user = info?['user'] ?? '';
                                                 final email = info?['email'] ?? '';
                                                 final repoUrl = '$repo/tree/$hash';
@@ -78,11 +83,11 @@ class OtherSection extends StatelessWidget {
                                                                 LabelRow(
                                                                         label: tr('settings.about.compiled_on'),
                                                                         value:
-                                                                        '${buildD.day.toString().padLeft(2, '0')}/'
-                                                                        '${buildD.month.toString().padLeft(2, '0')}/'
-                                                                        '${buildD.year} '
-                                                                        '${buildD.hour.toString().padLeft(2, '0')}:'
-                                                                        '${buildD.minute.toString().padLeft(2, '0')}'
+                                                                        '${buildDate.day.toString().padLeft(2, '0')}/'
+                                                                        '${buildDate.month.toString().padLeft(2, '0')}/'
+                                                                        '${buildDate.year} '
+                                                                        '${buildDate.hour.toString().padLeft(2, '0')}:'
+                                                                        '${buildDate.minute.toString().padLeft(2, '0')}'
                                                                 ),
                                                                 LabelRow(
                                                                         label: tr('settings.about.compiled_by'),
@@ -91,11 +96,23 @@ class OtherSection extends StatelessWidget {
                                                                 LabelRow(
                                                                         label: tr('settings.about.contact'),
                                                                         value: email
+                                                                ),
+
+                                                                ValueListenableBuilder<int>(
+                                                                        valueListenable: iterationNotifier,
+                                                                        builder: (context, iteration, _) {
+                                                                                return LabelRow(
+                                                                                        label: tr('settings.iteration_count'),
+                                                                                        value: iteration.toString()
+                                                                                );
+                                                                        }
                                                                 )
                                                         ]
                                                 );
                                         }
-                                )
+                                ),
+
+                                DevCreditsTile()
                         ]
                 );
         }

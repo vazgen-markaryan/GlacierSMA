@@ -17,10 +17,12 @@
 	},
 
 	"home": {
-		"battery": {
+		"hardware_info": {
 			"voltage": "Voltage: {value} V",
 			"voltage_unknown": "Voltage: Unknown",
-			"state": "State: {percent}%"
+			"state": "State: {percent}%",
+			"ram_used" : "RAM Used {ramPercentage}",
+			"bytes" : "bytes"
 		},
 
 		"dashboard": {
@@ -151,8 +153,7 @@
 		"detected_changes": "Detected Changes",
 		"no_changes": "No changes detected",
 		"save_before_disconnect": "Would you like to save your Test Data before disconnecting?",
-		"skip_tutorial": "Skip Tutorial",
-		"skip_tutorial_subtitle": "Skip the tutorial for the Test Page",
+		"skip_tutorial": "Skip Test Tutorial",
 		"skip_tutorial_description": "Can be reactivated in the settings."
 	},
 
@@ -192,7 +193,14 @@
 
 	"settings": {
 		"others": "Other",
-		"iteration_count": "Cycle count without restart: {iteration}",
+		"iteration_count": "Cycle count without restart",
+
+		"dev_credits": {
+			"title": "Developers Credits",
+			"frontend_developer": "Front-End Developer",
+			"backend_developer": "Back-End Developer",
+			"cant_open": "Unable to open"
+		},
 
 		"about": {
 			"title": "About",

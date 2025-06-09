@@ -30,12 +30,14 @@ class LinkRow extends StatelessWidget {
         final String label;
         final String url;
         final VoidCallback onError;
+        final Widget? icon;
 
         const LinkRow({
                 Key? key,
                 required this.label,
                 required this.url,
-                required this.onError
+                required this.onError,
+                this.icon
         }) : super(key: key);
 
         @override
@@ -44,8 +46,15 @@ class LinkRow extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         child: Row(
                                 children: [
-                                        Text('$label :', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                        if (icon != null) ...[
+                                                icon!,
+                                                const SizedBox(width: 6)
+                                        ],
+
+                                        Text('$label:', style: const TextStyle(fontWeight: FontWeight.bold)),
+
                                         const SizedBox(width: 8),
+
                                         TextButton(
                                                 style: TextButton.styleFrom(
                                                         padding: EdgeInsets.zero,

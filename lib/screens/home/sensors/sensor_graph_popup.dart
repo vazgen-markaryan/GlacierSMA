@@ -36,9 +36,9 @@ class SensorGraphPopupState extends State<SensorGraphPopup> {
         /// Formatte un label (1000→1k, 1500→1.5k, etc.)
         String formatLabel(double value) {
                 if (value.abs() >= 1000) {
-                        final k = value / 1000;
-                        final s = (k % 1 == 0) ? k.toInt().toString() : k.toStringAsFixed(1);
-                        return '${s}k';
+                        final milles = value / 1000;
+                        final label = (milles % 1 == 0) ? milles.toInt().toString() : milles.toStringAsFixed(1);
+                        return '${label}k';
                 }
                 return value.toInt().toString();
         }
@@ -46,14 +46,12 @@ class SensorGraphPopupState extends State<SensorGraphPopup> {
         @override
         Widget build(BuildContext context) {
                 return CustomPopup(
-                        // Titre du popup
                         title: tr(widget.sensor.title ?? ''),
                         content: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                         for (final entry in widget.sensor.history.entries) 
                                                 ...[
-
                                                         // Titre du champ + unité, centré sur le chart
                                                         Padding(
                                                                 padding: const EdgeInsets.symmetric(vertical: 8),
@@ -67,24 +65,20 @@ class SensorGraphPopupState extends State<SensorGraphPopup> {
                                                         // Le graphique
                                                         Builder(
                                                                 builder: (_) {
-
                                                                         // On filtre les FlSpot des dernières 60s
                                                                         final rawSpots = entry.value;
                                                                         final lastX = rawSpots.isNotEmpty ? rawSpots.last.x : 0.0;
                                                                         final spots = rawSpots
-                                                                                .where((pt) => pt.x >= lastX - windowX)
-                                                                                .map((pt) => FlSpot(pt.x - (lastX - windowX), pt.y))
+                                                                                .where((point) => point.x >= lastX - windowX)
+                                                                                .map((point) => FlSpot(point.x - (lastX - windowX), point.y))
                                                                                 .toList();
 
                                                                         // Calcule min/max
-                                                                        final maxData = spots.isNotEmpty ? spots.map((e) => e.y).reduce(max) : 0.0;
-                                                                        final minData = spots.isNotEmpty ? spots.map((e) => e.y).reduce(min) : 0.0;
+                                                                        final maxData = spots.isNotEmpty ? spots.map((event) => event.y).reduce(max) : 0.0;
+                                                                        final minData = spots.isNotEmpty ? spots.map((event) => event.y).reduce(min) : 0.0;
 
                                                                         // Si c'est Luxmètre, on met une marge de 1000 sinon 10
-                                                                        final margin = entry.key.header
-                                                                                .toLowerCase()
-                                                                                .contains('mb_asl20')
-                                                                                ? 1000.0 : 10.0;
+                                                                        final margin = entry.key.header.toLowerCase().contains('mb_asl20') ? 1000.0 : 10.0;
 
                                                                         // On calcule les limites Y du graphique
                                                                         double minY, maxY;
@@ -93,10 +87,12 @@ class SensorGraphPopupState extends State<SensorGraphPopup> {
                                                                                 minY = 0;
                                                                                 maxY = maxData + margin;
                                                                         }
+
                                                                         else if (maxData <= 0) {
                                                                                 minY = minData - margin;
                                                                                 maxY = 0;
                                                                         }
+
                                                                         else {
                                                                                 minY = minData - margin;
                                                                                 maxY = maxData + margin;
@@ -151,7 +147,7 @@ class SensorGraphPopupState extends State<SensorGraphPopup> {
                                                                                                                                                         formatLabel(value),
                                                                                                                                                         style: const TextStyle(
                                                                                                                                                                 color: Colors.white70,
-                                                                                                                                                                fontSize: fontSize
+                                                                                                                                                                fontSize: 12
                                                                                                                                                         )
                                                                                                                                                 );
                                                                                                                                         }

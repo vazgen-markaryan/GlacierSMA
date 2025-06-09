@@ -1,10 +1,9 @@
-import 'package:easy_localization/easy_localization.dart';
-
 import 'bottom_navbar.dart';
 import 'package:flutter/material.dart';
 import 'dashboard/dashboard_utils.dart';
+import '../connection/connection_manager.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
-import '../connection/disconnection_manager.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';

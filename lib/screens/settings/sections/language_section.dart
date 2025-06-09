@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:rev_glacier_sma_mobile/screens/settings/settings_section.dart';
+import 'package:rev_glacier_sma_mobile/screens/settings/settings_div.dart';
 
 /// Section « Langue » dans les paramètres, stylisée comme une ExpansionTile.
 /// Affiche les drapeaux et labels des langues prises en charge, avec l’option de sélectionner la locale active.
@@ -19,7 +19,7 @@ class LanguageSectionState extends State<LanguageSection> {
         Widget build(BuildContext context) {
                 final current = context.locale;
 
-                return SettingsSection(
+                return SettingsDiv(
                         title: tr('settings.language.title'),
                         children: [
                                 ExpansionTile(
@@ -52,8 +52,7 @@ class LanguageSectionState extends State<LanguageSection> {
                                                                                                         style: TextStyle(
                                                                                                                 color: isSelected ? Colors.green : Colors.red,
                                                                                                                 fontSize: 14,
-                                                                                                                fontWeight:
-                                                                                                                isSelected ? FontWeight.bold : FontWeight.normal
+                                                                                                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal
                                                                                                         )
                                                                                                 )
                                                                                         ]
@@ -61,8 +60,7 @@ class LanguageSectionState extends State<LanguageSection> {
                                                                         );
                                                                 }
                                                         ).toList()
-                                                ),
-                                                const SizedBox(height: 8.0)
+                                                )
                                         ]
                                 )
                         ]

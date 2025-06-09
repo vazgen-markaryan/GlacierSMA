@@ -2,9 +2,6 @@
 
 import 'package:flutter/material.dart';
 
-// Espacement par défaut utilisé dans les mises en page
-const defaultPadding = 16.0;
-
 // Couleurs principales de l'application
 const primaryColor = Color(0xFF2697FF);
 const secondaryColor = Color(0xFF2A2D3E);
@@ -12,7 +9,8 @@ const backgroundColor = Color(0xFF212332);
 
 // Type de capteurs disponibles dans le projet
 enum SensorType {
-        internal, modbus }
+        internal, modbus
+}
 
 // Chemins des icônes représentant les capteurs
 const String microchip = "assets/icons/microchip.svg";

@@ -25,18 +25,18 @@ class DebugScreen extends StatelessWidget {
                                 return Scaffold(
                                         backgroundColor: backgroundColor,
                                         body: SingleChildScrollView(
-                                                padding: const EdgeInsets.all(defaultPadding),
+                                                padding: const EdgeInsets.all(16),
                                                 child: Column(
                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                         children: [
                                                                 DebugLogProcessor(debugLogManager: debugLogManager),
 
-                                                                const SizedBox(height: defaultPadding * 2),
+                                                                const SizedBox(height: 32),
 
                                                                 ...createAllSensorGroups(
                                                                         maskNotifier: activeMaskNotifier,
                                                                         getSensors: getSensors,
-                                                                        onTap: (ctx, s) => showPopup(ctx, s),
+                                                                        onTap: (context, sensor) => showPopup(context, sensor),
                                                                         configMode: false,
                                                                         showInactive: true,
                                                                         testMode: false
@@ -49,17 +49,17 @@ class DebugScreen extends StatelessWidget {
                 );
         }
 
-        void showPopup(BuildContext ctx, SensorsData sensor) {
+        void showPopup(BuildContext context, SensorsData sensor) {
                 showGeneralDialog(
-                        context: ctx,
+                        context: context,
                         barrierColor: Colors.black54,
                         transitionDuration: const Duration(milliseconds: 300),
                         pageBuilder: (_, __, ___) => const SizedBox.shrink(),
-                        transitionBuilder: (_, anim, __, ___) => Transform.scale(
-                                scale: anim.value,
+                        transitionBuilder: (_, animation, __, ___) => Transform.scale(
+                                scale: animation.value,
                                 alignment: Alignment.center,
                                 child: Opacity(
-                                        opacity: anim.value,
+                                        opacity: animation.value,
                                         child: SensorPopup(sensor: sensor)
                                 )
                         )

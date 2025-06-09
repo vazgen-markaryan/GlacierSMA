@@ -21,9 +21,9 @@ class MessageService {
                         debugLogManager.updateLogs();
                         return ok;
                 }
-                catch (e) {
-                        final errLog = tr('debug.message_error', namedArgs: {'log': e.toString()});
-                        debugLogManager.setLogChunk(0, errLog);
+                catch (error) {
+                        final errorLog = tr('debug.message_error', namedArgs: {'log': error.toString()});
+                        debugLogManager.setLogChunk(0, errorLog);
                         debugLogManager.updateLogs();
                         return false;
                 }
@@ -32,13 +32,13 @@ class MessageService {
         /// Envoie un payload de 2 octets construit à partir d'un bitmask sur 16 capteurs.
         /// [enabledSensors] est une liste de 16 booléens, index 0→bit0, …, index15→bit15.
         Future<bool> sendSensorConfig(List<bool> enabledSensors, {String prefix = '<active>'}) async {
-                // 1) Génère le mask 16 bits
+                // Génère le mask 16 bits
                 int mask = 0;
                 for (int i = 0; i < enabledSensors.length && i < 16; i++) {
                         if (enabledSensors[i]) mask |= (1 << i);
                 }
 
-                // 2) Découpe en 2 octets (MSB puis LSB)
+                // Découpe en 2 octets (MSB puis LSB)
                 final high = (mask >> 8) & 0xFF;
                 final low = mask & 0xFF;
                 final payload = Uint8List.fromList([high, low]);
@@ -47,7 +47,7 @@ class MessageService {
                 try {
                         return await plugin!.write(data);
                 }
-                catch (e) {
+                catch (error) {
                         return false;
                 }
         }
@@ -62,7 +62,7 @@ class MessageService {
                         final data = Uint8List.fromList(full.codeUnits);
                         return await plugin?.write(data) ?? false;
                 }
-                catch (e) {
+                catch (error) {
                         return false;
                 }
         }
@@ -70,8 +70,8 @@ class MessageService {
         /// Envoie une nouvelle valeur de configuration au firmware.
         Future<bool> sendConfigDouble(String typeChar, double value) async {
                 final prefix = '<cfg>';
-                final bd = ByteData(4)..setFloat32(0, value, Endian.little);
-                final payload = Uint8List.fromList([typeChar.codeUnitAt(0), ...bd.buffer.asUint8List()]);
+                final byteData = ByteData(4)..setFloat32(0, value, Endian.little);
+                final payload = Uint8List.fromList([typeChar.codeUnitAt(0), ...byteData.buffer.asUint8List()]);
                 final data = Uint8List.fromList([...prefix.codeUnits, ...payload]);
                 return plugin!.write(data);
         }
@@ -79,8 +79,8 @@ class MessageService {
         /// Envoie une nouvelle valeur de configuration au firmware.
         Future<bool> sendConfigInteger(String typeChar, int value) async {
                 final prefix = '<cfg>';
-                final bd = ByteData(4)..setUint32(0, value, Endian.little);
-                final payload = Uint8List.fromList([typeChar.codeUnitAt(0), ...bd.buffer.asUint8List()]);
+                final byteData = ByteData(4)..setUint32(0, value, Endian.little);
+                final payload = Uint8List.fromList([typeChar.codeUnitAt(0), ...byteData.buffer.asUint8List()]);
                 final data = Uint8List.fromList([...prefix.codeUnits, ...payload]);
                 return plugin!.write(data);
         }

@@ -4,7 +4,8 @@ import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 
 /// États internes du bouton
 enum ConfigButtonStateEnum {
-        idle, loading, success, failure }
+        idle, loading, success, failure 
+}
 
 /// Bouton générique avec confirmation facultative, spinner interne et feedback visuel
 class ConfigButton extends StatefulWidget {
@@ -40,7 +41,7 @@ class ConfigButton extends StatefulWidget {
                 required this.failureIcon,
                 required this.idleColor,
                 required this.successColor,
-                required this.failureColor,
+                required this.failureColor
         }) : assert(
                 skipConfirmation || (confirmTitle != null && confirmContent != null), 'Si skipConfirmation est à false, confirmTitle et confirmContent doivent être fournis'),
                 super(key: key);
@@ -48,7 +49,6 @@ class ConfigButton extends StatefulWidget {
         @override
         ConfigButtonState createState() => ConfigButtonState();
 }
-
 
 class ConfigButtonState extends State<ConfigButton> {
         ConfigButtonStateEnum state = ConfigButtonStateEnum.idle;
@@ -87,6 +87,7 @@ class ConfigButtonState extends State<ConfigButton> {
                                         style: const TextStyle(color: Colors.white)
                                 ),
                                 style: ButtonStyle(
+
                                         // La couleur de fond en fonction de l'état interne, sans tenir compte de MaterialState.disabled
                                         backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
                                                         switch (state) {
@@ -114,16 +115,16 @@ class ConfigButtonState extends State<ConfigButton> {
                         final confirmed = await showDialog<bool>(
                                 context: context,
                                 barrierDismissible: false,
-                                builder: (ctx) => CustomPopup(
+                                builder: (context) => CustomPopup(
                                         title: widget.confirmTitle!,
                                         content: Text(widget.confirmContent!),
                                         actions: [
                                                 TextButton(
-                                                        onPressed: () => Navigator.of(ctx).pop(false),
+                                                        onPressed: () => Navigator.of(context).pop(false),
                                                         child: Text(tr("config.cancel"))
                                                 ),
                                                 TextButton(
-                                                        onPressed: () => Navigator.of(ctx).pop(true),
+                                                        onPressed: () => Navigator.of(context).pop(true),
                                                         child: Text(tr("config.confirm"))
                                                 )
                                         ]

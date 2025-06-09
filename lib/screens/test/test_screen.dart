@@ -4,13 +4,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
+import 'package:rev_glacier_sma_mobile/screens/test/test_utils.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_snackbar.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/test/test_utils.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/test/test_anomaly.dart';
+import 'package:rev_glacier_sma_mobile/screens/test/test_anomaly.dart';
+import 'package:rev_glacier_sma_mobile/screens/test/test_sensor_diff_row.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/test/test_sensor_diff_row.dart';
+import 'package:rev_glacier_sma_mobile/screens/test/test_range_setup_popup.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_feeder.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/test/test_range_setup_popup.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_group_factory.dart';
 
 /// Écran de test en environnement contrôlé
@@ -249,11 +249,11 @@ class TestScreenState extends State<TestScreen> {
                         backgroundColor: backgroundColor,
                         body: SafeArea(
                                 child: SingleChildScrollView(
-                                        padding: const EdgeInsets.symmetric(horizontal: defaultPadding),
+                                        padding: const EdgeInsets.symmetric(horizontal: 16),
                                         child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                                 children: [
-                                                        const SizedBox(height: defaultPadding / 4),
+                                                        const SizedBox(height: 4),
 
                                                         // 1) Titre “TEST STARTED”
                                                         Text(
@@ -265,7 +265,7 @@ class TestScreenState extends State<TestScreen> {
                                                                 textAlign: TextAlign.center
                                                         ),
 
-                                                        const SizedBox(height: defaultPadding / 4),
+                                                        const SizedBox(height: 4),
 
                                                         // 2) Horodatage
                                                         Text(
@@ -277,7 +277,7 @@ class TestScreenState extends State<TestScreen> {
                                                                 textAlign: TextAlign.center
                                                         ),
 
-                                                        const SizedBox(height: defaultPadding / 4),
+                                                        const SizedBox(height: 4),
 
                                                         // 3) Si on a des anomalies, on affiche “ANOMALIES DÉTECTÉES [n]”
                                                         if (toShow.isNotEmpty) ...[
@@ -290,7 +290,8 @@ class TestScreenState extends State<TestScreen> {
                                                                         ),
                                                                         textAlign: TextAlign.center
                                                                 ),
-                                                                const SizedBox(height: defaultPadding / 2)
+
+                                                                const SizedBox(height: 8)
                                                         ],
 
                                                         // 4) Liste des anomalies sans scroll interne
@@ -305,11 +306,11 @@ class TestScreenState extends State<TestScreen> {
                                                                         )
                                                                 ],
 
-                                                        const SizedBox(height: defaultPadding / 2),
+                                                        const SizedBox(height: 8),
 
                                                         // 5) Bouton “Arrêter Test” en bas de la page
                                                         Padding(
-                                                                padding: const EdgeInsets.only(bottom: defaultPadding),
+                                                                padding: const EdgeInsets.only(bottom: 16),
                                                                 child: SizedBox(
                                                                         width: double.infinity,
                                                                         height: 48,
@@ -352,7 +353,7 @@ class TestScreenState extends State<TestScreen> {
         /// - Un bouton “Lancer Test” en bas
         Widget buildConfigScreen() {
                 return SingleChildScrollView(
-                        padding: const EdgeInsets.all(defaultPadding),
+                        padding: const EdgeInsets.all(16),
                         child: Column(
                                 children: [
                                         // Reprend les mêmes cartes que sur HomeScreen, mais en cache le graphique (testMode: true)
@@ -364,7 +365,7 @@ class TestScreenState extends State<TestScreen> {
                                                 testMode: true
                                         ),
 
-                                        const SizedBox(height: defaultPadding),
+                                        const SizedBox(height: 16),
 
                                         // Bouton “Lancer Test”
                                         SizedBox(

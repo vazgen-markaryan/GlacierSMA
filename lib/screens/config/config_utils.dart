@@ -12,84 +12,83 @@ class CancelledException implements Exception {
 
 /// Résultat du parsing CSV pour la config série.
 class SeriesParams {
-        final int sleep;
+        final int sleepTime;
         final double seaPressure;
         final int capture;
         final int iridiumMode;
-        SeriesParams(this.sleep, this.seaPressure, this.capture, this.iridiumMode);
+        SeriesParams(this.sleepTime, this.seaPressure, this.capture, this.iridiumMode);
 }
 
 /// Parse les champs « sleep_minutes », « sea_level_pressure », « capture_amount ».
 SeriesParams parseSeriesParams(RawData raw) {
-        final m = raw.asMap;
+        final map = raw.asMap;
         return SeriesParams(
-                int.tryParse(m['sleep_minutes'] ?? '') ?? 0,
-                double.tryParse(m['sea_level_pressure'] ?? '') ?? 0,
-                int.tryParse(m['capture_amount'] ?? '') ?? 0,
-                int.tryParse(m['iridium_signalcheck'] ?? '') ?? 0
+                int.tryParse(map['sleep_minutes'] ?? '') ?? 0,
+                double.tryParse(map['sea_level_pressure'] ?? '') ?? 0,
+                int.tryParse(map['capture_amount'] ?? '') ?? 0,
+                int.tryParse(map['iridium_signalcheck'] ?? '') ?? 0
         );
 }
 
 /// Clamp + validation
-int validateSleep(int v) => v.clamp(0, 1440);
-bool isSleepInvalid(int v) => v < 0 || v > 1440;
-int validateCapture(int v) => v.clamp(0, 255);
-bool isCaptureInvalid(int v) => v < 0 || v > 255;
+int validateSleep(int value) => value.clamp(0, 1440);
+bool isSleepInvalid(int value) => value < 0 || value > 1440;
+int validateCapture(int value) => value.clamp(0, 255);
+bool isCaptureInvalid(int value) => value < 0 || value > 255;
 
 /// Envoie la config de masques (16 bits). Renvoie true si OK.
 Future<bool> sendMaskConfig({
         required BuildContext context,
         required int initialMask,
         required int newMask,
-        required MessageService svc
+        required MessageService messageService
 }) {
         return submitConfiguration(
                 context: context,
                 initialMask: initialMask,
                 newMask: newMask,
-                messageService: svc
+                messageService: messageService
         );
 }
 
 /// Envoie les paramètres série S, P, C, I si modifiés.
 /// Met à jour les init* par callbacks et renvoie true si tous OK.
 Future<bool> sendSeriesConfig({
-        required MessageService svc,
+        required MessageService messageService,
         required int sleep,
         required int initSleep,
         required void Function(int) updateInitSleep,
-        required double sea,
-        required double initSea,
-        required void Function(double) updateInitSea,
-        required int capture,
-        required int initCapture,
-        required void Function(int) updateInitCapture,
+        required double seaPressure,
+        required double initSeaPressure,
+        required void Function(double) updateInitSeaPressure,
+        required int captureAmount,
+        required int initCaptureAmount,
+        required void Function(int) updateInitCaptureAmount,
         required int iridiumMode,
         required int initIridiumMode,
         required void Function(int) updateInitIridiumMode
 }) async {
         if (sleep != initSleep) {
-                if (!await svc.sendConfigInteger('S', sleep)) return false;
+                if (!await messageService.sendConfigInteger('S', sleep)) return false;
                 updateInitSleep(sleep);
         }
-        if (sea != initSea) {
-                if (!await svc.sendConfigDouble('P', sea)) return false;
-                updateInitSea(sea);
+        if (seaPressure != initSeaPressure) {
+                if (!await messageService.sendConfigDouble('P', seaPressure)) return false;
+                updateInitSeaPressure(seaPressure);
         }
-        if (capture != initCapture) {
-                if (!await svc.sendConfigInteger('C', capture)) return false;
-                updateInitCapture(capture);
+        if (captureAmount != initCaptureAmount) {
+                if (!await messageService.sendConfigInteger('C', captureAmount)) return false;
+                updateInitCaptureAmount(captureAmount);
         }
         if (iridiumMode != initIridiumMode) {
-                if (!await svc.sendConfigInteger('I', iridiumMode)) return false;
+                if (!await messageService.sendConfigInteger('I', iridiumMode)) return false;
                 updateInitIridiumMode(iridiumMode);
         }
         return true;
 }
 
 /// Réinitialise aux valeurs par défaut via heartbeat.
-Future<bool> resetToDefaults(MessageService svc) =>
-svc.sendString('<default-settings>');
+Future<bool> resetToDefaults(MessageService messageService) => messageService.sendString('<default-settings>');
 
 /// Affiche un popup “Mot de passe requis”
 Future<bool> showPasswordDialog(
@@ -102,7 +101,7 @@ Future<bool> showPasswordDialog(
                 final result = await showDialog<bool>(
                         context: context,
                         barrierDismissible: false,
-                        builder: (ctx) => StatefulBuilder(builder: (ctx, setState) {
+                        builder: (context) => StatefulBuilder(builder: (context, setState) {
                                         return AnimatedPadding(
                                                 padding: EdgeInsets.symmetric(horizontal: errorText == null ? 0 : 8),
                                                 duration: const Duration(milliseconds: 50),
@@ -118,11 +117,11 @@ Future<bool> showPasswordDialog(
                                                         ),
                                                         actions: [
                                                                 TextButton(
-                                                                        onPressed: () => Navigator.of(ctx).pop(false),
+                                                                        onPressed: () => Navigator.of(context).pop(false),
                                                                         child: Text(tr('config.quit'))
                                                                 ),
                                                                 TextButton(
-                                                                        onPressed: () => Navigator.of(ctx).pop(true),
+                                                                        onPressed: () => Navigator.of(context).pop(true),
                                                                         child: Text(tr('config.validate'))
                                                                 )
                                                         ]
@@ -146,16 +145,16 @@ Future<bool> showDiscardDialog(BuildContext context) async {
         final leave = await showDialog<bool>(
                 context: context,
                 barrierDismissible: false,
-                builder: (ctx) => CustomPopup(
+                builder: (context) => CustomPopup(
                         title: tr('config.unsaved_changes_title'),
                         content: Text(tr('config.unsaved_changes_content')),
                         actions: [
                                 TextButton(
-                                        onPressed: () => Navigator.of(ctx).pop(false),
+                                        onPressed: () => Navigator.of(context).pop(false),
                                         child: Text(tr('no'))
                                 ),
                                 TextButton(
-                                        onPressed: () => Navigator.of(ctx).pop(true),
+                                        onPressed: () => Navigator.of(context).pop(true),
                                         child: Text(tr('yes'))
                                 )
                         ]
@@ -175,18 +174,18 @@ Future<bool> submitConfiguration({
 }) async {
         // Les lignes de différence
         final differences = <Widget>[];
-        for (final s in allSensors.where((s) => s.bitIndex != null)) {
-                final bit = s.bitIndex!;
+        for (final sensor in allSensors.where((sensor) => sensor.bitIndex != null)) {
+                final bit = sensor.bitIndex!;
                 final oldOn = (initialMask & (1 << bit)) != 0;
                 final newOn = (newMask & (1 << bit)) != 0;
                 if (oldOn != newOn) {
                         differences.add(
                                 ConfigCustomSensor(
-                                        svgIcon: s.svgIcon!,
-                                        title: s.title!,
-                                        bus: s.bus,
-                                        code: s.codeName,
-                                        place: s.placement,
+                                        svgIcon: sensor.svgIcon!,
+                                        title: sensor.title!,
+                                        bus: sensor.bus,
+                                        code: sensor.codeName,
+                                        place: sensor.placement,
                                         oldStatus: oldOn,
                                         newStatus: newOn
                                 )
@@ -225,7 +224,7 @@ Future<bool> submitConfiguration({
                 throw CancelledException();
         }
 
-        // 3) Envoi de la config
+        // Envoi de la config
         return await messageService.sendSensorConfig(
                 List<bool>.generate(16, (i) => (newMask & (1 << i)) != 0)
         );

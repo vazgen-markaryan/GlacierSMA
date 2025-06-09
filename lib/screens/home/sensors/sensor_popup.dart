@@ -78,7 +78,7 @@ class SensorPopupState extends State<SensorPopup>
                                                                                                         )
                                                                                                 ),
                                                                                                 const SizedBox(height: 12),
-                                                                                                ...items.map((e) => buildRow(e.key, e.value)).toList()
+                                                                                                ...items.map((event) => buildRow(event.key, event.value)).toList()
                                                                                         ]
                                                                                 );
                                                                         }
@@ -96,9 +96,9 @@ class SensorPopupState extends State<SensorPopup>
                 // Affiche la valeur brute +, si Iridium, ajoute la traduction (0–5 → Mauvais, OK…)
                 String display = value.toString();
                 if (key.header.toLowerCase() == 'iridium_signal_quality') {
-                        final q = int.tryParse(display) ?? -1;
-                        final txt = getIridiumSvgLogoAndColor(q)['value'] as String;
-                        display = '$display ($txt)';
+                        final quality = int.tryParse(display) ?? -1;
+                        final text = getIridiumSvgLogoAndColor(quality)['value'] as String;
+                        display = '$display ($text)';
                 }
 
                 return Container(
@@ -117,17 +117,18 @@ class SensorPopupState extends State<SensorPopup>
                                                                 key.svgLogo,
                                                                 height: 24,
                                                                 width: 24,
-                                                                colorFilter: const ColorFilter.mode(
-                                                                        Colors.white70, BlendMode.srcIn
-                                                                )
+                                                                colorFilter: const ColorFilter.mode(Colors.white70, BlendMode.srcIn)
                                                         ),
+
                                                         const SizedBox(width: 8),
+
                                                         Text(
                                                                 tr(key.name),
                                                                 style: const TextStyle(color: Colors.white70, fontSize: 15)
                                                         )
                                                 ]
                                         ),
+
                                         Flexible(
                                                 child: Text(
                                                         display,
