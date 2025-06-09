@@ -240,9 +240,9 @@ class TestScreenState extends State<TestScreen> {
                         "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')} "
                         "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}";
 
-                // On affiche au plus les 8 dernières anomalies
-                final toShow = anomalyLog.length > 8
-                        ? anomalyLog.sublist(anomalyLog.length - 8)
+                // On affiche au plus les 9 dernières anomalies
+                final toShow = anomalyLog.length > 9
+                        ? anomalyLog.sublist(anomalyLog.length - 9)
                         : anomalyLog;
 
                 return Scaffold(

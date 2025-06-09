@@ -170,7 +170,7 @@ class SensorCard extends StatelessWidget {
                                                                 style: TextStyle(
                                                                         color: configMode
                                                                                 ? (isOn! ? Colors.black : Colors.white)
-                                                                                : Colors.white,
+                                                                                : (iconColor == Colors.yellow ? Colors.black : Colors.white),
                                                                         fontSize: 12,
                                                                         fontWeight: FontWeight.bold
                                                                 )
