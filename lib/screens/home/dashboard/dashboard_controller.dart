@@ -42,7 +42,6 @@ class DashboardController {
         }
 
         Future<void> init(void Function() onDataReceived) async {
-                // Vrai matériel : démarrage du stopwatch
                 connectionStopwatch = Stopwatch()..start();
 
                 // Prépare la liaison série
@@ -72,16 +71,18 @@ class DashboardController {
                         ramNotifier: ramNotifier
                 );
 
-                // Ping toutes les 2s pour détecter la perte de connexion
-                pingTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
-                                final ok = await messageService.sendString(communicationMessageAndroid);
-                                if (!ok) {
-                                        pingTimer?.cancel();
-                                        connectionStopwatch.stop();
-                                        onConnectionLost(connectionStopwatch.elapsed);
+                if (plugin != null) {
+                        // Ping toutes les 2s pour détecter la perte de connexion
+                        pingTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
+                                        final ok = await messageService.sendString(communicationMessageAndroid);
+                                        if (!ok) {
+                                                pingTimer?.cancel();
+                                                connectionStopwatch.stop();
+                                                onConnectionLost(connectionStopwatch.elapsed);
+                                        }
                                 }
-                        }
-                );
+                        );
+                }
 
                 // Demander info ACTIVE des sensors lors de la connexion
                 messageService.sendString("<info>");

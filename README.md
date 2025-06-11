@@ -21,30 +21,42 @@ qu’une interface moderne et réactive.
 | ![](assets/screens/Connexion_1.png)                         | ![](assets/screens/Accueil_2.png)                                                   |
 | Permet de se connecter à Arduino via un Câble ou Bluetooth. | Affiche tous les capteurs actifs, leur statut, emplacement et le type de connexion. |
 
+<br>
+
 | **Le Popup des capteurs**                                                            | **Le Graphique des capteurs**                                                            |
 |--------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|
 | ![](assets/screens/Accueil_3.png)                                                    | ![](assets/screens/Accueil_4.png)                                                        |
 | Affiche l'information des capteurs en forme du texte. Se rafraîchit automatiquement. | Affiche l'information des capteurs en forme du Graphique. Se rafraîchit automatiquement. |
+
+<br>
 
 | **Écran de Débogage**                                                                                                                    | **Écran de Configuration**                   |
 |------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
 | ![](assets/screens/Debug_5.png)                                                                                                          | ![](assets/screens/Config_6.png)             |
 | Écran plus technique qui montre les données des sensors en Brut et avec minimes modifications visuels ainsi que les capteurs désactivés. | Permet d'activer te désactiver les capteurs. |
 
+<br>
+
 | **Écran de Configuration**                   | **Écran de l'Environnement contrôlé**                                                |
 |----------------------------------------------|--------------------------------------------------------------------------------------|
 | ![](assets/screens/Config_7.png)             | ![](assets/screens/Test_8.png)                                                       |
 | Permet également de paramétrer les capteurs. | Permet de tester la validité de données des capteurs dans un environnement contrôlé. |
+
+<br>
 
 | **Écran de l'Environnement contrôlé**               | **Écran de l'Environnement contrôlé**      |
 |-----------------------------------------------------|--------------------------------------------|
 | ![](assets/screens/Test_9.png)                      | ![](assets/screens/Test_10.png)            |
 | Configuration de l'Environnement contrôlé souhaité. | Affiche également la configuration défini. |
 
+<br>
+
 | **Écran de l'Environnement contrôlé**                                                                                   | **Écran de l'Environnement contrôlé**                                                     |
 |-------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
 | ![](assets/screens/Test_11.png)                                                                                         | ![](assets/screens/Test_12.png)                                                           |
 | Comparaison automatique des valeurs réelles vs attendues permet de voir si le capteurs transmet les données incorrects. | À la fin d'un Test, utilisateur peut sauvegarder le fichier CSV pour le traitement futur. |
+
+<br>
 
 | **Écran de Paramètres**               | **Écran de Paramètres**               |
 |---------------------------------------|---------------------------------------|
@@ -152,20 +164,19 @@ pour interagir avec des capteurs industriels connectés à une station météo A
 
 ## 🪪 Développeurs
 
-> ### 👨‍💻 Vazgen Markaryan
-> **Développeur Mobile – Front-End (Flutter)**  
-> 📍 Montréal, Canada <br>
-> [![LinkedIn](https://img.shields.io/badge/LinkedIn-Vazgen%20Markaryan-blue?logo=linkedin&style=flat-square)](https://linkedin.com/in/vazgen-markaryan)  
-> [![GitHub](https://img.shields.io/badge/GitHub-vazgen--markaryan-181717?logo=github&style=flat-square)](https://github.com/vazgen-markaryan)
+> ![Nom](https://img.shields.io/badge/Vazgen%20Markaryan-FF0000?style=for-the-badge&logoColor=white&labelColor=000000)   
+> ![Front-End](https://img.shields.io/badge/Front--End-0175C2?style=for-the-badge&logo=windowsterminal&logoColor=white)
+> ![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
+> ![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)  
+> [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=red)](https://linkedin.com/in/vazgen-markaryan)
+> [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/vazgen-markaryan)  
 
-> ### 👨‍💻 Nathan Marien
-> **Développeur C++ - Back-End (Arduino)**  
-> 📍 Montréal, Canada <br>
-> [![LinkedIn](https://img.shields.io/badge/LinkedIn-Collaborateur%20Backend-blue?logo=linkedin&style=flat-square)](https://www.linkedin.com/in/nathan-marien-54118b309/)  
-> [![GitHub](https://img.shields.io/badge/GitHub-backend--dev--placeholder-181717?logo=github&style=flat-square)](https://github.com/nathannino)
+> ![Nom](https://img.shields.io/badge/Nathan%20Marien-FF0000?style=for-the-badge&logoColor=white&labelColor=000000)   
+> ![Back-End](https://img.shields.io/badge/Back--End-00599C?style=for-the-badge&logo=server&logoColor=white)
+> ![C++](https://img.shields.io/badge/C++-00599C?style=for-the-badge&logo=c%2b%2b&logoColor=white)
+> ![Arduino](https://img.shields.io/badge/Arduino-00979D?style=for-the-badge&logo=arduino&logoColor=white)  
+> [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=red)](https://www.linkedin.com/in/nathan-marien-54118b309/)
+> [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/nathannino)
 
----
-
-> ⚠️ Le code source Back-End n’est pas inclus dans ce dépôt.
-
-> 📅 Dernière mise à jour : **Juin 2025**
+> ⚠️ Le code source Back-End n’est pas inclus dans ce dépôt.  
+> 📅 La dernière mise à jour du ReadMe: **20 Juin 2025**
