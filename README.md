@@ -114,7 +114,7 @@ lib/
 └── main.dart             → Point d’entrée de l’application
 ```
 
-## 🔧 Technologies & outils utilisés
+## 🔧 Technologies & Outils utilisés
 
 | Technologie / Package          | Usage principal                                        |
 |--------------------------------|--------------------------------------------------------|
@@ -128,7 +128,8 @@ lib/
 | `file_selector`                | Sélection ou sauvegarde de fichiers manuellement       |
 | `path_provider`                | Accès au système de fichiers (Download, AppData, etc.) |
 | `device_info_plus`             | Récupération des infos matérielles                     |
-| `easy_localization`            | Système de traduction multilingue (FR/EN)              |
+| `easy_localization`            | Système de traduction multilingue (FR/EN/ES)           |
+| `flutter_blue_plus`            | Connexion Bluetooth BLE multiplateforme                |
 | `permission_handler`           | Gestion des autorisations système                      |
 | `flutter_localizations`        | Intègre les localisations natives Flutter              |
 | `flutter_serial_communication` | Communication série avec l’Arduino (USB)               |
@@ -169,7 +170,7 @@ pour interagir avec des capteurs industriels connectés à une station météo A
 > ![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
 > ![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)  
 > [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=red)](https://linkedin.com/in/vazgen-markaryan)
-> [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/vazgen-markaryan)  
+> [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/vazgen-markaryan)
 
 > ![Nom](https://img.shields.io/badge/Nathan%20Marien-FF0000?style=for-the-badge&logoColor=white&labelColor=000000)   
 > ![Back-End](https://img.shields.io/badge/Back--End-00599C?style=for-the-badge&logo=server&logoColor=white)

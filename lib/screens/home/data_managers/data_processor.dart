@@ -99,13 +99,10 @@ void processRawData({
                 final lines = rawData.split('\n');
                 if (lines.length >= 2) {
                         final maskString = lines[1].trim();
-                        try {
-                                final hex = maskString.startsWith('0x') ? maskString.substring(2) : maskString;
-                                final mask = int.parse(hex, radix: 16);
-                                onActiveReceived(mask);
-                        }
-                        catch (_) {
-                        }
+                        final hex = maskString.startsWith('0x') ? maskString.substring(2) : maskString;
+                        final cleanedHex = hex.replaceAll(RegExp(r'[^A-Fa-f0-9]'), '');
+                        final mask = int.parse(cleanedHex, radix: 16);
+                        onActiveReceived(mask);
                 }
                 return;
         }
@@ -182,7 +179,7 @@ void processRawData({
                 updateSensorsData(
                         rawData,
                         getSensors,
-                        communicationMessageStatus
+                        "<status>"
                 );
         }
 

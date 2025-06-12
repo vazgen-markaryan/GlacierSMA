@@ -6,8 +6,9 @@
 	"connection": {
 		"appTitle": "Glacier SMA Connect",
 		"devices_found": "Devices detected",
-		"no_device_found": "No compatible device found:\n1. Flash the RevGlacierSMA code\n2. Check the cable\n3. Check the physical Debug Switch.",
+		"no_device_found": "No compatible device found:\n1. Flash the RevGlacierSMA code\n2. Check the cable or the Bluetooth\n3. Check the physical Debug Switch.",
 		"failed_to_connect": "Connection failed. Check the cable or permissions.",
+		"bluetooth_required": "Please enable Bluetooth to connect.",
 		"bluetooth_connection": "Bluetooth Connection",
 		"arrow_instruction": "Select a connection method",
 		"cable_connection": "Cable Connection",

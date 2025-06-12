@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
-import 'package:rev_glacier_sma_mobile/screens/connection/bluetooth.dart';
+import 'package:rev_glacier_sma_mobile/screens/connection/connection_manager.dart';
 
 /// Contient les widgets pour la section de connexion :
 /// - buildBluetoothSection : carte Bluetooth
@@ -11,7 +11,7 @@ import 'package:rev_glacier_sma_mobile/screens/connection/bluetooth.dart';
 // Affiche une carte pour la connexion Bluetooth
 Widget buildBluetoothSection(BuildContext context) {
         return GestureDetector(
-                onTap: () => showBluetoothDeviceDialog(context),
+                onTap: () => scanBleDevices(context),
                 child: Card(
                         color: secondaryColor,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

@@ -1,6 +1,7 @@
 import 'dart:async';
-import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:rev_glacier_sma_mobile/utils/message_service.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
@@ -9,15 +10,14 @@ import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
 import 'package:rev_glacier_sma_mobile/screens/debug_log/debug_log_updater.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_reader.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_processor.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/data_managers/bluetooth_data_reader.dart';
 
-/// Contrôleur pour l'initialisation, la gestion du flux série et le nettoyage du Dashboard.
-/// Inclut un Stopwatch pour mesurer le temps écoulé depuis la connexion initiale.
+enum ConnectionType {
+        serial, bluetooth
+}
+
 class DashboardController {
-        final FlutterSerialCommunication? plugin;
-        final List<DeviceInfo> connectedDevices;
         final DebugLogUpdater debugLogManager;
-        final MessageService messageService;
-        final void Function(Duration elapsed) onConnectionLost;
         final void Function(String reason) onFatalReceived;
         final ValueNotifier<double?> batteryVoltage = ValueNotifier(null);
         final ValueNotifier<Map<String, double?>> ramNotifier = ValueNotifier({'ram_stack': null, 'ram_heap': null});
@@ -25,71 +25,127 @@ class DashboardController {
         final ValueNotifier<int?> activeMaskNotifier = ValueNotifier(null);
         final ValueNotifier<RawData?> configNotifier = ValueNotifier(null);
         final ValueNotifier<int> iterationNotifier = ValueNotifier(0);
-        late final ValueNotifier<bool> isInitialLoading;
-        late final Stopwatch connectionStopwatch;
+        final ValueNotifier<bool> isInitialLoading = ValueNotifier(true);
+        final Stopwatch connectionStopwatch = Stopwatch();
+
+        // Variables spécifiques selon le type
+        final ConnectionType type;
+        final FlutterSerialCommunication? plugin;
+        final List<DeviceInfo>? connectedDevices;
+        final MessageService? messageService;
+        final void Function(Duration elapsed)? onConnectionLost;
+        final BluetoothDevice? bluetoothDevice;
+
         Timer? pingTimer;
         EventChannel? messageChannel;
+        BluetoothDataReader? dataReader;
+        Timer? pollingTimer;
 
-        DashboardController({
+        DashboardController.serial({
                 required this.plugin,
                 required this.connectedDevices,
-                required this.debugLogManager,
                 required this.messageService,
                 required this.onConnectionLost,
+                required this.debugLogManager,
                 required this.onFatalReceived
-        }) {
-                isInitialLoading = ValueNotifier(true);
-        }
+        }) : type = ConnectionType.serial,
+                bluetoothDevice = null;
 
-        Future<void> init(void Function() onDataReceived) async {
-                connectionStopwatch = Stopwatch()..start();
+        DashboardController.bluetooth({
+                required this.bluetoothDevice,
+                required this.debugLogManager,
+                required this.onFatalReceived
+        }) : type = ConnectionType.bluetooth,
+                plugin = null,
+                connectedDevices = null,
+                messageService = null,
+                onConnectionLost = null;
 
-                // Prépare la liaison série
-                messageChannel = plugin?.getSerialMessageListener();
-                plugin?.setDTR(true);
+        Future<void> init(void Function() onDataReceived, BuildContext context) async {
+                connectionStopwatch.start();
 
-                // Lance la lecture du port série
-                readMessage(
-                        messageChannel: messageChannel,
-                        sendAndroidMessage: messageService.sendString,
-                        debugLogManager: debugLogManager,
-                        getSensors: getSensors,
-                        onDataReceived: () {
-                                final hasData = [
-                                        ...getSensors(SensorType.internal),
-                                        ...getSensors(SensorType.modbus)
-                                ].any((sensor) => sensor.powerStatus != null);
-                                if (hasData) isInitialLoading.value = false;
-                                onDataReceived();
-                        },
-                        batteryVoltage: batteryVoltage,
-                        onIdReceived: (id) => firmwareNotifier.value = id,
-                        onActiveReceived: (mask) => activeMaskNotifier.value = mask,
-                        onFatalReceived: (reason) => onFatalReceived(reason),
-                        onConfigReceived: (config) {configNotifier.value = config;},
-                        iterationNotifier: iterationNotifier,
-                        ramNotifier: ramNotifier
-                );
+                if (type == ConnectionType.serial) {
+                        // MODE SÉRIE
+                        messageChannel = plugin?.getSerialMessageListener();
+                        plugin?.setDTR(true);
 
-                if (plugin != null) {
-                        // Ping toutes les 2s pour détecter la perte de connexion
-                        pingTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
-                                        final ok = await messageService.sendString(communicationMessageAndroid);
+                        readMessage(
+                                messageChannel: messageChannel,
+                                sendAndroidMessage: messageService!.sendString,
+                                debugLogManager: debugLogManager,
+                                getSensors: getSensors,
+                                onDataReceived: () {
+                                        final hasData = [
+                                                ...getSensors(SensorType.internal),
+                                                ...getSensors(SensorType.modbus)
+                                        ].any((sensor) => sensor.powerStatus != null);
+                                        if (hasData) isInitialLoading.value = false;
+                                        onDataReceived();
+                                },
+                                batteryVoltage: batteryVoltage,
+                                onIdReceived: (id) => firmwareNotifier.value = id,
+                                onActiveReceived: (mask) => activeMaskNotifier.value = mask,
+                                onFatalReceived: (reason) => onFatalReceived(reason),
+                                onConfigReceived: (config) => configNotifier.value = config,
+                                iterationNotifier: iterationNotifier,
+                                ramNotifier: ramNotifier
+                        );
+
+                        // PING USB pour perte de connexion
+                        pingTimer = Timer.periodic(const Duration(seconds: 2),
+                                (_) async {
+                                        final ok = await messageService!.sendString(communicationMessageAndroid);
                                         if (!ok) {
                                                 pingTimer?.cancel();
                                                 connectionStopwatch.stop();
-                                                onConnectionLost(connectionStopwatch.elapsed);
+                                                onConnectionLost!(connectionStopwatch.elapsed);
+                                        }
+                                }
+                        );
+
+                        messageService!.sendString("<info>");
+                }
+
+                if (type == ConnectionType.bluetooth) {
+                        // MODE BLUETOOTH
+                        dataReader = BluetoothDataReader(bluetoothDevice!);
+                        await dataReader!.init();
+
+                        pollingTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
+                                        if (!context.mounted) return;
+
+                                        final rawDataList = await dataReader!.readAllData();
+                                        for (var singleRaw in rawDataList) {
+                                                print('✅✅✅RawDataList: $singleRaw');
+                                                processRawData(
+                                                        rawData: singleRaw,
+                                                        debugLogManager: debugLogManager,
+                                                        getSensors: getSensors,
+                                                        onDataReceived: () {
+                                                                final hasData = [
+                                                                        ...getSensors(SensorType.internal),
+                                                                        ...getSensors(SensorType.modbus)
+                                                                ].any((sensor) => sensor.powerStatus != null);
+                                                                if (hasData) isInitialLoading.value = false;
+                                                                onDataReceived();
+                                                        },
+                                                        batteryVoltage: batteryVoltage,
+                                                        onIdReceived: (id) => firmwareNotifier.value = id,
+                                                        onActiveReceived: (mask) => activeMaskNotifier.value = mask,
+                                                        onFatalReceived: (reason) => onFatalReceived(reason),
+                                                        onConfigReceived: (config) => configNotifier.value = config,
+                                                        iterationNotifier: iterationNotifier,
+                                                        ramNotifier: ramNotifier
+                                                );
                                         }
                                 }
                         );
                 }
-
-                // Demander info ACTIVE des sensors lors de la connexion
-                messageService.sendString("<info>");
         }
 
         void dispose() {
                 pingTimer?.cancel();
+                pollingTimer?.cancel();
                 isInitialLoading.dispose();
                 batteryVoltage.dispose();
                 firmwareNotifier.dispose();

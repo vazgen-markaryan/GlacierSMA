@@ -1,18 +1,11 @@
 import 'language_popup.dart';
-import 'connection_widgets.dart';
 import 'connection_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
-import 'package:flutter_serial_communication/models/device_info.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
 
-/// Écran de connexion : permet de se connecter à un appareil via Bluetooth ou USB
-/// Affiche un Popup de sélection de langue et un écran de connexion
-/// Gère la connexion et la déconnexion
-/// Gère l'affichage des appareils connectés
-/// Gère l'affichage des instructions de connexion
 class ConnectionScreen extends StatefulWidget {
         const ConnectionScreen({super.key});
 
@@ -21,13 +14,8 @@ class ConnectionScreen extends StatefulWidget {
 }
 
 class ConnectionScreenState extends State<ConnectionScreen> {
-        // Plugin pour la communication série
         final plugin = FlutterSerialCommunication();
 
-        // Liste des appareils détectés via USB
-        List<DeviceInfo> connectedDevices = [];
-
-        // État du popup langue
         bool langPopupVisible = false;
         OverlayEntry? langOverlay;
 
@@ -39,7 +27,6 @@ class ConnectionScreenState extends State<ConnectionScreen> {
                                 automaticallyImplyLeading: false,
                                 title: Text(tr("connection.appTitle")),
                                 actions: [
-                                        // L’icône drapeau à droite
                                         Builder(builder: 
                                                 (context) {
                                                         return GestureDetector(
@@ -65,14 +52,10 @@ class ConnectionScreenState extends State<ConnectionScreen> {
                                                 child: Column(
                                                         children: [
                                                                 Expanded(child: buildBluetoothSection(context)),
-
                                                                 const SizedBox(height: 12),
-
                                                                 buildArrowInstruction(),
-
                                                                 const SizedBox(height: 12),
-
-                                                                Expanded(child: buildCableSection(context, onCable))
+                                                                Expanded(child: buildCableSection(context))
                                                         ]
                                                 )
                                         );
@@ -81,32 +64,76 @@ class ConnectionScreenState extends State<ConnectionScreen> {
                 );
         }
 
-        /// Launch la détection et la sélection d’un device câble
-        Future<void> onCable() async {
-                // Récupère la liste des devices USB
-                await getAllCableConnectedDevices(
-                        plugin,
-                        (devices) => setState(() => connectedDevices = devices)
+        Widget buildBluetoothSection(BuildContext context) {
+                return GestureDetector(
+                        onTap: () => scanBleDevices(context),
+                        child: Card(
+                                color: secondaryColor,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                child: Center(
+                                        child: Column(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                        Icon(Icons.bluetooth, size: 64, color: Colors.white),
+                                                        SizedBox(height: 8),
+                                                        Text(tr("connection.bluetooth_connection"),
+                                                                style: TextStyle(fontSize: 18, color: Colors.white))
+                                                ]
+                                        )
+                                )
+                        )
                 );
-
-                // Ouvre le dialog de sélection
-                await showDeviceSelectionDialog(context, connectedDevices, plugin);
-
-                // Vide la liste après fermeture
-                setState(() => connectedDevices.clear());
         }
 
-        /// Ouvre / ferme le popup de sélection de langue
+        Widget buildCableSection(BuildContext context) {
+                return GestureDetector(
+                        onTap: () => scanUsbDevices(context, plugin),
+                        child: Card(
+                                color: secondaryColor,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                child: Center(
+                                        child: Column(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                        Icon(Icons.usb_rounded, size: 64, color: Colors.white),
+                                                        SizedBox(height: 8),
+                                                        Text(tr("connection.cable_connection"),
+                                                                style: TextStyle(fontSize: 18, color: Colors.white))
+                                                ]
+                                        )
+                                )
+                        )
+                );
+        }
+
+        Widget buildArrowInstruction() {
+                return Row(
+                        children: [
+                                Expanded(child: Divider(color: Colors.white24)),
+                                Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                        child: Column(
+                                                children: [
+                                                        Icon(Icons.keyboard_arrow_up, color: Colors.white54),
+                                                        Text(tr("connection.arrow_instruction"),
+                                                                style: TextStyle(color: Colors.white54)),
+                                                        Icon(Icons.keyboard_arrow_down, color: Colors.white54)
+                                                ]
+                                        )
+                                ),
+                                Expanded(child: Divider(color: Colors.white24))
+                        ]
+                );
+        }
+
         void toggleLangPopup(BuildContext targetContext) {
                 if (langPopupVisible) {
-                        // Si déjà visible, on ferme
                         langOverlay?.remove();
                         langPopupVisible = false;
                         return;
                 }
                 langPopupVisible = true;
 
-                // On récupère la position et la taille de l’icône drapeau
                 final render = targetContext.findRenderObject();
                 if (render is! RenderBox) return;
                 final box = render;
@@ -116,14 +143,12 @@ class ConnectionScreenState extends State<ConnectionScreen> {
 
                 langOverlay = OverlayEntry(
                         builder: (_) {
-                                // Calcul pour que le popup s’aligne à gauche du SVG
                                 final right = screen.width - position.dx - iconSize;
-                                final top = position.dy + box.size.height + 5.0; // 5px d’écart sous le drapeau
+                                final top = position.dy + box.size.height + 5.0;
 
                                 return GestureDetector(
                                         behavior: HitTestBehavior.translucent,
                                         onTap: () {
-                                                // Clique hors du popup → ferme
                                                 langOverlay?.remove();
                                                 langPopupVisible = false;
                                         },
@@ -134,10 +159,8 @@ class ConnectionScreenState extends State<ConnectionScreen> {
                                                                 right: right,
                                                                 top: top,
                                                                 child: LanguagePopup(
-                                                                        // Position de la flèche : moitié de la largeur du SVG
                                                                         iconCenterOffset: iconSize - 25,
                                                                         onSelect: (locale) {
-                                                                                // Lorsqu’on choisit une langue
                                                                                 context.setLocale(locale);
                                                                                 langOverlay?.remove();
                                                                                 langPopupVisible = false;

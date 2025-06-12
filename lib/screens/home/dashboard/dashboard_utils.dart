@@ -4,11 +4,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 import 'package:rev_glacier_sma_mobile/utils/message_service.dart';
-import 'package:rev_glacier_sma_mobile/utils/custom_snackbar.dart';
 import 'package:rev_glacier_sma_mobile/screens/test/test_utils.dart';
+import 'package:rev_glacier_sma_mobile/utils/custom_snackbar.dart';
 import 'package:rev_glacier_sma_mobile/screens/test/test_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/home_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/config/config_screen.dart';
+import 'package:rev_glacier_sma_mobile/utils/dummy_message_service.dart';
 import 'package:rev_glacier_sma_mobile/screens/settings/settings_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/debug_log/debug_screen.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
@@ -33,28 +34,44 @@ mixin DashboardUtils on State<Home_Screen> {
         late bool isConnected;
         int selectedIndex = 0;
 
-        /// Initialise DashboardController, MessageService, etc.
+        /// Initialise UnifiedDashboardController et MessageService
         void initDashboard(Home_Screen widget) {
                 isConnected = widget.isConnected;
-
                 final debugManager = DebugLogUpdater();
-                messageService = MessageService(
-                        plugin: widget.plugin,
-                        debugLogManager: debugManager
-                );
 
-                controller = DashboardController(
-                        plugin: widget.plugin,
-                        connectedDevices: widget.connectedDevices,
-                        debugLogManager: debugManager,
-                        messageService: messageService,
-                        onConnectionLost: handleConnectionLost,
-                        onFatalReceived: handleFatalError
-                );
+                if (widget.plugin != null) {
+                        messageService = MessageService(
+                                plugin: widget.plugin,
+                                debugLogManager: debugManager
+                        );
 
-                controller.init(() => setState(() {
+                        controller = DashboardController.serial(
+                                plugin: widget.plugin,
+                                connectedDevices: widget.connectedDevices,
+                                debugLogManager: debugManager,
+                                messageService: messageService,
+                                onConnectionLost: handleConnectionLost,
+                                onFatalReceived: handleFatalError
+                        );
+                }
+                else if (widget.bluetoothDevice != null) {
+                        messageService = DummyMessageService(); // Car pas de serial sous BLE
+
+                        controller = DashboardController.bluetooth(
+                                bluetoothDevice: widget.bluetoothDevice!,
+                                debugLogManager: debugManager,
+                                onFatalReceived: handleFatalError
+                        );
+                }
+
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted) {
+                                        controller.init(() => setState(() {
+                                                        }
+                                                ), context);
                                 }
-                        ));
+                        }
+                );
         }
 
         Future<void> handleConnectionLost(Duration elapsed) async {

@@ -38,8 +38,6 @@ const String satellite = "assets/icons/satellite.svg";
 const communicationMessageAndroid = "<android>";
 const communicationMessagePhoneStart = "\n<phone_start>";
 const communicationMessagePhoneEnd = "\n<phone_end>";
-const communicationMessageData = "<data>";
-const communicationMessageStatus = "<status>";
 
 // WARNING: LES VALEURS REPRESENTENT DES PLAGES MIN/MAX POUR CHAQUE CAPTEUR SELON LEUR DATASPEC
 // Map statique des plages min/max par (sensor, champ)

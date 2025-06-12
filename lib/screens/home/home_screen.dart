@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'dashboard/dashboard_utils.dart';
 import '../connection/connection_manager.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
@@ -14,12 +15,14 @@ class Home_Screen extends StatefulWidget {
         final FlutterSerialCommunication? plugin;
         final bool isConnected;
         final List<DeviceInfo> connectedDevices;
+        final BluetoothDevice? bluetoothDevice;
 
         const Home_Screen({
                 Key? key,
                 required this.plugin,
                 required this.isConnected,
-                required this.connectedDevices
+                required this.connectedDevices,
+                this.bluetoothDevice
         }) : super(key: key);
 
         @override

@@ -89,3 +89,5 @@ class MyApp extends StatelessWidget {
                 );
         }
 }
+
+//TODO test peut pas etre lancé si capteurs sont desactivés/deconnectés

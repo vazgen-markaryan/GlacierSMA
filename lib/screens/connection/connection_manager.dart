@@ -1,8 +1,5 @@
-/// Gère la détection et la sélection des appareils connectés via port série.
-/// Affiche uniquement les appareils dont le nom contient "RevGlacierSMA".
-/// Si aucun n'est compatible, affiche un SnackBar d'information.
-
 import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
@@ -12,166 +9,220 @@ import 'package:rev_glacier_sma_mobile/screens/home/home_screen.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
 import 'package:rev_glacier_sma_mobile/screens/connection/connection_screen.dart';
 
-// Indicateur global pour empêcher le spam de SnackBars
-bool isShowingDeviceSnackbar = false;
-
-// Récupère tous les appareils disponibles et les passe à [updateDevices].
-Future<void> getAllCableConnectedDevices(
-        FlutterSerialCommunication plugin,
-        void Function(List<DeviceInfo>) updateDevices
-) async {
-        final devices = await plugin.getAvailableDevices();
-        updateDevices(devices);
+/// --- Abstraction unifiée ---
+abstract class DeviceCandidate {
+        String get displayName;
+        String get uniqueId;
+        Future<bool> connect(BuildContext context);
 }
 
-// Affiche un dialogue pour sélectionner un appareil "RevGlacierSMA".
-// Si aucun compatible n'est détecté, affiche un SnackBar dédié.
-Future<void> showDeviceSelectionDialog(
-        BuildContext context,
-        List<DeviceInfo> connectedDevices,
-        FlutterSerialCommunication plugin
-) async {
-        // Filtrer les appareils pour ne garder que les noms contenant "RevGlacierSMA"
-        final compatibleDevices = connectedDevices
-                .where((device) => device.productName.contains('RevGlacierSMA'))
-                .toList();
+/// --- USB wrapper ---
+class UsbDeviceCandidate extends DeviceCandidate {
+        final DeviceInfo device;
+        final FlutterSerialCommunication plugin;
 
-        // Aucun appareil compatible
-        if (compatibleDevices.isEmpty) {
-                if (isShowingDeviceSnackbar) return;
-                isShowingDeviceSnackbar = true;
+        UsbDeviceCandidate(this.device, this.plugin);
 
-                final controller = ScaffoldMessenger.of(context).showSnackBar(
-                        buildCustomSnackBar(
-                                message: tr("connection.no_device_found"),
-                                iconData: Icons.error,
-                                backgroundColor: Colors.white,
-                                textColor: Colors.black,
-                                iconColor: Colors.black
-                        )
-                );
+        @override
+        String get displayName => device.productName;
 
-                controller.closed.then((_) => isShowingDeviceSnackbar = false);
-                return;
+        @override
+        String get uniqueId => device.deviceId.toString();
+
+        @override
+        Future<bool> connect(BuildContext context) async {
+                return await plugin.connect(device, 115200);
         }
+}
 
-        // Afficher la liste des appareils compatibles
+/// --- BLE wrapper ---
+class BleDeviceCandidate extends DeviceCandidate {
+        final BluetoothDevice device;
+
+        BleDeviceCandidate(this.device);
+
+        @override
+        String get displayName => device.platformName.isNotEmpty ? device.platformName : device.remoteId.toString();
+
+        @override
+        String get uniqueId => device.remoteId.toString();
+
+        @override
+        Future<bool> connect(BuildContext context) async {
+                await device.connect(timeout: const Duration(seconds: 8));
+                return true;
+        }
+}
+
+/// --- Popup unifiée pour tous types de devices ---
+Future<void> showDeviceSelectionDialogUnifiedDynamic(
+        BuildContext context,
+        ValueNotifier<List<DeviceCandidate>> devicesNotifier
+) async {
         showDialog(
                 context: context,
-                builder: (_) => AlertDialog(
-                        backgroundColor: secondaryColor,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        title: Text(tr("connection.devices_found"),
-                                style: TextStyle(
-                                        color: primaryColor,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold
-                                )
-                        ),
-                        content: SizedBox(
-                                width: double.maxFinite,
-                                child: ListView.builder(
-                                        shrinkWrap: true,
-                                        itemCount: compatibleDevices.length,
-                                        itemBuilder: (context, index) {
-                                                final device = compatibleDevices[index];
-                                                return Card(
-                                                        color: backgroundColor,
-                                                        margin: const EdgeInsets.symmetric(vertical: 8.0),
-                                                        child: ListTile(
-                                                                title: Text(
-                                                                        device.productName,
-                                                                        style: const TextStyle(color: Colors.white, fontSize: 16)
-                                                                ),
-                                                                subtitle: Text(
-                                                                        "ID: ${device.deviceId}",
-                                                                        style: const TextStyle(color: Colors.white70, fontSize: 14)
-                                                                ),
-                                                                onTap: () async {
-                                                                        final success = await plugin.connect(device, 115200);
-                                                                        if (success) {
-                                                                                // Naviguer vers Dashboard
-                                                                                Navigator.pushReplacement(
-                                                                                        context,
-                                                                                        MaterialPageRoute(
-                                                                                                builder: (_) => Home_Screen(
-                                                                                                        plugin: plugin,
-                                                                                                        isConnected: true,
-                                                                                                        connectedDevices: compatibleDevices
-                                                                                                )
-                                                                                        )
-                                                                                );
-                                                                        }
-                                                                        else {
-                                                                                // Échec de connexion
-                                                                                Navigator.pop(context);
-                                                                                showCustomSnackBar(
-                                                                                        context,
-                                                                                        message: tr("connection.failed_to_connect")
-                                                                                );
-                                                                        }
+                barrierDismissible: false,
+                builder: (_) => CustomPopup(
+                        title: tr("connection.devices_found"),
+                        content: ValueListenableBuilder<List<DeviceCandidate>>(
+                                valueListenable: devicesNotifier,
+                                builder: (context, devices, _) {
+                                        if (devices.isEmpty) {
+                                                return const Center(child: CircularProgressIndicator());
+                                        }
+                                        else {
+                                                return Column(
+                                                        children: devices.map(
+                                                                (candidate) {
+                                                                        return Card(
+                                                                                color: backgroundColor,
+                                                                                margin: const EdgeInsets.symmetric(vertical: 8.0),
+                                                                                child: ListTile(
+                                                                                        title: Text(candidate.displayName, style: const TextStyle(color: Colors.white, fontSize: 16)),
+                                                                                        subtitle: Text("ID: ${candidate.uniqueId}", style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                                                                                        onTap: () async {
+                                                                                                final success = await candidate.connect(context);
+                                                                                                if (success) {
+                                                                                                        Navigator.pushReplacement(
+                                                                                                                context,
+                                                                                                                MaterialPageRoute(
+                                                                                                                        builder: (_) {
+                                                                                                                                if (candidate is UsbDeviceCandidate) {
+                                                                                                                                        return Home_Screen(
+                                                                                                                                                plugin: candidate.plugin,
+                                                                                                                                                isConnected: true,
+                                                                                                                                                connectedDevices: [candidate.device]
+                                                                                                                                        );
+                                                                                                                                }
+                                                                                                                                else if (candidate is BleDeviceCandidate) {
+                                                                                                                                        return Home_Screen(
+                                                                                                                                                plugin: null,
+                                                                                                                                                isConnected: true,
+                                                                                                                                                connectedDevices: [],
+                                                                                                                                                bluetoothDevice: candidate.device
+                                                                                                                                        );
+                                                                                                                                }
+                                                                                                                                else {
+                                                                                                                                        return const ConnectionScreen();
+                                                                                                                                }
+                                                                                                                        }
+                                                                                                                )
+                                                                                                        );
+                                                                                                }
+                                                                                                else {
+                                                                                                        Navigator.pop(context);
+                                                                                                        showCustomSnackBar(context, message: tr("connection.failed_to_connect"));
+                                                                                                }
+                                                                                        }
+                                                                                )
+                                                                        );
                                                                 }
-                                                        )
+                                                        ).toList()
                                                 );
                                         }
-                                )
-                        )
+                                }
+                        ),
+                        actions: []
                 )
         );
 }
 
-/// Gère les popups de déconnexion utilisateur et de perte de connexion automatique.
-/// Utilise CustomPopup pour un style uniforme, puis déconnecte et retourne à l’écran de connexion.
-/// Affiche un popup pour confirmer une déconnexion manuelle si [requireConfirmation] est vrai.
-/// Sinon, déconnecte immédiatement sans confirmation.
-/// Retourne `true` si la déconnexion a eu lieu, `false` si l’utilisateur a annulé.
+/// --- Scan USB ---
+Future<void> scanUsbDevices(BuildContext context, FlutterSerialCommunication plugin) async {
+        ValueNotifier<List<DeviceCandidate>> devicesNotifier = ValueNotifier([]);
+
+        // Démarre la popup immédiatement (affiche "Recherche...")
+        showDeviceSelectionDialogUnifiedDynamic(context, devicesNotifier);
+
+        // Pendant 10 secondes, on scanne les USB chaque 500ms
+        final endTime = DateTime.now().add(const Duration(seconds: 10));
+
+        while (DateTime.now().isBefore(endTime)) {
+                final devices = await plugin.getAvailableDevices();
+                final compatible = devices
+                        .where((device) => device.productName.contains('RevGlacierSMA'))
+                        .map((device) => UsbDeviceCandidate(device, plugin))
+                        .toList();
+
+                devicesNotifier.value = compatible;
+
+                // Si au moins 1 device trouvé, on arrête la boucle immédiatement
+                if (compatible.isNotEmpty) break;
+
+                await Future.delayed(const Duration(milliseconds: 500));
+        }
+}
+
+/// --- Scan BLE ---
+Future<void> scanBleDevices(BuildContext context) async {
+        BluetoothAdapterState state = await FlutterBluePlus.adapterState.first;
+        ValueNotifier<List<DeviceCandidate>> devicesNotifier = ValueNotifier([]);
+
+        if (state != BluetoothAdapterState.on) {
+                await FlutterBluePlus.turnOn();
+                state = await FlutterBluePlus.adapterState.first;
+
+                if (state != BluetoothAdapterState.on) {
+                        showCustomSnackBar(context, message: tr("connection.bluetooth_required"));
+                        return;
+                }
+        }
+
+        final subscription = FlutterBluePlus.scanResults.listen(
+                (results) {
+                        final foundDevices = results
+                                .where((result) => result.advertisementData.advName.contains("RevGlacierSMA"))
+                                .map((result) => BleDeviceCandidate(result.device))
+                                .toList();
+
+                        devicesNotifier.value = [...foundDevices];
+                }
+        );
+
+        FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
+
+        // On affiche le popup immédiatement et il se mettra à jour
+        await showDeviceSelectionDialogUnifiedDynamic(context, devicesNotifier);
+
+        await Future.delayed(const Duration(seconds: 15));
+        FlutterBluePlus.stopScan();
+        subscription.cancel();
+}
+
+/// --- Déconnexion universelle ---
 Future<bool> showDisconnectPopup({
         required BuildContext context,
         required FlutterSerialCommunication? plugin,
         bool requireConfirmation = false
 }) async {
         if (requireConfirmation) {
-                // Affiche le CustomPopup et attend la réponse true/false
                 final result = await showDialog<bool>(
                         context: context,
                         builder: (_) => CustomPopup(
                                 title: tr("connection.disconnect"),
-                                content: Text(tr("connection.disconnect_confirmation"),
-                                        style: TextStyle(color: Colors.white)
-                                ),
+                                content: Text(tr("connection.disconnect_confirmation"), style: const TextStyle(color: Colors.white)),
                                 actions: [
                                         TextButton(
-                                                // Action "Non" : renvoie false
                                                 onPressed: () => Navigator.of(context).pop(false),
-                                                child: Text(tr("no"), style: TextStyle(color: primaryColor))
+                                                child: Text(tr("no"), style: const TextStyle(color: primaryColor))
                                         ),
                                         TextButton(
-                                                // Action "Oui" : renvoie true
                                                 onPressed: () => Navigator.of(context).pop(true),
-                                                child: Text(tr("yes"), style: TextStyle(color: primaryColor))
+                                                child: Text(tr("yes"), style: const TextStyle(color: primaryColor))
                                         )
                                 ]
                         )
                 );
 
                 if (result == true) {
-                        // L’utilisateur a confirmé : déconnexion et retour à l’écran de connexion
                         await plugin?.disconnect();
-                        Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(builder: (_) => const ConnectionScreen())
-                        );
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ConnectionScreen()));
                         return true;
                 }
-                // L’utilisateur a annulé
                 return false;
         }
 
-        // Déconnexion sans confirmation
         await plugin?.disconnect();
-        Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const ConnectionScreen())
-        );
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ConnectionScreen()));
         return true;
 }
