@@ -14,7 +14,7 @@
 		"cable_connection": "Cable Connection",
 		"disconnect": "Disconnect",
 		"disconnect_confirmation": "Do you really want to disconnect?",
-		"lost_connection": "Connection lost after: {time}\n\nCheck the cable or the hardware Debug Switch."
+		"lost_connection": "Connection lost after: {time}\n\nCheck the cable, the Bluetooth or the hardware Debug Switch."
 	},
 
 	"home": {
@@ -189,7 +189,9 @@
 		"iridium_netav": "Fast (0/5)",
 		"iridium_netav2": "NetAv",
 		"iridium_quality": "Accurate (0-5)",
-		"iridium_quality2": "Automatic"
+		"iridium_quality2": "Automatic",
+		"bluetooth_blocked_title" : "Bluetooth? -> Read Only",
+		"bluetooth_blocked_message" : "Connected via Bluetooth, you will not be able to modify any settings.\n\nIf you want to modify the settings, please connect via USB cable."
 	},
 
 	"settings": {

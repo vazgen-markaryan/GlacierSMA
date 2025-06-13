@@ -14,7 +14,7 @@
 		"cable_connection": "Connexion par câble",
 		"disconnect": "Déconnexion",
 		"disconnect_confirmation": "Voulez-vous vraiment vous déconnecter?",
-		"lost_connection": "Connexion perdue après : {time}\n\nVérifiez le câble ou le commutateur de débogage matériel."
+		"lost_connection": "Connexion perdue après : {time}\n\nVérifiez le câble, le Bluetooth ou la Switch de débogage matériel."
 	},
 
 	"home": {
@@ -189,7 +189,9 @@
 		"iridium_netav": "Rapide (0/5)",
 		"iridium_netav2": "NetAv",
 		"iridium_quality": "Précise (0-5)",
-		"iridium_quality2": "Automatique"
+		"iridium_quality2": "Automatique",
+		"bluetooth_blocked_title" : "Bluetooth? -> Lecture seule",
+		"bluetooth_blocked_message" : "Connecté via Bluetooth, vous ne pourrez pas modifier les paramètres.\n\nPour modifier les paramètres, veuillez connecter via câble USB."
 	},
 
 	"settings": {

@@ -7,7 +7,11 @@ import 'package:rev_glacier_sma_mobile/utils/global_utilities.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_graph_popup.dart';
 
-/// Carte de capteur, avec popup graphique en mode normal.
+/// Widget unique pour afficher une carte de capteur (SensorCard)
+///   - Mode normal (testMode / accueil): simple affichage + popup graphique
+///   - Mode configMode: affichage + switch ON/OFF (activable uniquement USB)
+///   - En BLE: switch présent mais désactivé (non-cliquable, géré via parent)
+
 class SensorCard extends StatelessWidget {
         final SensorsData sensor;
         final bool configMode;
@@ -28,13 +32,13 @@ class SensorCard extends StatelessWidget {
 
         @override
         Widget build(BuildContext context) {
+
+                // Détermine les couleurs globales selon le statut power du capteur
                 final (iconColor, borderColor, statusLabel) = getStatusUI(sensor.powerStatus);
                 String assetPath = sensor.svgIcon!;
-                Color svgTint = configMode
-                        ? (isOn! ? Colors.green : Colors.red)
-                        : iconColor;
+                Color svgTint = configMode ? (isOn! ? Colors.green : Colors.red) : iconColor;
 
-                // Cas particulier : override pour le statut Iridium
+                // Cas particulier : pour l’Iridium on ajuste l’icône et couleur selon qualité signal
                 if (sensor.header?.toLowerCase() == 'iridium_status') {
                         final entry = sensor.data.entries.firstWhere(
                                 (entry) => entry.key.header.toLowerCase() == 'iridium_signal_quality',
@@ -49,7 +53,7 @@ class SensorCard extends StatelessWidget {
                         svgTint = config['color'] as Color;
                 }
 
-                // Génère une ligne de "chips" (code, bus, emplacement)
+                /// Construit la ligne de "chips" d’identification (code / bus / emplacement)
                 Widget buildChipRow() {
                         final chips = <ChipData>[];
                         if (sensor.codeName != null) chips.add(ChipData(sensor.codeName!, Colors.blueGrey.shade700));
@@ -75,45 +79,40 @@ class SensorCard extends StatelessWidget {
                                                                 color: secondaryColor,
                                                                 borderRadius: BorderRadius.circular(10),
                                                                 border: Border.all(
-                                                                        color: configMode
-                                                                                ? (isOn! ? Colors.green : Colors.red)
-                                                                                : borderColor,
+                                                                        color: configMode ? (isOn! ? Colors.green : Colors.red) : borderColor,
                                                                         width: 3
                                                                 )
                                                         ),
                                                         padding: const EdgeInsets.all(16),
                                                         child: Row(
                                                                 children: [
-                                                                        // Icône du capteur
+                                                                        /// Icône principale du capteur
                                                                         SvgPicture.asset(
                                                                                 assetPath,
-                                                                                height: 50, width: 50,
+                                                                                height: 50,
+                                                                                width: 50,
                                                                                 colorFilter: ColorFilter.mode(svgTint, BlendMode.srcIn)
                                                                         ),
                                                                         const SizedBox(width: 16),
 
-                                                                        // Informations principales
+                                                                        /// Texte d’information (titre + chips)
                                                                         Expanded(
                                                                                 child: Column(
                                                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                                                         mainAxisAlignment: MainAxisAlignment.center,
                                                                                         children: [
-                                                                                                // Titre (nom du capteur)
                                                                                                 Text(
                                                                                                         tr(sensor.title ?? tr('home.sensors.title_unknown')),
                                                                                                         style: Theme.of(context).textTheme.bodyLarge,
                                                                                                         overflow: TextOverflow.ellipsis
                                                                                                 ),
-
                                                                                                 const SizedBox(height: 4),
-
-                                                                                                // Ligne de chips
                                                                                                 buildChipRow()
                                                                                         ]
                                                                                 )
                                                                         ),
 
-                                                                        // Switch en mode config
+                                                                        /// Switch visible uniquement en mode config
                                                                         if (configMode) ...[
                                                                                 Switch(
                                                                                         value: isOn!,
@@ -124,12 +123,13 @@ class SensorCard extends StatelessWidget {
                                                                                 )
                                                                         ]
 
-                                                                        // Bouton graphique en mode normal (ouvre SensorGraphPopup)
+                                                                        /// Bouton graphique (uniquement en mode normal si applicable)
                                                                         else if (sensor.data.isNotEmpty &&
                                                                                 sensor.header?.toLowerCase() != 'sdcard' &&
                                                                                 sensor.header?.toLowerCase() != 'gps_status' &&
-                                                                                sensor.header?.toLowerCase() != 'iridium_status' && 
-                                                                                !testMode && sensor.powerStatus == 1
+                                                                                sensor.header?.toLowerCase() != 'iridium_status' &&
+                                                                                !testMode &&
+                                                                                sensor.powerStatus == 1
                                                                         ) ...[
                                                                                 Padding(
                                                                                         padding: const EdgeInsets.only(left: 16),
@@ -140,7 +140,8 @@ class SensorCard extends StatelessWidget {
                                                                                                 ),
                                                                                                 child: SvgPicture.asset(
                                                                                                         graphPath,
-                                                                                                        height: 40, width: 40,
+                                                                                                        height: 40,
+                                                                                                        width: 40,
                                                                                                         colorFilter: ColorFilter.mode(svgTint, BlendMode.srcIn)
                                                                                                 )
                                                                                         )
@@ -151,9 +152,10 @@ class SensorCard extends StatelessWidget {
                                                 )
                                         ),
 
-                                        // Badge de statut en haut à droite
+                                        /// Badge de statut en haut à droite
                                         Positioned(
-                                                top: -10, right: -10,
+                                                top: -10,
+                                                right: -10,
                                                 child: Container(
                                                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                                         decoration: BoxDecoration(
@@ -182,14 +184,14 @@ class SensorCard extends StatelessWidget {
                 );
         }
 
-        /// Retourne (couleurIcône, couleurBordure, libelléStatut) selon powerStatus
+        /// Retourne les couleurs et le label selon le powerStatus du capteur
         (Color, Color, String) getStatusUI(int? status) {
                 switch (status) {
-                        case 1:  return (Colors.green,  Colors.green, tr('home.sensors.status.operational'));
-                        case 2:  return (Colors.yellow, Colors.yellow, tr('home.sensors.status.disconnected'));
-                        case 3:  return (Colors.red,    Colors.red, tr('home.sensors.status.error'));
-                        case 0:  return (Colors.grey,   Colors.grey, tr('home.sensors.status.unknown'));
-                        default: return (Colors.black,  Colors.black, tr('home.sensors.status.disabled'));
+                        case 1: return (Colors.green, Colors.green, tr('home.sensors.status.operational'));
+                        case 2: return (Colors.yellow, Colors.yellow, tr('home.sensors.status.disconnected'));
+                        case 3: return (Colors.red, Colors.red, tr('home.sensors.status.error'));
+                        case 0: return (Colors.grey, Colors.grey, tr('home.sensors.status.unknown'));
+                        default: return (Colors.black, Colors.black, tr('home.sensors.status.disabled'));
                 }
         }
 }

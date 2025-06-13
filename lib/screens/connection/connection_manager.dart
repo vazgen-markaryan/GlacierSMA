@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
+import 'package:rev_glacier_sma_mobile/utils/global_state.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_snackbar.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
@@ -59,6 +61,8 @@ Future<void> showDeviceSelectionDialog(
         BuildContext context,
         ValueNotifier<List<DeviceCandidate>> devicesNotifier
 ) async {
+        ValueNotifier<String?> connectingDeviceId = ValueNotifier(null);
+
         showDialog(
                 context: context,
                 barrierDismissible: false,
@@ -80,7 +84,21 @@ Future<void> showDeviceSelectionDialog(
                                                                                 child: ListTile(
                                                                                         title: Text(candidate.displayName, style: const TextStyle(color: Colors.white, fontSize: 16)),
                                                                                         subtitle: Text("ID: ${candidate.uniqueId}", style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                                                                                        trailing: ValueListenableBuilder<String?>(
+                                                                                                valueListenable: connectingDeviceId,
+                                                                                                builder: (context, currentId, _) {
+                                                                                                        if (currentId == candidate.uniqueId) {
+                                                                                                                return const SizedBox(
+                                                                                                                        width: 24, height: 24,
+                                                                                                                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                                                                                                                );
+                                                                                                        }
+                                                                                                        return const SizedBox.shrink();
+                                                                                                }
+                                                                                        ),
                                                                                         onTap: () async {
+                                                                                                connectingDeviceId.value = candidate.uniqueId;
+
                                                                                                 final success = await candidate.connect(context);
                                                                                                 if (success) {
                                                                                                         Navigator.pushReplacement(
@@ -88,16 +106,16 @@ Future<void> showDeviceSelectionDialog(
                                                                                                                 MaterialPageRoute(
                                                                                                                         builder: (_) {
                                                                                                                                 if (candidate is UsbDeviceCandidate) {
+                                                                                                                                        GlobalConnectionState.instance.setUsbConnected();
                                                                                                                                         return Home_Screen(
                                                                                                                                                 plugin: candidate.plugin,
-                                                                                                                                                isConnected: true,
                                                                                                                                                 connectedDevices: [candidate.device]
                                                                                                                                         );
                                                                                                                                 }
                                                                                                                                 else if (candidate is BleDeviceCandidate) {
+                                                                                                                                        GlobalConnectionState.instance.setBluetoothConnected();
                                                                                                                                         return Home_Screen(
                                                                                                                                                 plugin: null,
-                                                                                                                                                isConnected: true,
                                                                                                                                                 connectedDevices: [],
                                                                                                                                                 bluetoothDevice: candidate.device
                                                                                                                                         );
@@ -110,6 +128,7 @@ Future<void> showDeviceSelectionDialog(
                                                                                                         );
                                                                                                 }
                                                                                                 else {
+                                                                                                        connectingDeviceId.value = null;
                                                                                                         Navigator.pop(context);
                                                                                                         showCustomSnackBar(context, message: tr("connection.failed_to_connect"));
                                                                                                 }
@@ -155,6 +174,11 @@ Future<void> scanUsbDevices(BuildContext context, FlutterSerialCommunication plu
 
 /// Scan BLE
 Future<void> scanBleDevices(BuildContext context) async {
+
+        // DEMANDE LES PERMISSIONS
+        bool granted = await requestBluetoothPermissions(context);
+        if (!granted) return;
+
         BluetoothAdapterState state = await FlutterBluePlus.adapterState.first;
         ValueNotifier<List<DeviceCandidate>> devicesNotifier = ValueNotifier([]);
 
@@ -224,5 +248,26 @@ Future<bool> showDisconnectPopup({
 
         await plugin?.disconnect();
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ConnectionScreen()));
+        return true;
+}
+
+Future<bool> requestBluetoothPermissions(BuildContext context) async {
+        // Android 12+ permissions
+        final permissions = [
+                Permission.bluetoothScan,
+                Permission.bluetoothConnect,
+                Permission.locationWhenInUse
+        ];
+
+        Map<Permission, PermissionStatus> statuses = await permissions.request();
+
+        // Vérifie si au moins un est refusé
+        bool allGranted = statuses.values.every((status) => status.isGranted);
+
+        if (!allGranted) {
+                showCustomSnackBar(context, message: tr("connection.permissions_required"));
+                return false;
+        }
+
         return true;
 }

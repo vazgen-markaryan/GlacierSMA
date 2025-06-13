@@ -26,8 +26,10 @@ class RawDataParser {
         static RawData parse(String rawData) {
                 // Nettoyage général avant le split
                 final cleanedRaw = rawData
-                        .replaceAll('\r', '') // Supprime retour chariot Windows
-                        .replaceAll('\u0007', ','); // Remplace les BELL par des virgules
+                        .replaceAll('\r', '')
+                        .replaceAll('\u0007', ',')
+                        .replaceAll('\x00', '')
+                        .replaceAll('\u0000', '');
 
                 final lines = cleanedRaw.split('\n');
                 if (lines.length < 3) return RawData([], []);
@@ -35,14 +37,13 @@ class RawDataParser {
                 // Lecture des headers
                 final headers = lines[1]
                         .split(',')
-                        .map((header) => header.trim().toLowerCase())
+                        .map((header) => header.trim().toLowerCase().replaceAll(RegExp(r'[\x00-\x1F]'), ''))
                         .toList();
 
                 // Lecture des valeurs, en nettoyant les bytes parasites (nulls ou padding)
                 final values = lines[2]
                         .split(',')
-                        .map((value) => value.trim().replaceAll('\u0000', '').replaceAll('\x00', '').replaceAll('\u0007', ','))
-                        .map((cleaned) => cleaned.trim())
+                        .map((value) => value.trim().replaceAll(RegExp(r'[\x00-\x1F]'), ''))
                         .toList();
 
                 return RawData(headers, values);

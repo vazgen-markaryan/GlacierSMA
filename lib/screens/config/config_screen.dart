@@ -1,12 +1,21 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:rev_glacier_sma_mobile/secrets.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:rev_glacier_sma_mobile/utils/global_state.dart';
+import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 import 'package:rev_glacier_sma_mobile/utils/message_service.dart';
 import 'package:rev_glacier_sma_mobile/screens/config/config_utils.dart';
 import 'package:rev_glacier_sma_mobile/screens/config/config_button.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_group_factory.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_processor.dart';
+
+/// Écran complet de configuration de la station (masque capteurs + séries)
+/// - Gère le bitmask des capteurs via `createAllSensorGroups`
+/// - Gère les paramètres série (sleep, pression, captures, iridium)
+/// - Gère la validation des changements et le reset
+/// - Demande un mot de passe avant d'autoriser l'accès
 
 class ConfigScreen extends StatefulWidget {
         final ValueNotifier<int?> activeMaskNotifier;
@@ -27,19 +36,24 @@ class ConfigScreen extends StatefulWidget {
 }
 
 class ConfigScreenState extends State<ConfigScreen> {
-        bool authenticated = false;
+        /// Mode read-only si on est en Bluetooth
+        bool get isReadOnly => GlobalConnectionState.instance.currentMode == ConnectionMode.bluetooth;
 
+        /// Variables de travail locales pour masque et séries
         late int initialMask;
-        late TextEditingController sleepController, seaController, captureController;
-
         late ValueNotifier<int> localMaskNotifier;
         late ValueNotifier<int> iridiumModeNotifier;
+
+        late TextEditingController sleepController, seaController, captureController;
 
         int initSleepTime = 0, sleepTime = 0;
         double initSeaPressure = 0, seaPressure = 0;
         int initCaptureAmount = 0, captureAmount = 0;
         int initIridiumMode = 0, iridiumMode = 0;
         bool invalidSleepTime = false, invalidCaptureAmount = false;
+
+        /// Indique si l'accès à l'écran est authentifié
+        bool authenticated = false;
 
         @override
         void initState() {
@@ -54,9 +68,12 @@ class ConfigScreenState extends State<ConfigScreen> {
 
                 widget.configNotifier.addListener(reload);
                 reload();
+
+                /// Lance la demande de mot de passe après l'affichage initial
                 WidgetsBinding.instance.addPostFrameCallback((_) => askPassword());
         }
 
+        /// Recharge les paramètres séries depuis le bloc RawData reçu
         void reload() {
                 final raw = widget.configNotifier.value;
                 if (raw == null) return;
@@ -65,42 +82,103 @@ class ConfigScreenState extends State<ConfigScreen> {
                                 initSleepTime = params.sleepTime;
                                 sleepTime = params.sleepTime;
                                 sleepController.text = params.sleepTime.toString();
+
                                 initSeaPressure = params.seaPressure;
                                 seaPressure = params.seaPressure;
                                 seaController.text = params.seaPressure.toString();
+
                                 initCaptureAmount = params.capture;
                                 captureAmount = params.capture;
                                 captureController.text = params.capture.toString();
+
                                 initIridiumMode = params.iridiumMode;
-                                iridiumMode = params.iridiumMode; 
+                                iridiumMode = params.iridiumMode;
                                 iridiumModeNotifier.value = params.iridiumMode;
                         }
                 );
         }
 
-        // La place où on demande le mot de passe pour accéder à la config
+        /// Demande le mot de passe d'accès
         Future<void> askPassword() async {
-                final ok = await showPasswordDialog(context, motDePasse: '');
-                if (!ok) widget.onCancel(); else setState(() => authenticated = true);
+                if (isReadOnly) {
+                        // Si Bluetooth, on affiche simplement le popup spécial
+                        final result = await showDialog<bool>(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (_) => CustomPopup(
+                                        title: tr("config.bluetooth_blocked_title"),
+                                        content: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                        Row(
+                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                children: [
+                                                                        Icon(Icons.psychology, size: 30, color: Colors.yellow),
+                                                                        SizedBox(width: 8),
+                                                                        Icon(Icons.arrow_forward, size: 20, color: Colors.white),
+                                                                        Icon(Icons.tune, size: 30, color: Colors.orangeAccent),
+                                                                        SizedBox(width: 8),
+                                                                        Icon(Icons.arrow_forward, size: 20, color: Colors.white),
+                                                                        Icon(Icons.bluetooth, size: 30, color: Colors.blue),
+                                                                        SizedBox(width: 8),
+                                                                        Icon(Icons.arrow_forward, size: 20, color: Colors.white),
+                                                                        Icon(Icons.bluetooth_disabled, size: 30, color: Colors.red),
+                                                                        SizedBox(width: 8),
+                                                                        Icon(Icons.arrow_forward, size: 20, color: Colors.white),
+                                                                        Icon(Icons.usb, size: 30, color: Colors.green)
+                                                                ]
+                                                        ),
+                                                        SizedBox(height: 16),
+                                                        Text(
+                                                                tr("config.bluetooth_blocked_message"),
+                                                                style: TextStyle(color: Colors.white, fontSize: 16),
+                                                                textAlign: TextAlign.center
+                                                        )
+                                                ]
+                                        ),
+                                        actions: [
+                                                TextButton(
+                                                        onPressed: () => Navigator.of(context).pop(true),
+                                                        child: Text("OK", style: TextStyle(color: Colors.white))
+                                                )
+                                        ],
+                                        showCloseButton: false
+                                )
+                        );
+
+                        // Si OK cliqué => on autorise l'accès
+                        if (result == true) setState(() => authenticated = true);
+                        else widget.onCancel();
+                }
+                else {
+                        // Sinon mode câble classique : mot de passe habituel
+                        final ok = await showPasswordDialog(context, motDePasse: configPassword);
+
+                        if (!ok) widget.onCancel();
+                        else setState(() => authenticated = true);
+                }
         }
 
         @override
         void dispose() {
                 widget.configNotifier.removeListener(reload);
                 localMaskNotifier.dispose();
+                iridiumModeNotifier.dispose();
                 sleepController.dispose();
                 seaController.dispose();
                 captureController.dispose();
-                iridiumModeNotifier.dispose();
                 super.dispose();
         }
 
+        /// Détection de modifications
         bool get maskChanged => localMaskNotifier.value != initialMask;
-        bool get seriesChanged => (sleepTime != initSleepTime && !invalidSleepTime) ||
+        bool get seriesChanged =>
+        (sleepTime != initSleepTime && !invalidSleepTime) ||
                 (seaPressure != initSeaPressure) ||
                 (captureAmount != initCaptureAmount && !invalidCaptureAmount) ||
                 (iridiumMode != initIridiumMode);
 
+        /// Confirmation en quittant l'écran si des changements sont non sauvegardés
         Future<bool> confirmDiscard() async {
                 if (maskChanged || seriesChanged) return showDiscardDialog(context);
                 return true;
@@ -109,12 +187,15 @@ class ConfigScreenState extends State<ConfigScreen> {
         @override
         Widget build(BuildContext context) {
                 if (!authenticated) return const SizedBox.shrink();
+
                 return WillPopScope(
                         onWillPop: confirmDiscard,
                         child: SingleChildScrollView(
                                 padding: const EdgeInsets.all(16),
                                 child: Column(
                                         children: [
+
+                                                /// Gestion des capteurs avec le masque (bitmask)
                                                 ...createAllSensorGroups(
                                                         maskNotifier: localMaskNotifier,
                                                         getSensors: getSensors,
@@ -127,7 +208,7 @@ class ConfigScreenState extends State<ConfigScreen> {
 
                                                 const SizedBox(height: 16),
 
-                                                // Appliquer masque
+                                                /// Bouton d'application du masque
                                                 ConfigButton(
                                                         skipConfirmation: true,
                                                         action: () => sendMaskConfig(
@@ -135,12 +216,9 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                                 initialMask: initialMask,
                                                                 newMask: localMaskNotifier.value,
                                                                 messageService: widget.messageService
-                                                        ).then(
-                                                                        (ok) {
+                                                        ).then((ok) {
                                                                                 if (ok) {
-                                                                                        // Met à jour la valeur partagée
                                                                                         widget.activeMaskNotifier.value = localMaskNotifier.value;
-                                                                                        // Réinitialise initialMask pour désactiver le bouton
                                                                                         setState(() => initialMask = localMaskNotifier.value);
                                                                                 }
                                                                                 return ok;
@@ -156,12 +234,18 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                         idleColor: Theme.of(context).primaryColor,
                                                         successColor: Colors.green,
                                                         failureColor: Colors.red,
-                                                        enabled: maskChanged
+                                                        enabled: !isReadOnly && maskChanged
                                                 ),
 
                                                 const SizedBox(height: 24),
 
-                                                Center(child: Text(tr('config.collection_settings'), style: Theme.of(context).textTheme.titleMedium)),
+                                                /// Paramètres séries
+                                                Center(
+                                                        child: Text(
+                                                                tr('config.collection_settings'),
+                                                                style: Theme.of(context).textTheme.titleMedium
+                                                        )
+                                                ),
 
                                                 const SizedBox(height: 8),
 
@@ -172,12 +256,15 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                                 padding: const EdgeInsets.all(16),
                                                                 child: Column(
                                                                         children: [
+
+                                                                                /// Input : Sleep time
                                                                                 TextFormField(
                                                                                         controller: sleepController,
                                                                                         decoration: InputDecoration(
                                                                                                 labelText: tr('config.sleep_minutes'),
                                                                                                 labelStyle: TextStyle(color: invalidSleepTime ? Colors.red : null, fontWeight: FontWeight.bold)
                                                                                         ),
+                                                                                        enabled: !isReadOnly,
                                                                                         keyboardType: TextInputType.number,
                                                                                         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                                                                         onChanged: (value) {
@@ -189,23 +276,25 @@ class ConfigScreenState extends State<ConfigScreen> {
 
                                                                                 const SizedBox(height: 8),
 
+                                                                                /// Input : Sea pressure
                                                                                 TextFormField(
                                                                                         controller: seaController,
-                                                                                        decoration: InputDecoration(
-                                                                                                labelText: tr('config.sea_level_pressure')
-                                                                                        ),
+                                                                                        decoration: InputDecoration(labelText: tr('config.sea_level_pressure')),
+                                                                                        enabled: !isReadOnly,
                                                                                         keyboardType: TextInputType.numberWithOptions(decimal: true),
                                                                                         onChanged: (value) => setState(() => seaPressure = double.tryParse(value) ?? seaPressure)
                                                                                 ),
 
                                                                                 const SizedBox(height: 8),
 
+                                                                                /// Input : Capture amount
                                                                                 TextFormField(
                                                                                         controller: captureController,
                                                                                         decoration: InputDecoration(
                                                                                                 labelText: tr('config.number_of_captures'),
                                                                                                 labelStyle: TextStyle(color: invalidCaptureAmount ? Colors.red : null, fontWeight: FontWeight.bold)
                                                                                         ),
+                                                                                        enabled: !isReadOnly,
                                                                                         keyboardType: TextInputType.number,
                                                                                         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                                                                         onChanged: (value) {
@@ -217,6 +306,7 @@ class ConfigScreenState extends State<ConfigScreen> {
 
                                                                                 const SizedBox(height: 8),
 
+                                                                                /// Sélection du mode Iridium
                                                                                 Card(
                                                                                         color: Colors.grey[700],
                                                                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -225,28 +315,25 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                                                                 children: [
                                                                                                         Padding(
                                                                                                                 padding: const EdgeInsets.all(8.0),
-                                                                                                                child: Text(
-                                                                                                                        tr('config.iridium_mode'),
-                                                                                                                        style: const TextStyle(fontWeight: FontWeight.bold)
-                                                                                                                )
+                                                                                                                child: Text(tr('config.iridium_mode'), style: const TextStyle(fontWeight: FontWeight.bold))
                                                                                                         ),
                                                                                                         RadioListTile<int>(
                                                                                                                 value: 0,
                                                                                                                 groupValue: iridiumMode,
-                                                                                                                onChanged: (value) => setState(() => iridiumMode = value ?? 0),
+                                                                                                                onChanged: isReadOnly ? null : (value) => setState(() => iridiumMode = value ?? 0),
                                                                                                                 title: Text(tr('config.iridium_none'))
                                                                                                         ),
                                                                                                         RadioListTile<int>(
                                                                                                                 value: 1,
                                                                                                                 groupValue: iridiumMode,
-                                                                                                                onChanged: (value) => setState(() => iridiumMode = value ?? 0),
+                                                                                                                onChanged: isReadOnly ? null : (value) => setState(() => iridiumMode = value ?? 0),
                                                                                                                 title: Text(tr('config.iridium_netav')),
                                                                                                                 subtitle: Text(tr('config.iridium_netav2'))
                                                                                                         ),
                                                                                                         RadioListTile<int>(
                                                                                                                 value: 2,
                                                                                                                 groupValue: iridiumMode,
-                                                                                                                onChanged: (value) => setState(() => iridiumMode = value ?? 0),
+                                                                                                                onChanged: isReadOnly ? null : (value) => setState(() => iridiumMode = value ?? 0),
                                                                                                                 title: Text(tr('config.iridium_quality')),
                                                                                                                 subtitle: Text(tr('config.iridium_quality2'))
                                                                                                         )
@@ -260,11 +347,12 @@ class ConfigScreenState extends State<ConfigScreen> {
 
                                                 const SizedBox(height: 8),
 
+                                                /// Boutons Eenvoyer + Reset
                                                 Row(
                                                         children: [
-                                                                // Bouton “Envoyer les paramètres”
+
+                                                                /// Bouton envoyer
                                                                 Expanded(
-                                                                        flex: 1,
                                                                         child: ConfigButton(
                                                                                 action: () => sendSeriesConfig(
                                                                                         messageService: widget.messageService,
@@ -293,15 +381,14 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                                                 idleColor: Theme.of(context).primaryColor,
                                                                                 successColor: Colors.green,
                                                                                 failureColor: Colors.red,
-                                                                                enabled: seriesChanged && !invalidSleepTime && !invalidCaptureAmount
+                                                                                enabled: !isReadOnly && seriesChanged && !invalidSleepTime && !invalidCaptureAmount
                                                                         )
                                                                 ),
 
                                                                 const SizedBox(width: 8),
 
-                                                                // Bouton “Reset default”
+                                                                /// Bouton reset
                                                                 Expanded(
-                                                                        flex: 1,
                                                                         child: ConfigButton(
                                                                                 action: () => resetToDefaults(widget.messageService),
                                                                                 confirmTitle: tr('config.confirm_reset'),
@@ -316,7 +403,7 @@ class ConfigScreenState extends State<ConfigScreen> {
                                                                                 idleColor: Colors.red,
                                                                                 successColor: Colors.green,
                                                                                 failureColor: Colors.red,
-                                                                                enabled: true
+                                                                                enabled: !isReadOnly
                                                                         )
                                                                 )
                                                         ]

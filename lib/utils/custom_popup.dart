@@ -7,12 +7,14 @@ class CustomPopup extends StatelessWidget {
         final String title;
         final Widget content;
         final List<Widget> actions;
+        final bool showCloseButton;
 
         const CustomPopup({
                 Key? key,
                 required this.title,
                 required this.content,
-                required this.actions
+                required this.actions,
+                this.showCloseButton = true
         }) : super(key: key);
 
         @override
@@ -54,6 +56,7 @@ class CustomPopup extends StatelessWidget {
                                                                                                 )
                                                                                         )
                                                                                 ),
+                                                                                if (showCloseButton)
                                                                                 GestureDetector(
                                                                                         onTap: () => Navigator.of(context).pop(),
                                                                                         child: const Icon(

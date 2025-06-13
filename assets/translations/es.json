@@ -14,7 +14,7 @@
 		"cable_connection": "Conexión por cable",
 		"disconnect": "Desconectar",
 		"disconnect_confirmation": "Realmente desea desconectarse?",
-		"lost_connection": "Conexión perdida después de: {time}\n\nVerifique el cable o el interruptor de depuración de hardware."
+		"lost_connection": "Conexión perdida después de: {time}\n\nVerifique el cable, el Bluetooth o el interruptor de depuración de hardware."
 	},
 
 	"home": {
@@ -189,7 +189,9 @@
 		"iridium_netav": "Rápido (0/5)",
 		"iridium_netav2": "NetAv",
 		"iridium_quality": "Preciso (0-5)",
-		"iridium_quality2": "Automático"
+		"iridium_quality2": "Automático",
+		"bluetooth_blocked_title" : "Bluetooth? -> Solo lectura",
+		"bluetooth_blocked_message" : "Conectado por Bluetooth, no podrá modificar ningún ajuste.\n\nSi desea modificar los ajustes, conecte mediante cable USB."
 	},
 
 	"settings": {

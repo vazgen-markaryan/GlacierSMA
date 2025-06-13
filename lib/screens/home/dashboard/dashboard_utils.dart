@@ -2,6 +2,7 @@ import 'dashboard_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:rev_glacier_sma_mobile/utils/constants.dart';
+import 'package:rev_glacier_sma_mobile/utils/global_state.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_popup.dart';
 import 'package:rev_glacier_sma_mobile/utils/message_service.dart';
 import 'package:rev_glacier_sma_mobile/screens/test/test_utils.dart';
@@ -31,12 +32,10 @@ mixin DashboardUtils on State<Home_Screen> {
         late final MessageService messageService;
 
         /// État de connexion et onglet courant
-        late bool isConnected;
         int selectedIndex = 0;
 
         /// Initialise UnifiedDashboardController et MessageService
         void initDashboard(Home_Screen widget) {
-                isConnected = widget.isConnected;
                 final debugManager = DebugLogUpdater();
 
                 if (widget.plugin != null) {
@@ -53,18 +52,29 @@ mixin DashboardUtils on State<Home_Screen> {
                                 onConnectionLost: handleConnectionLost,
                                 onFatalReceived: handleFatalError
                         );
+
+                        // Met à jour le mode de connexion global
+                        GlobalConnectionState.instance.setUsbConnected();
                 }
                 else if (widget.bluetoothDevice != null) {
-                        messageService = DummyMessageService(); // Car pas de serial sous BLE
+                        messageService = DummyMessageService();
 
                         controller = DashboardController.bluetooth(
                                 bluetoothDevice: widget.bluetoothDevice!,
                                 debugLogManager: debugManager,
-                                onFatalReceived: handleFatalError
+                                onFatalReceived: handleFatalError,
+                                onConnectionLost: handleConnectionLost
                         );
+
+                        GlobalConnectionState.instance.setBluetoothConnected();
+                }
+                else {
+                        // Cas très rare mais on est safe
+                        GlobalConnectionState.instance.setDisconnected();
                 }
 
-                WidgetsBinding.instance.addPostFrameCallback((_) {
+                WidgetsBinding.instance.addPostFrameCallback(
+                        (_) {
                                 if (mounted) {
                                         controller.init(() => setState(() {
                                                         }
@@ -76,7 +86,7 @@ mixin DashboardUtils on State<Home_Screen> {
 
         Future<void> handleConnectionLost(Duration elapsed) async {
                 if (!mounted) return;
-                setState(() => isConnected = false);
+                GlobalConnectionState.instance.setDisconnected();
 
                 // Formate le temps écoulé
                 final formatted = "${elapsed.inHours}h ${elapsed.inMinutes.remainder(60)}m ${elapsed.inSeconds.remainder(60)}s";
@@ -357,48 +367,52 @@ mixin DashboardUtils on State<Home_Screen> {
                 }
         }
 
-        /// Les 4 pages de la BottomNavBar
-        List<Widget> get pages => [
+        /// Les 4 (ou 5) pages de la BottomNavBar
+        List<Widget> get pages {
+                final mode = GlobalConnectionState.instance.currentMode;
 
-                // Tableau de bord
-                ValueListenableBuilder<bool>(
-                        valueListenable: controller.isInitialLoading,
-                        builder: (_, loading, __) {
-                                if (loading) return const Center(child: CircularProgressIndicator());
-                                return DashboardBody(
-                                        getSensors: getSensors,
-                                        activeMaskNotifier: controller.activeMaskNotifier
-                                );
-                        }
-                ),
+                return [
+                        // Tableau de bord
+                        ValueListenableBuilder<bool>(
+                                valueListenable: controller.isInitialLoading,
+                                builder: (_, loading, __) {
+                                        if (loading) return const Center(child: CircularProgressIndicator());
+                                        return DashboardBody(
+                                                getSensors: getSensors,
+                                                activeMaskNotifier: controller.activeMaskNotifier
+                                        );
+                                }
+                        ),
 
-                // Debug logs
-                DebugScreen(
-                        debugLogManager: controller.debugLogManager,
-                        activeMaskNotifier: controller.activeMaskNotifier
-                ),
+                        // Debug logs
+                        DebugScreen(
+                                debugLogManager: controller.debugLogManager,
+                                activeMaskNotifier: controller.activeMaskNotifier
+                        ),
 
-                // Configuration capteurs
-                ConfigScreen(
-                        key: configKey,
-                        activeMaskNotifier: controller.activeMaskNotifier,
-                        messageService: messageService,
-                        onCancel: () => setState(() => selectedIndex = 0),
-                        configNotifier: controller.configNotifier
-                ),
+                        // Configuration capteurs
+                        ConfigScreen(
+                                key: configKey,
+                                activeMaskNotifier: controller.activeMaskNotifier,
+                                messageService: messageService,
+                                onCancel: () => setState(() => selectedIndex = 0),
+                                configNotifier: controller.configNotifier
+                        ),
 
-                // Environnement contrôlé
-                TestScreen(
-                        key: testScreenKey,
-                        activeMaskNotifier: controller.activeMaskNotifier,
-                        getSensors: getSensors,
-                        iterationNotifier: controller.iterationNotifier
-                ),
+                        // ➔ On ajoute TestScreen seulement si USB
+                        if (mode == ConnectionMode.usb)
+                        TestScreen(
+                                key: testScreenKey,
+                                activeMaskNotifier: controller.activeMaskNotifier,
+                                getSensors: getSensors,
+                                iterationNotifier: controller.iterationNotifier
+                        ),
 
-                // Paramètres
-                SettingsScreen(
-                        firmwareNotifier: controller.firmwareNotifier,
-                        iterationNotifier: controller.iterationNotifier
-                )
-        ];
+                        // Paramètres
+                        SettingsScreen(
+                                firmwareNotifier: controller.firmwareNotifier,
+                                iterationNotifier: controller.iterationNotifier
+                        )
+                ];
+        }
 }

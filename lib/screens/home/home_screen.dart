@@ -13,14 +13,12 @@ import 'package:rev_glacier_sma_mobile/screens/home/dashboard/dashboard_header.d
 /// Écran principal qui gère l'affichage des onglets et la navigation
 class Home_Screen extends StatefulWidget {
         final FlutterSerialCommunication? plugin;
-        final bool isConnected;
         final List<DeviceInfo> connectedDevices;
         final BluetoothDevice? bluetoothDevice;
 
         const Home_Screen({
                 Key? key,
                 required this.plugin,
-                required this.isConnected,
                 required this.connectedDevices,
                 this.bluetoothDevice
         }) : super(key: key);
@@ -47,7 +45,6 @@ class Home_ScreenState extends State<Home_Screen> with DashboardUtils {
                                         automaticallyImplyLeading: false,
                                         backgroundColor: secondaryColor,
                                         title: DashboardHeader(
-                                                isConnected: isConnected,
                                                 connectedDevices: widget.connectedDevices,
                                                 batteryVoltageNotifier: controller.batteryVoltage,
                                                 firmwareNotifier: controller.firmwareNotifier,

@@ -40,6 +40,7 @@ class DashboardController {
         EventChannel? messageChannel;
         BluetoothDataReader? dataReader;
         Timer? pollingTimer;
+        StreamSubscription<BluetoothConnectionState>? bleConnectionSubscription;
 
         DashboardController.serial({
                 required this.plugin,
@@ -54,12 +55,12 @@ class DashboardController {
         DashboardController.bluetooth({
                 required this.bluetoothDevice,
                 required this.debugLogManager,
-                required this.onFatalReceived
+                required this.onFatalReceived,
+                required this.onConnectionLost
         }) : type = ConnectionType.bluetooth,
                 plugin = null,
                 connectedDevices = null,
-                messageService = null,
-                onConnectionLost = null;
+                messageService = null;
 
         Future<void> init(void Function() onDataReceived, BuildContext context) async {
                 connectionStopwatch.start();
@@ -92,7 +93,7 @@ class DashboardController {
                         );
 
                         // PING USB pour perte de connexion
-                        pingTimer = Timer.periodic(const Duration(seconds: 2),
+                        pingTimer = Timer.periodic(const Duration(seconds: 2), 
                                 (_) async {
                                         final ok = await messageService!.sendString(communicationMessageAndroid);
                                         if (!ok) {
@@ -110,6 +111,20 @@ class DashboardController {
                         // MODE BLUETOOTH
                         dataReader = BluetoothDataReader(bluetoothDevice!);
                         await dataReader!.init();
+
+                        // ATTENTION: Ici on écoute la perte de connexion BLE
+                        bleConnectionSubscription = bluetoothDevice!.connectionState.listen(
+                                (state) {
+                                        if (state == BluetoothConnectionState.disconnected) {
+                                                print("🔌 BLE disconnected (listener)");
+                                                pollingTimer?.cancel();
+                                                connectionStopwatch.stop();
+                                                if (onConnectionLost != null) {
+                                                        onConnectionLost!(connectionStopwatch.elapsed);
+                                                }
+                                        }
+                                }
+                        );
 
                         pollingTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
                                         if (!context.mounted) return;
@@ -145,11 +160,13 @@ class DashboardController {
         void dispose() {
                 pingTimer?.cancel();
                 pollingTimer?.cancel();
+                bleConnectionSubscription?.cancel();
                 isInitialLoading.dispose();
                 batteryVoltage.dispose();
                 firmwareNotifier.dispose();
                 activeMaskNotifier.dispose();
                 configNotifier.dispose();
                 ramNotifier.dispose();
+                iterationNotifier.dispose();
         }
 }

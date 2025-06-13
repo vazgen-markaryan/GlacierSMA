@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:rev_glacier_sma_mobile/utils/global_state.dart';
 import 'package:flutter_serial_communication/models/device_info.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/hardware_info/hardware_svg.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_processor.dart';
 
-/// En-tête du Dashboard : statut USB + nom + icône “éditer” + indicateur batterie.
-/// Se reconstruit automatiquement quand [firmwareNotifier] émet une nouvelle donnée.
 class DashboardHeader extends StatelessWidget {
-        final bool isConnected;
         final List<DeviceInfo> connectedDevices;
         final ValueNotifier<double?> batteryVoltageNotifier;
         final ValueNotifier<RawData?> firmwareNotifier;
@@ -16,7 +14,6 @@ class DashboardHeader extends StatelessWidget {
 
         const DashboardHeader({
                 super.key,
-                required this.isConnected,
                 required this.connectedDevices,
                 required this.batteryVoltageNotifier,
                 required this.ramNotifier,
@@ -29,60 +26,64 @@ class DashboardHeader extends StatelessWidget {
                 return ValueListenableBuilder<RawData?>(
                         valueListenable: firmwareNotifier,
                         builder: (_, idData, __) {
-                                // Choix du nom : priorité au "name" venant du bloc <id>, sinon productName USB, sinon “Appareil inconnu”
-                                String name;
-                                if (isConnected) {
-                                        if (idData != null && (idData.asMap['name']?.isNotEmpty ?? false)) {
-                                                name = idData.asMap['name']!;
-                                        }
-                                        else if (connectedDevices.isNotEmpty) {
-                                                name = connectedDevices.first.productName;
-                                        }
-                                        else {
-                                                name = tr('home.dashboard.unknown_device');
-                                        }
-                                }
-                                else {
-                                        name = tr('home.dashboard.not_connected');
-                                }
+                                return ValueListenableBuilder<ConnectionMode>(
+                                        valueListenable: GlobalConnectionState.instance.modeNotifier,
+                                        builder: (_, mode, __) {
+                                                String name;
+                                                IconData icon;
+                                                Color iconColor;
 
-                                return Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                                Expanded(
-                                                        child: Row(
-                                                                children: [
-                                                                        Icon(
-                                                                                isConnected ? Icons.usb : Icons.usb_off,
-                                                                                color: isConnected ? Colors.green : Colors.red
-                                                                        ),
-                                                                        const SizedBox(width: 8),
-                                                                        Flexible(
-                                                                                child: Text(
-                                                                                        name,
-                                                                                        style: const TextStyle(fontSize: 16),
-                                                                                        overflow: TextOverflow.ellipsis
-                                                                                )
-                                                                        ),
-                                                                        const SizedBox(width: 8),
-                                                                        GestureDetector(
-                                                                                onTap: onRename,
-                                                                                child: const Icon(
-                                                                                        Icons.edit,
-                                                                                        size: 25,
-                                                                                        color: Colors.white70
-                                                                                )
+                                                if (mode == ConnectionMode.usb) {
+                                                        icon = Icons.usb;
+                                                        iconColor = Colors.green;
+                                                        name = (idData?.asMap['name']?.isNotEmpty ?? false)
+                                                                ? idData!.asMap['name']!
+                                                                : (connectedDevices.isNotEmpty
+                                                                        ? connectedDevices.first.productName
+                                                                        : tr('home.dashboard.unknown_device'));
+                                                }
+                                                else if (mode == ConnectionMode.bluetooth) {
+                                                        icon = Icons.bluetooth;
+                                                        iconColor = Colors.blue;
+                                                        name = (idData?.asMap['name']?.isNotEmpty ?? false)
+                                                                ? idData!.asMap['name']!
+                                                                : tr('home.dashboard.unknown_device');
+                                                }
+                                                else {
+                                                        icon = Icons.usb_off;
+                                                        iconColor = Colors.red;
+                                                        name = tr('home.dashboard.not_connected');
+                                                }
+
+                                                return Row(
+                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                        children: [
+                                                                Expanded(
+                                                                        child: Row(
+                                                                                children: [
+                                                                                        Icon(icon, color: iconColor),
+                                                                                        const SizedBox(width: 8),
+                                                                                        Flexible(
+                                                                                                child: Text(name, style: const TextStyle(fontSize: 16), overflow: TextOverflow.ellipsis)
+                                                                                        ),
+                                                                                        const SizedBox(width: 8),
+
+                                                                                        // Affiche le bouton de renommage SEULEMENT en USB
+                                                                                        if (mode == ConnectionMode.usb)
+                                                                                        GestureDetector(
+                                                                                                onTap: onRename,
+                                                                                                child: const Icon(Icons.edit, size: 25, color: Colors.white70)
+                                                                                        )
+                                                                                ]
                                                                         )
-                                                                ]
-                                                        )
-                                                ),
-
-                                                // Indicateur de batterie et RAM
-                                                HardwareSVG(
-                                                        voltageNotifier: batteryVoltageNotifier,
-                                                        ramNotifier: ramNotifier
-                                                )
-                                        ]
+                                                                ),
+                                                                HardwareSVG(
+                                                                        voltageNotifier: batteryVoltageNotifier,
+                                                                        ramNotifier: ramNotifier
+                                                                )
+                                                        ]
+                                                );
+                                        }
                                 );
                         }
                 );
