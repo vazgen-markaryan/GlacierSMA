@@ -8,8 +8,8 @@ import 'package:flutter_serial_communication/models/device_info.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
 import 'package:rev_glacier_sma_mobile/screens/debug_log/debug_log_updater.dart';
-import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_reader.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/data_managers/data_processor.dart';
+import 'package:rev_glacier_sma_mobile/screens/home/data_managers/serial_data_reader.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/data_managers/bluetooth_data_reader.dart';
 
 enum ConnectionType {
@@ -116,7 +116,6 @@ class DashboardController {
 
                                         final rawDataList = await dataReader!.readAllData();
                                         for (var singleRaw in rawDataList) {
-                                                print('✅✅✅RawDataList: $singleRaw');
                                                 processRawData(
                                                         rawData: singleRaw,
                                                         debugLogManager: debugLogManager,

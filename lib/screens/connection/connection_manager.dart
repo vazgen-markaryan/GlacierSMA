@@ -9,14 +9,14 @@ import 'package:rev_glacier_sma_mobile/screens/home/home_screen.dart';
 import 'package:flutter_serial_communication/flutter_serial_communication.dart';
 import 'package:rev_glacier_sma_mobile/screens/connection/connection_screen.dart';
 
-/// --- Abstraction unifiée ---
+/// Abstraction unifiée
 abstract class DeviceCandidate {
         String get displayName;
         String get uniqueId;
         Future<bool> connect(BuildContext context);
 }
 
-/// --- USB wrapper ---
+/// USB wrapper
 class UsbDeviceCandidate extends DeviceCandidate {
         final DeviceInfo device;
         final FlutterSerialCommunication plugin;
@@ -35,7 +35,7 @@ class UsbDeviceCandidate extends DeviceCandidate {
         }
 }
 
-/// --- BLE wrapper ---
+/// BLE wrapper
 class BleDeviceCandidate extends DeviceCandidate {
         final BluetoothDevice device;
 
@@ -54,8 +54,8 @@ class BleDeviceCandidate extends DeviceCandidate {
         }
 }
 
-/// --- Popup unifiée pour tous types de devices ---
-Future<void> showDeviceSelectionDialogUnifiedDynamic(
+/// Popup unifiée pour tous types de devices
+Future<void> showDeviceSelectionDialog(
         BuildContext context,
         ValueNotifier<List<DeviceCandidate>> devicesNotifier
 ) async {
@@ -127,12 +127,12 @@ Future<void> showDeviceSelectionDialogUnifiedDynamic(
         );
 }
 
-/// --- Scan USB ---
+/// Scan USB
 Future<void> scanUsbDevices(BuildContext context, FlutterSerialCommunication plugin) async {
         ValueNotifier<List<DeviceCandidate>> devicesNotifier = ValueNotifier([]);
 
         // Démarre la popup immédiatement (affiche "Recherche...")
-        showDeviceSelectionDialogUnifiedDynamic(context, devicesNotifier);
+        showDeviceSelectionDialog(context, devicesNotifier);
 
         // Pendant 10 secondes, on scanne les USB chaque 500ms
         final endTime = DateTime.now().add(const Duration(seconds: 10));
@@ -153,7 +153,7 @@ Future<void> scanUsbDevices(BuildContext context, FlutterSerialCommunication plu
         }
 }
 
-/// --- Scan BLE ---
+/// Scan BLE
 Future<void> scanBleDevices(BuildContext context) async {
         BluetoothAdapterState state = await FlutterBluePlus.adapterState.first;
         ValueNotifier<List<DeviceCandidate>> devicesNotifier = ValueNotifier([]);
@@ -182,14 +182,14 @@ Future<void> scanBleDevices(BuildContext context) async {
         FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
 
         // On affiche le popup immédiatement et il se mettra à jour
-        await showDeviceSelectionDialogUnifiedDynamic(context, devicesNotifier);
+        await showDeviceSelectionDialog(context, devicesNotifier);
 
         await Future.delayed(const Duration(seconds: 15));
         FlutterBluePlus.stopScan();
         subscription.cancel();
 }
 
-/// --- Déconnexion universelle ---
+/// Déconnexion universelle
 Future<bool> showDisconnectPopup({
         required BuildContext context,
         required FlutterSerialCommunication? plugin,

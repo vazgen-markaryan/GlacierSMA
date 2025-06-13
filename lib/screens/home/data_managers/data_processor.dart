@@ -7,40 +7,49 @@ import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensors_data.dart';
 import 'package:rev_glacier_sma_mobile/screens/debug_log/debug_log_updater.dart';
 import 'package:rev_glacier_sma_mobile/screens/home/sensors/sensor_status_updater.dart';
 
-/// Résultat du parsing CSV : listes d’en-têtes et de valeurs.
-/// Et accès par clé via [asMap].
+/// Structure contenant les headers et les valeurs d'un bloc CSV.
 class RawData {
         final List<String> headers;
         final List<String> values;
 
         RawData(this.headers, this.values);
 
-        /// Accès aux valeurs par nom de colonne (en minuscules).
-        Map<String, String> get asMap => Map.fromIterables(headers.map((headers) => headers.toLowerCase()), values);
+        /// Conversion en map clé-valeur pour accéder facilement aux colonnes.
+        Map<String, String> get asMap => Map.fromIterables(
+                headers.map((h) => h.toLowerCase()),
+                values
+        );
 }
 
-/// Utility pour parser le CSV d’un bloc de données brut.
+/// Parseur principal du format CSV reçu de la station météo.
 class RawDataParser {
-        /// Prend rawData (>=3 lignes) et renvoie [RawData] propre.
         static RawData parse(String rawData) {
-                final lines = rawData.split('\n');
+                // Nettoyage général avant le split
+                final cleanedRaw = rawData
+                        .replaceAll('\r', '') // Supprime retour chariot Windows
+                        .replaceAll('\u0007', ','); // Remplace les BELL par des virgules
+
+                final lines = cleanedRaw.split('\n');
                 if (lines.length < 3) return RawData([], []);
 
+                // Lecture des headers
                 final headers = lines[1]
                         .split(',')
                         .map((header) => header.trim().toLowerCase())
                         .toList();
 
+                // Lecture des valeurs, en nettoyant les bytes parasites (nulls ou padding)
                 final values = lines[2]
                         .split(',')
-                        .map((value) => value.trim().replaceAll('\u0007', ',')) // Remplace par BELL caractère pour Arduino
+                        .map((value) => value.trim().replaceAll('\u0000', '').replaceAll('\x00', '').replaceAll('\u0007', ','))
+                        .map((cleaned) => cleaned.trim())
                         .toList();
 
                 return RawData(headers, values);
         }
 }
 
-/// Traite un bloc `rawData`, gère `<id>`, `<fatal>` et `<active>`.
+/// Traitement général d’un bloc complet reçu
 void processRawData({
         required String rawData,
         required DebugLogUpdater debugLogManager,
@@ -54,7 +63,7 @@ void processRawData({
         required void Function(String reason) onFatalReceived,
         required void Function(RawData configData) onConfigReceived
 }) {
-        // Bloc <id>
+        /// Bloc ID
         if (rawData.startsWith('<id>')) {
                 final idData = RawDataParser.parse(rawData);
                 onIdReceived(idData);
@@ -79,14 +88,14 @@ void processRawData({
                 return;
         }
 
-        // Bloc <config>
+        /// Bloc Config
         if (rawData.startsWith('<config>')) {
                 final configData = RawDataParser.parse(rawData);
                 onConfigReceived(configData);
                 return;
         }
 
-        // Bloc <fatal>
+        /// Bloc Fatal
         if (rawData.contains('<fatal>')) {
                 final lines = rawData.split('\n');
                 final reason = lines.length >= 2 ? lines[1].trim() : 'GENERIC';
@@ -94,7 +103,7 @@ void processRawData({
                 return;
         }
 
-        // Bloc <active>
+        /// Bloc Active
         if (rawData.contains('<active>')) {
                 final lines = rawData.split('\n');
                 if (lines.length >= 2) {
@@ -107,10 +116,10 @@ void processRawData({
                 return;
         }
 
-        // Parsing CSV standard (status / data)
+        /// Bloc général CSV : Status ou Data
         final parsed = RawDataParser.parse(rawData);
 
-        // Récupère et notifie la nouvelle itération
+        // Gestion de l'itération
         final iteration = parsed.headers.indexOf('iteration');
         if (iteration >= 0) {
                 final newIteration = int.tryParse(parsed.values[iteration]) ?? 0;
@@ -121,31 +130,29 @@ void processRawData({
         final values = parsed.values;
         final maxHeaderLength = headers.fold<int>(0, (currentMax, header) => max(currentMax, header.length));
 
-        // Status
+        /// Bloc Status (affiché dans le debug log)
         if (rawData.contains('<status>')) {
                 final statusLog = 'Status:\n' +
-                        headers.asMap().entries.map(
-                                (event) {
-                                        final header = event.value.toUpperCase().padRight(maxHeaderLength);
-                                        final value = values[event.key];
+                        headers.asMap().entries.map((entry) {
+                                        final header = entry.value.toUpperCase().padRight(maxHeaderLength);
+                                        final value = values[entry.key];
                                         return '$header : $value';
                                 }
                         ).join('\n');
                 debugLogManager.setLogChunk(1, statusLog);
         }
 
-        // Data + Batterie + RAM
+        /// Bloc Data (valeurs principales + batterie + RAM)
         if (rawData.contains('<data>')) {
-                final batteryIndex = headers.indexWhere((header) => header.toLowerCase() == 'battery_voltage');
+                final batteryIndex = headers.indexWhere((h) => h == 'battery_voltage');
                 if (batteryIndex != -1) {
                         final voltage = double.tryParse(values[batteryIndex]);
                         if (voltage != null) batteryVoltage.value = voltage;
                 }
 
                 // RAM
-                final ramStackIndex = headers.indexWhere((header) => header.toLowerCase() == 'ram_stack');
-                final ramHeapIndex = headers.indexWhere((header) => header.toLowerCase() == 'ram_heap');
-
+                final ramStackIndex = headers.indexWhere((h) => h == 'ram_stack');
+                final ramHeapIndex = headers.indexWhere((h) => h == 'ram_heap');
                 if (ramStackIndex != -1 && ramHeapIndex != -1) {
                         final ramStack = double.tryParse(values[ramStackIndex]);
                         final ramHeap = double.tryParse(values[ramHeapIndex]);
@@ -153,12 +160,11 @@ void processRawData({
                 }
 
                 final dataLog = '\nValeurs:\n' +
-                        headers.asMap().entries.map((event) {
-                                        final header = event.value.toUpperCase().padRight(maxHeaderLength);
-                                        final raw = values[event.key];
+                        headers.asMap().entries.map((entry) {
+                                        final header = entry.value.toUpperCase().padRight(maxHeaderLength);
+                                        final raw = values[entry.key];
                                         final formatted = double.tryParse(raw) != null
-                                                ? '${double.parse(raw).toStringAsFixed(2)}'
-                                                '${getUnitForHeader(event.value.toLowerCase())}'
+                                                ? '${double.parse(raw).toStringAsFixed(2)}${getUnitForHeader(entry.value)}'
                                                 : raw;
                                         return '$header : $formatted';
                                 }
@@ -168,22 +174,18 @@ void processRawData({
 
         debugLogManager.updateLogs();
 
-        // Mise à jour des capteurs
+        // Mise à jour des sensors
         if (rawData.contains('<data>')) {
-                populateSensorData(
-                        rawData,
-                        [getSensors(SensorType.internal), getSensors(SensorType.modbus)]
-                );
+                populateSensorData(rawData, [
+                                getSensors(SensorType.internal),
+                                getSensors(SensorType.modbus)
+                        ]);
         }
         if (rawData.contains('<status>')) {
-                updateSensorsData(
-                        rawData,
-                        getSensors,
-                        "<status>"
-                );
+                updateSensorsData(rawData, getSensors, "<status>");
         }
 
-        // Notification UI
+        // Si des données existent, on notifie l'UI
         final hasData = [
                 ...getSensors(SensorType.internal),
                 ...getSensors(SensorType.modbus)

@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
+/// Classe qui lit tous les blocs de données sur le périphérique Bluetooth connecté.
 class BluetoothDataReader {
         final BluetoothDevice device;
         late BluetoothService service;
 
+        /// UUIDs des différentes caractéristiques BLE utilisées
         static const Map<String, String> uuids = {
                 'id': '00debc9a-7856-3412-f0de-bc9a78563412',
                 'status': '01debc9a-7856-3412-f0de-bc9a78563412',
@@ -16,12 +18,13 @@ class BluetoothDataReader {
 
         BluetoothDataReader(this.device);
 
+        /// Découverte des services BLE
         Future<void> init() async {
                 List<BluetoothService> services = await device.discoverServices();
                 service = services.firstWhere((s) => s.uuid.toString().toLowerCase().contains("1815"));
         }
 
-        // Tu vas maintenant lire tous les blocs séparément :
+        /// Lecture complète de toutes les caractéristiques (champs ID, STATUS, DATA, ACTIVE, CONFIG)
         Future<List<String>> readAllData() async {
                 List<String> allBlocks = [];
 
@@ -47,6 +50,7 @@ class BluetoothDataReader {
                 return allBlocks;
         }
 
+        /// Fonction utilitaire pour lire une caractéristique BLE donnée
         Future<String> readChar(String charUuid) async {
                 final characteristic = service.characteristics.firstWhere(
                         (char) {
@@ -57,6 +61,7 @@ class BluetoothDataReader {
                 );
 
                 final data = await characteristic.read();
-                return utf8.decode(data);
+                final decoded = utf8.decode(data);
+                return decoded;
         }
 }
