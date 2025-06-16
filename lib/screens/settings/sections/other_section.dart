@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:rev_glacier_sma_mobile/utils/global_state.dart';
 import 'package:rev_glacier_sma_mobile/utils/custom_snackbar.dart';
 import 'package:rev_glacier_sma_mobile/screens/settings/dev_credits.dart';
 import 'package:rev_glacier_sma_mobile/screens/settings/settings_div.dart';
@@ -24,10 +25,11 @@ class OtherSection extends StatelessWidget {
 
         @override
         Widget build(BuildContext context) {
+                final bool isUsbConnected = GlobalConnectionState.instance.currentMode == ConnectionMode.usb;
                 return SettingsDiv(
                         title: tr('settings.others'),
                         children: [
-                                TestTutorialSwitch(),
+                                if (isUsbConnected) TestTutorialSwitch(),
 
                                 ValueListenableBuilder<RawData?>(
                                         valueListenable: firmwareNotifier,
