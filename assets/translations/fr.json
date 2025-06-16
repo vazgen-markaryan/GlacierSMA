@@ -52,6 +52,9 @@
 			"sensor_details": "Détails du capteur",
 			"updated_at": "Mis à jour : {timestamp}",
 			"title_unknown": "Capteur inconnu",
+			"gps_data_unavailable": "Données GPS indisponibles",
+			"cant_launch_gmap": "Impossible de lancer Google Maps",
+			"error_launching_gmap": "Erreur lors du lancement de Google Maps",
 
 			"status": {
 				"activated": "Activé",

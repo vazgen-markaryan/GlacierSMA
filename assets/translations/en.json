@@ -52,6 +52,9 @@
 			"sensor_details": "Sensor Details",
 			"updated_at": "Updated at: {timestamp}",
 			"title_unknown": "Unknown sensor",
+			"gps_data_unavailable": "GPS data is unavailable",
+			"cant_launch_gmap": "Unable to launch Google Maps",
+			"error_launching_gmap" : "Error launching Google Maps",
 
 			"status": {
 				"activated": "Activated",
