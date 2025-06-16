@@ -136,7 +136,7 @@ lib/
 
 ## 📥 Installation (Pré-requis)
 
-- Flutter SDK (version ≥ 3.32.0)
+- [Flutter SDK](https://docs.flutter.dev/get-started/install/windows/mobile) (version ≥ 3.32.0)
 - Dart SDK (version ≥ 3.8.0)
 - Appareil Android 4+
 - Arduino ESP-32 Feather M0
@@ -147,6 +147,80 @@ lib/
 > une configuration matérielle bien précise. Elle **ne peut pas être utilisée telle quelle** avec un
 > autre matériel sans modifications majeures. Ce projet est donc destiné principalement à un usage
 > interne ou personnel.
+
+## 🔑 Configuration de l’écran «Config» en connexion USB (Mot De Passe)
+
+Lorsque l’application est connectée à la station météo via câble USB, l’accès à l’écran de configuration est protégé par un mot de passe par défaut.
+
+> ⚠️ **Important** : Pour avoir un fichier APK avec le mot de passe modifié, vous devez avoir Dart et Flutter installés sur votre machine. 
+> (Voir la section Installation, plus haut). C'est souvent difficile d'installer Dart et Flutter. Si vous avez des difficultés, vous pouvez chercher de l'aide sur Internet (ChatGPT, StackOverflow, YouTube).
+
+> ⚠️ **Important** : Si vous n'avez pas les droits de lecture sur le dépôt, vous devez demander à quelqu'un qui a les droits de le faire pour vous. (Carl Beaulieu, par exemple)
+
+Pour changer ce mot de passe, suivez ces étapes :
+
+- Clonez le projet et préparez les dossiers pour la modification
+```bash
+   git clone https://github.com/climaCAL/RevGlacierSMA-Mobile
+```
+
+- Ouvrez le projet dans votre IDE et déplacez-vous dans le dossier `RevGlacierSMA-Mobile` ou tout simplement ouvrez le terminal dans le dossier `RevGlacierSMA-Mobile`
+```bash
+   cd RevGlacierSMA-Mobile
+```
+
+- Installez les dépendances avec les commandes suivantes (une par une):
+```bash
+   flutter pub get
+   flutter pub outdated
+   flutter pub upgrade
+```
+
+- Dans le dossier `lib` créez le fichier `secrets.dart`. Vous devez l'avoir juste à côté du fichier `main`.
+
+![img.png](assets/readme/secrets.png)
+
+- Ajoutez le code suivant dans le fichier `secrets.dart` :
+
+```dart
+const String configPassword = "Votre-Mot-De-Passe-Entre-Les-Guillemets";
+```
+
+- Remplacez `"Votre-Mot-De-Passe-Entre-Les-Guillemets"` par le mot de passe souhaité, par exemple `"1234"` (Non SVP n'utilisez pas "1234" comme mot de passe, c'est juste un exemple).
+- Enregistrez le fichier `secrets.dart` avec la combinaison de touches `Ctrl + S` ou `Cmd + S` sur Mac.
+- Revenez dans le terminal et exécutez la commande suivante pour créer le fichier APK avec le mot de passe modifié :
+
+```bash
+   flutter build apk --release
+```
+
+- Une fois la compilation terminée (environ 3 minutes), le fichier APK sera généré dans le dossier `build/app/outputs/flutter-apk/`. Vous pouvez le trouver sous le nom `app-release.apk`.
+
+![apk.png](assets/readme/apk.png)
+
+- Pour faciliter la vie des autres, renommez le fichier APK en quelque chose de plus explicite, par exemple `SMA-Mobile-20-Juin-2025.apk`.
+- Comme ça les gens sauront que c'est la version du 20 Juin 2025.
+- Aussi il est fortement recommandé de le déplacer dans le dossier `RevGlacierSMA-Mobile` (drag and drop) et remplacer l'APK existant pour que les autres puissent le télécharger plus facilement.
+- Si vous avez bien suivi les étapes jusqu'ici, vous devriez avoir un fichier APK tout en bas de votre dépôt GitHub (juste à côté du `README.md`) prêt à être partagé.
+
+![sma.png](assets/readme/sma.png)
+
+- Une fois terminé, vous devez sauvegarder vos modifications dans le dépôt GitHub en utilisant les commandes suivantes (une par une):
+
+> ⚠️ **Important** : Si vous n'avez pas les droits d'écriture sur le dépôt, vous devez demander à quelqu'un qui a les droits de le faire pour vous. (Carl Beaulieu, par exemple)
+
+```bash
+   git add .
+   git commit -m "Modification du mot de passe de l'écran Config"
+   git push
+```
+
+- Une fois que vous avez terminé, vous pouvez partager le fichier APK avec les autres utilisateurs ou les demander d'aller sur le dépôt [GitHub](https://github.com/climaCAL/RevGlacierSMA-Mobile) et de télécharger le fichier APK modifié.
+- Ils devront le voir sur la page principale du dépôt GitHub.
+
+![git.png](assets/readme/git.png)
+
+- Ils pourront l'installer sur leur appareil Android et accéder à l'écran de configuration avec le nouveau mot de passe.
 
 ## 🧠 À propos du projet
 
