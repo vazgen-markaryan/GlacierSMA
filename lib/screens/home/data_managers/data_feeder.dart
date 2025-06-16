@@ -37,8 +37,12 @@ void populateSensorData(
                                         final raw = values[index];
                                         final doubleFormatted = double.tryParse(raw);
                                         if (doubleFormatted != null) {
-                                                // Texte limité à 2 décimales
-                                                formatted = '${doubleFormatted.toStringAsFixed(2)}${getUnitForHeader(key.header)}';
+                                                if (key.header.toLowerCase().contains("latitude") || key.header.toLowerCase().contains("longitude")) {
+                                                        formatted = '${doubleFormatted.toStringAsFixed(6)}${getUnitForHeader(key.header)}';
+                                                }
+                                                else {
+                                                        formatted = '${doubleFormatted.toStringAsFixed(2)}${getUnitForHeader(key.header)}';
+                                                }
                                                 numeric = double.parse(doubleFormatted.toStringAsFixed(2));
                                         }
                                         else {

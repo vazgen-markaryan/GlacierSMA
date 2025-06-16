@@ -53,9 +53,6 @@ class SensorPopupState extends State<SensorPopup> with SingleTickerProviderState
         @override
         Widget build(BuildContext context) {
                 final isGpsSensor = widget.sensor.title?.toLowerCase().contains('gps') ?? false;
-                final gpsData = GpsUtils.extractGpsValues(widget.sensor);
-                final latitude = gpsData['latitude'];
-                final longitude = gpsData['longitude'];
 
                 return ScaleTransition(
                         scale: scale,
@@ -74,6 +71,11 @@ class SensorPopupState extends State<SensorPopup> with SingleTickerProviderState
                                                                         valueListenable: widget.sensor.dataNotifier,
                                                                         builder: (_, data, __) {
                                                                                 final items = data.entries.toList();
+
+                                                                                final gpsData = GpsUtils.extractGpsValues(data);
+                                                                                final latitude = gpsData['latitude'];
+                                                                                final longitude = gpsData['longitude'];
+
                                                                                 return Column(
                                                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                                                         children: [
@@ -88,8 +90,8 @@ class SensorPopupState extends State<SensorPopup> with SingleTickerProviderState
 
                                                                                                 if (isGpsSensor)
                                                                                                 buildGpsRow(
-                                                                                                        lat: latitude,
-                                                                                                        lon: longitude
+                                                                                                        latitude: latitude,
+                                                                                                        longitude: longitude
                                                                                                 ),
 
                                                                                                 if (errorMessage != null)
@@ -165,11 +167,15 @@ class SensorPopupState extends State<SensorPopup> with SingleTickerProviderState
         }
 
         /// Génère le row complet Google Maps (entier cliquable)
-        Widget buildGpsRow({required double? lat, required double? lon}) {
+        Widget buildGpsRow({required double? latitude, required double? longitude}) {
                 return GestureDetector(
                         onTap: () {
-                                if (lat != null && lon != null && lat != 0 && lon != 0) {
-                                        openInGoogleMaps(context, lat, lon);
+                                if (latitude != null && longitude != null && latitude != 0 && longitude != 0) {
+                                        openInGoogleMaps(
+                                                latitude: latitude,
+                                                longitude: longitude,
+                                                onError: showTemporaryError
+                                        );
                                 }
                                 else {
                                         showTemporaryError(tr("home.sensors.gps_data_unavailable"));
@@ -222,13 +228,9 @@ class SensorPopupState extends State<SensorPopup> with SingleTickerProviderState
 
 /// Extraction des données GPS à partir du SensorsData
 class GpsUtils {
-        static Map<String, double?> extractGpsValues(SensorsData sensor) {
+        static Map<String, double?> extractGpsValues(Map<DataMap, dynamic> data) {
                 double? latitude;
                 double? longitude;
-                double? hdop;
-                int? satellites;
-
-                final data = sensor.dataNotifier.value;
 
                 for (final entry in data.entries) {
                         final key = entry.key.header.toLowerCase();
@@ -240,40 +242,28 @@ class GpsUtils {
                         if (key.contains('longitude')) {
                                 longitude = (value is num) ? value.toDouble() : double.tryParse(value.toString());
                         }
-                        if (key.contains('hdop')) {
-                                hdop = (value is num) ? value.toDouble() : double.tryParse(value.toString());
-                        }
-                        if (key.contains('satellite')) {
-                                satellites = (value is num) ? value.toInt() : int.tryParse(value.toString());
-                        }
                 }
-
                 return {
                         'latitude': latitude,
-                        'longitude': longitude,
-                        'hdop': hdop,
-                        'satellites': satellites?.toDouble()
+                        'longitude': longitude
                 };
         }
 }
 
 /// Ouvre Google Maps à la position spécifiée.
-Future<void> openInGoogleMaps(BuildContext context, double latitude, double longitude) async {
+Future<void> openInGoogleMaps({
+        required double latitude,
+        required double longitude,
+        required void Function(String) onError
+}) async {
         final url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$latitude,$longitude');
-        final canLaunch = await canLaunchUrl(url);
-
-        if (!canLaunch) {
-                if (context.mounted) {
-                        final state = context.findAncestorStateOfType<SensorPopupState>();
-                        state?.showTemporaryError(tr("home.sensors.cant_launch_gmap"));
+        try {
+                final launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+                if (!launched) {
+                        onError(tr("home.sensors.error_launching_gmap"));
                 }
-                return;
         }
-
-        if (await launchUrl(url, mode: LaunchMode.externalApplication) == false) {
-                if (context.mounted) {
-                        final state = context.findAncestorStateOfType<SensorPopupState>();
-                        state?.showTemporaryError(tr("home.sensors.error_launching_gmap"));
-                }
+        catch (e) {
+                onError(tr("home.sensors.error_launching_gmap") + ': $e');
         }
 }

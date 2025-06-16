@@ -164,7 +164,8 @@ void processRawData({
                         headers.asMap().entries.map((entry) {
                                         final header = entry.value.toUpperCase().padRight(maxHeaderLength);
                                         final raw = values[entry.key];
-                                        final formatted = double.tryParse(raw) != null
+                                        final lowerHeader = entry.value.toLowerCase();
+                                        final formatted = (lowerHeader != 'gps_latitude' && lowerHeader != 'gps_longitude' && double.tryParse(raw) != null)
                                                 ? '${double.parse(raw).toStringAsFixed(2)}${getUnitForHeader(entry.value)}'
                                                 : raw;
                                         return '$header : $formatted';
