@@ -1,5 +1,6 @@
 # 🌦️ RevGlacierSMA-Mobile - Application de Supervision et débogage d’une Station Météo Autonome
 
+[![](assets/images/logo_yt.png)](https://www.youtube.com/watch?v=haKFvLpnKWo)
 ![](assets/screens/Station_Meteo.png)
 
 Cette application mobile Flutter permet de superviser en temps réel une station météo connectée (via
