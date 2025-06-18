@@ -1,6 +1,7 @@
 # 🌦️ RevGlacierSMA-Mobile - Application de Supervision et débogage d’une Station Météo Autonome
 
 [![](assets/images/logo_yt.png)](https://www.youtube.com/watch?v=haKFvLpnKWo)
+![](assets/images/Station.jpg)
 ![](assets/screens/Station_Meteo.png)
 
 Cette application mobile Flutter permet de superviser en temps réel une station météo connectée (via
@@ -8,6 +9,9 @@ câble USB ou Bluetooth). Elle a été développée dans un environnement indust
 d’un stage de fin d’études. Le projet inclut la lecture de capteurs internes et externes,
 l’affichage dynamique des données, des outils de configuration, de test et de diagnostic, ainsi
 qu’une interface moderne et réactive.
+
+> ⚠️ **Important** : Si vous clonez le dépôt pour la première fois, vous devez créer le fichier `secrets.dart`
+>  Pour le faire, consultez la section **🔑 Configuration de l’écran «Config» en connexion USB (Mot De Passe)** plus bas dans ce fichier.
 
 > ⚠️ **Important** : Cette application a été développée pour une station météo spécifique basée sur
 > un microcontrôleur Arduino, avec un jeu de capteurs prédéfini, un protocole série personnalisé, et
